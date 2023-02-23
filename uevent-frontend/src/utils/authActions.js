@@ -44,10 +44,35 @@ export const fetchLogin = createAsyncThunk(
                 config
             )
             // store user's token in local storage
-            localStorage.setItem('userToken', data.userToken)
+            localStorage.setItem('accessToken', data.accessToken)
             return data
         } catch (error) {
             // return custom error message from API if any
+            if (error.response && error.response.data.message) {
+                return rejectWithValue(error.response.data.message)
+            } else {
+                return rejectWithValue(error.message)
+            }
+        }
+    }
+)
+
+export const fetchLogout = createAsyncThunk(
+    'auth/fetchLogout',
+    // eslint-disable-next-line
+    async ({}, { rejectWithValue }) => {
+        try {
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }
+            await axios.post(
+                `${backendURL}/api/auth/logout`,
+                config
+            )
+            localStorage.removeItem('accessToken')
+        } catch (error) {
             if (error.response && error.response.data.message) {
                 return rejectWithValue(error.response.data.message)
             } else {

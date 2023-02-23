@@ -5,7 +5,7 @@ export default function UserPage() {
   const { userInfo } = useSelector((state) => state.auth)
   return (
     <div>
-      Welcome <strong>{userInfo?.firstName || 'anonymous'}</strong> !
+      Welcome <strong>{userInfo?.firstName}</strong> !
     </div>
   )
 }
