@@ -9,12 +9,12 @@ export default function Header() {
       <Nav>
         <img src={require('../assets/logo.png')} alt="logo" />
         <ul className={`${isOpen && "open"}`}>
-          <li><NavLink to='/'>Events</NavLink></li>
-          <li><NavLink to='/'>Companies</NavLink></li>
-          <li><NavLink to='/'>Orders</NavLink></li>
-          <li><NavLink to='/user-profile'>Account</NavLink></li>
-          <li><NavLink to='/login'>Sign In</NavLink></li>
-          <li><NavLink to='/basket'><img src={require('../assets/basket.png')} alt="logo" /></NavLink></li>
+          <li onClick={() => setIsOpen(!isOpen)}><NavLink to='/'>Events</NavLink></li>
+          <li onClick={() => setIsOpen(!isOpen)}><NavLink to='/'>Companies</NavLink></li>
+          <li onClick={() => setIsOpen(!isOpen)}><NavLink to='/'>Orders</NavLink></li>
+          <li onClick={() => setIsOpen(!isOpen)}><NavLink to='/user-profile'>Account</NavLink></li>
+          <li onClick={() => setIsOpen(!isOpen)}><NavLink to='/login'>Sign In</NavLink></li>
+          <li onClick={() => setIsOpen(!isOpen)}><NavLink to='/basket'><img src={require('../assets/basket.png')} alt="logo" /></NavLink></li>
         </ul>
         <div
           className={`nav-toggle ${isOpen && "open"}`}
