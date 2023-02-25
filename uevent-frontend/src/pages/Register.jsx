@@ -90,4 +90,19 @@ export default function Register() {
 }
 
 const FormContainer = styled.div`
+  margin: 0 auto;
+  width: fit-content;
+  background-color: black;
+  padding: 10px;
+
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    button {
+      width: 100%;
+    }
+  }
 `;

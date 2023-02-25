@@ -11,7 +11,7 @@ export default function ProtectedRoute () {
             <div className='unauthorized'>
                 <h1>Unauthorized :&#40;</h1>
                 <span>
-                <NavLink to='/login'>Login</NavLink> to gain access
+                    <NavLink to='/login'>Login</NavLink> to gain access
                 </span>
             </div>
         )

@@ -25,6 +25,7 @@ export default function Login() {
     if(Object.keys(userInfo).length !== 0) {
       navigate(`/users/${userInfo.id}`)
     }
+    console.log(window.innerHeight)
   }, [navigate, userInfo] )
 
   const handleSubmit = async (e) => {
@@ -69,4 +70,20 @@ export default function Login() {
 }
 
 const FormContainer = styled.div`
+  margin: 0 auto;
+  width: fit-content;
+  background-color: black;
+  padding: 10px;
+  height 100%;
+
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    button {
+      width: 100%;
+    }
+  }
 `;
