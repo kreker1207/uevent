@@ -42,11 +42,11 @@ api.interceptors.response.use(
             } else {
             // Clear the cookies and redirect to the login page
                 window.localStorage.removeItem('accessToken')
-                Cookies.remove('refreshToken');
                 window.location.href = '/login';
             }
         }
         return Promise.reject(error);
     }
 );
+
 export default api
