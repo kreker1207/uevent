@@ -74,7 +74,7 @@ const FormContainer = styled.div`
   width: fit-content;
   background-color: black;
   padding: 10px;
-  height 100%;
+  height: 100%;
 
   form {
     display: flex;

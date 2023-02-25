@@ -57,7 +57,7 @@ class authController{
             if (!validPassword){
                 return res.status(400).json({message: `Wrong password`})
             }
-            const token = generateAccessToken(user._id,user.role)
+            const token = generateAccessToken(user._id, user.role)
             return res.json({token})
 
         }catch(e){
