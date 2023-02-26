@@ -5,7 +5,7 @@ module.exports = function(req,res, next){
         next()
     }
     try{
-        const token = req.cookies.token;
+        const token = req.headers.authorization;
         if(!token){
             return res.status(401).json({message:"User is not authorized"})
         }

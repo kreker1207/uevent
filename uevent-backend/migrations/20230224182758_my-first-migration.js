@@ -9,6 +9,7 @@ exports.up = function(knex) {
           table.string('login').notNullable().unique();
           table.string('password').notNullable();
           table.string('email').unique().notNullable();
+        //   table.string('profile_pic')
           table.string('role').references('role');
           table.boolean('isActive').defaultTo(true);
           table.timestamps(true, true);

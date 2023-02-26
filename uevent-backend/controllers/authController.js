@@ -7,12 +7,14 @@ const {validationResult} = require('express-validator')
 const {secret} = require('../config')
 
 
-const generateAccessToken = (id, role) => {
+const generateToken = (user,hours) => {
     const payload = {
-        id,
-        role
+        id:user._id,
+        login:user.login,
+        email:user.email,
+        role:user.role
     }
-    return jwt.sign(payload,secret,{expiresIn:"1h"})
+    return jwt.sign(payload,secret,{expiresIn: hours})
 }
 
 class authController{
@@ -57,14 +59,14 @@ class authController{
             if (!validPassword){
                 return res.status(400).json({message: `Wrong password`})
             }
-            const token = generateAccessToken(user._id, user.role)
-            console.log(token)
-            res.cookie('token', token.toString(), {
-                maxAge: 60 * 60 * 1000,
+            const accessToken = generateToken(user,"15m")
+            const refreshToken = generateToken(user,"60d")
+            res.cookie('token', refreshToken.toString(), {
+                maxAge: 5000*1000,
                 httpOnly: true, 
                 credentials: "include"
               });
-            res.send(`Logged in!`);
+            res.send(`${accessToken}`);
 
         }catch(e){
             console.log(e)
@@ -84,9 +86,9 @@ class authController{
             if (decoded.exp > Date.now()) {
                 return res.status(401).json({ error: 'Unauthorized' });
             }
-            const newToken = generateAccessToken(decoded._id,decoded.role)
+            const newToken = generateToken(decoded,"60d")
             res.cookie('token', newToken.toString(), {
-                maxAge: 60 * 60 * 1000,
+                maxAge: 5000*1000,
                 httpOnly: true, 
                 credentials: "include"
               });
