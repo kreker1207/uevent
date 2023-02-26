@@ -10,6 +10,6 @@ router.post('/registration', [
     check('email',"Not valid email").isEmail()
 ] ,controller.registration)
 router.post('/login',controller.login)
-router.get('/refresh', authMiddleware, controller.refresh)
+router.post('/refresh-token', controller.refresh)
 
 module.exports = router

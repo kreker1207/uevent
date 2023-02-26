@@ -8,6 +8,5 @@ exports.seed = async function(knex) {
   await knex('role').insert([
     {id: 1, value: 'USER'},
     {id: 2, value: 'ADMIN'},
-    {id: 3, value: 'ORGANIZER'}
   ]);
 };

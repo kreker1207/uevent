@@ -1,10 +1,13 @@
 const express = require('express')
 const morgan = require('morgan')
+const cookieParser = require('cookie-parser')
 const authRouter = require('./routes/authRouter')
 const userRouter = require('./routes/userRouter')
 
+
 const PORT = process.env.PORT || 8080
 const app = express()
+app.use(cookieParser())
 
 const errorHandler = async (err, req, res, next) => {
   if(err) console.log(err);
@@ -13,6 +16,7 @@ const errorHandler = async (err, req, res, next) => {
 
 app.use(morgan('dev'))
 app.use(express.json())
+
 app.use(express.urlencoded({ extended: true }))
 
 app.use('/api',userRouter,errorHandler)
