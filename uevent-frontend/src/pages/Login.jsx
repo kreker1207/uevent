@@ -25,7 +25,6 @@ export default function Login() {
     if(Object.keys(userInfo).length !== 0) {
       navigate(`/users/${userInfo.id}`)
     }
-    console.log(window.innerHeight)
   }, [navigate, userInfo] )
 
   const handleSubmit = async (e) => {

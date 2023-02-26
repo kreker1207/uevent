@@ -1,21 +1,75 @@
 import React, {useState} from 'react'
 import styled from 'styled-components';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const { userInfo } = useSelector((state) => state.auth)
+  const [activeIndex, setActiveIndex] = useState(null);
+  const navigate = useNavigate()
+  const handleOnClick = (index) => {
+    setActiveIndex(index === activeIndex ? null : index);
+  };
+
+  const li = [
+    { id: 1, label: "Events", path: '/'},
+    { id: 2, label: "Companies", path: '/companies' },
+    { id: 3, label: "Orders", path: '/orders' },
+    { id: 4, label: "Account", path: '/user-profile' },
+    { id: 5, label: Object.keys(userInfo).length !== 0 ? 'Sign Out ' : 'Sign In' , path: '/login' }
+  ];
+
+
+  const handleSign = async (e) => {
+    if(Object.keys(userInfo).length !== 0) {
+      if(isOpen) {
+        setIsOpen(!isOpen)
+      }
+      navigate('/login')
+    } else {
+        //await dispatch(fetchLogout)
+        if(isOpen) 
+          setIsOpen(!isOpen)
+        navigate('/login')
+    }
+  }
+
   return (
     <header>
       <Nav>
         <img src={require('../assets/logo.png')} alt="logo" />
         <ul className={`${isOpen && "open"}`}>
-          <li onClick={() => setIsOpen(!isOpen)}><NavLink to='/'>Events</NavLink></li>
-          <li onClick={() => setIsOpen(!isOpen)}><NavLink to='/'>Companies</NavLink></li>
-          <li onClick={() => setIsOpen(!isOpen)}><NavLink to='/'>Orders</NavLink></li>
-          <li onClick={() => setIsOpen(!isOpen)}><NavLink to='/user-profile'>Account</NavLink></li>
-          <li onClick={() => setIsOpen(!isOpen)}><NavLink to='/login'> {userInfo ? 'Sign In ' : 'Sign Out' }</NavLink></li>
+          {
+            li.map(({ id, label, path }, index) => (
+              <li
+                key={id}
+                onClick=
+                {
+                  id !== 5 ?
+                    (
+                      isOpen ? 
+                      () => { setIsOpen(!isOpen); handleOnClick(index) } 
+                      : 
+                      () => handleOnClick(index)
+                    ) 
+                    : 
+                    (
+                      isOpen ? 
+                      () => { setIsOpen(!isOpen); handleOnClick(index); handleSign()} 
+                      : 
+                      () => { handleOnClick(index); handleSign()}
+                    )
+                }
+                className= {index === activeIndex ? "active" : ""}
+              >
+                {
+                  id !== 5 ? <NavLink to={path}>{label}</NavLink> : `${label}`
+                }
+              </li>
+            ))
+          }
+          {/* <li> <NavLink onClick={handleSign} to='/login'> {Object.keys(userInfo).length !== 0 ? 'Sign Out ' : 'Sign In' }</NavLink></li> */}
           <div onClick={() => setIsOpen(!isOpen)}>
             <NavLink to='/basket'>
               <img src={require('../assets/basket.png')} alt="logo" />
@@ -84,6 +138,22 @@ const Nav = styled.nav`
       display: inline-block;
       list-style: none;
       margin: 10px 30px;
+      cursor: pointer;
+      color: black;
+      &.active {
+          &::after {
+          content: "";
+          position: absolute;
+          left: 0;
+          top: 120%;
+          width: 100%;
+          opacity: 1;
+          height: 2px;
+          background: #ffffff;
+          transition: all 0.45s;
+        }
+      }
+
       &:hover {
         opacity: 1;
         &::after {
