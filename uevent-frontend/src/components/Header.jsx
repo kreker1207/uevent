@@ -1,9 +1,11 @@
 import React, {useState} from 'react'
 import styled from 'styled-components';
 import { NavLink } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const { userInfo } = useSelector((state) => state.auth)
   return (
     <header>
       <Nav>
@@ -13,8 +15,13 @@ export default function Header() {
           <li onClick={() => setIsOpen(!isOpen)}><NavLink to='/'>Companies</NavLink></li>
           <li onClick={() => setIsOpen(!isOpen)}><NavLink to='/'>Orders</NavLink></li>
           <li onClick={() => setIsOpen(!isOpen)}><NavLink to='/user-profile'>Account</NavLink></li>
-          <li onClick={() => setIsOpen(!isOpen)}><NavLink to='/login'>Sign In</NavLink></li>
-          <li onClick={() => setIsOpen(!isOpen)}><NavLink to='/basket'><img src={require('../assets/basket.png')} alt="logo" /></NavLink></li>
+          <li onClick={() => setIsOpen(!isOpen)}><NavLink to='/login'> {userInfo ? 'Sign In ' : 'Sign Out' }</NavLink></li>
+          <div onClick={() => setIsOpen(!isOpen)}>
+            <NavLink to='/basket'>
+              <img src={require('../assets/basket.png')} alt="logo" />
+              <div className= {Object.keys(userInfo).length !== 0 ? 'auth' : ''}><p>2</p></div>
+            </NavLink>
+            </div>
         </ul>
         <div
           className={`nav-toggle ${isOpen && "open"}`}
@@ -35,6 +42,42 @@ const Nav = styled.nav`
   ul {
     display: flex;
     align-items: center;
+    div {
+      position: relative;
+      opacity: 0.9;
+      display: inline-block;
+      list-style: none;
+      margin: 10px 30px;
+      a {
+        text-decoration: none;
+        position: relative;
+        img {
+          display: inline-block;
+          width: 32px;
+          height: 32px;
+        }
+        div {
+          display: none;
+          &.auth {
+            margin: 0;
+
+            display: flex;
+            justify-content: center; 
+            align-items: center; 
+
+            position: absolute;
+            right: -15px;
+            top: 10px;
+
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            color: #ffffff;
+            background-color: red;
+          }
+        }
+      }
+    }
     li {
       position: relative;
       opacity: 0.9;
@@ -43,15 +86,15 @@ const Nav = styled.nav`
       margin: 10px 30px;
       &:hover {
         opacity: 1;
-        &::before {
+        &::after {
           width: 100%;
         }
       }
-      &::before {
+      &::after {
         content: "";
         position: absolute;
         left: 0;
-        bottom: 0;
+        top: 120%;
         width: 0;
         height: 2px;
         background: #ffffff;
@@ -59,12 +102,7 @@ const Nav = styled.nav`
       }
       a {
         text-decoration: none;
-        color: red;
-        img {
-          display: inline-block;
-          width: 32px;
-          height: 32px;
-        }
+        color: black;
       }
     }
   }

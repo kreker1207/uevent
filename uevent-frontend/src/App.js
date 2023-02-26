@@ -8,6 +8,7 @@ import Register from './pages/Register'
 import EventPage from './pages/EventPage'
 import UserPage from './pages/UserPage'
 import Footer from './components/Footer'
+import Basket from './pages/Basket'
 
 export default function App() {
   return (
@@ -22,8 +23,10 @@ export default function App() {
           <Route element = {<ProtectedRoute/>}>
             <Route path='/user-profile' element={<UserPage/>}/>
           </Route>
+          <Route element = {<ProtectedRoute/>}>
+            <Route path='/basket' element={<Basket/>}/>
+          </Route>
         </Routes>
-        
       </main>
       <Footer/>
     </BrowserRouter>

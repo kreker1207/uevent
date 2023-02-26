@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import { useDispatch, useSelector } from "react-redux";
 import { fetchLogin } from '../utils/authActions';
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {ToastContainer, toast} from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css';
 import styled from 'styled-components';
@@ -57,6 +57,7 @@ export default function Login() {
 
   return (
     <FormContainer>
+      <div className='formName'>Login</div>
       <form onSubmit={handleSubmit}>
         <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password"/>
@@ -64,26 +65,46 @@ export default function Login() {
           {loading ? 'Logging in...' : 'Log in'}
         </button>
       </form>
+      <div>Don't have an accout? <NavLink to='/register'>Sign Up</NavLink> !</div>
       <ToastContainer/>
     </FormContainer>
   )
 }
 
 const FormContainer = styled.div`
+  display: flex;
+  flex-direction: column;
   margin: 0 auto;
   width: fit-content;
-  background-color: black;
-  padding: 10px;
-  height: 100%;
+  background-color: #cbc6c0;
+  padding: 30px;
+  border-radius: 10px;
 
-  form {
+  div {
+      align-self: center;
+      font-size: 15px;
+      &.formName {
+        margin-bottom: 10px;
+        font-size: 32px;
+      }
+  }
+
+  form {  
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: none;
+      border-radius: 5px;
+    }
     button {
       width: 100%;
+      padding: 5px;
+      margin-bottom: 10px;
     }
   }
 `;

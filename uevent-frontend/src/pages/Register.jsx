@@ -4,7 +4,7 @@ import { fetchRegister } from '../utils/authActions';
 import {ToastContainer, toast} from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css';
 import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, NavLink } from 'react-router-dom';
 
 export default function Register() {
   const [firstName, setFirstName] = useState("");
@@ -75,6 +75,7 @@ export default function Register() {
 
   return (
       <FormContainer>
+        <div className='formName'>Register</div>
         <form onSubmit={handleSubmit}>
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
           <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First name" />
@@ -84,25 +85,46 @@ export default function Register() {
             {loading ? 'Signing up...' : 'Sign up'}
           </button>
         </form>
+        <div>Already have an account? <NavLink to='/login'>Sign In</NavLink> !</div>
         <ToastContainer />
       </FormContainer>
   )
 }
 
 const FormContainer = styled.div`
+  display: flex;
+  flex-direction: column;
   margin: 0 auto;
   width: fit-content;
-  background-color: black;
-  padding: 10px;
+  background-color: #cbc6c0;
+  padding: 30px;
+  border-radius: 10px;
 
-  form {
+  div {
+      align-self: center;
+      font-size: 15px;
+      &.formName {
+        margin-bottom: 10px;
+        font-size: 32px;
+      }
+  }
+
+  form {  
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: none;
+      border-radius: 5px;
+    }
     button {
       width: 100%;
+      padding: 5px;
+      margin-bottom: 10px;
     }
   }
 `;
