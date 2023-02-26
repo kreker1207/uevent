@@ -6,5 +6,5 @@ const roleMiddleware = require('../middleware/roleMiddleware')
 
 router.get('/users', controller.getUsers)
 router.get('/users/:id',controller.getUserById)
-router.delete('/users/:id',roleMiddleware(['ADMIN']) ,controller.deleteUserById)
+router.delete('/users/:id',authMiddleware,controller.deleteUserById)
 module.exports = router

@@ -12,7 +12,7 @@ const generateAccessToken = (id, role) => {
         id,
         role
     }
-    return jwt.sign(payload,secret,{expiresIn:"24h"})
+    return jwt.sign(payload,secret,{expiresIn:"1h"})
 }
 
 class authController{
@@ -58,7 +58,13 @@ class authController{
                 return res.status(400).json({message: `Wrong password`})
             }
             const token = generateAccessToken(user._id, user.role)
-            return res.json({token})
+            console.log(token)
+            res.cookie('token', token.toString(), {
+                maxAge: 60 * 60 * 1000,
+                httpOnly: true, 
+                credentials: "include"
+              });
+            res.send(`Logged in!`);
 
         }catch(e){
             console.log(e)
@@ -67,13 +73,28 @@ class authController{
 
     }
     async refresh(req, res){
-        try{
-            console.log("refreshing jwt")
-        }catch(e){
-            console.log(e)
-            res.status(400).json({message: 'Refresh error'})
+        const token = req.cookies.token;
+        console.log(token)
+        if (!token) {
+            return res.status(401).json({ error: 'Unauthorized' });
         }
 
+        try {
+            const decoded = jwt.verify(token, secret, { ignoreExpiration: true });
+            if (decoded.exp > Date.now()) {
+                return res.status(401).json({ error: 'Unauthorized' });
+            }
+            const newToken = generateAccessToken(decoded._id,decoded.role)
+            res.cookie('token', newToken.toString(), {
+                maxAge: 60 * 60 * 1000,
+                httpOnly: true, 
+                credentials: "include"
+              });
+            return res.json({ token: newToken });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
     }
 }
 module.exports = new authController()
