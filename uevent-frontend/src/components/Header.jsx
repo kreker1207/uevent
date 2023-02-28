@@ -7,6 +7,7 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const { userInfo } = useSelector((state) => state.auth)
   const [activeIndex, setActiveIndex] = useState(null);
+
   const navigate = useNavigate()
   const handleOnClick = (index) => {
     setActiveIndex(index === activeIndex ? null : index);

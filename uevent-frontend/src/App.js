@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import {BrowserRouter, Routes, Route} from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute'
 import Header from './components/Header'
@@ -12,7 +12,21 @@ import Basket from './pages/Basket'
 import Orders from './pages/Orders'
 import Companies from './pages/Companies'
 
+import { useDispatch } from 'react-redux'
+import { fetchProfile } from './utils/authActions'
+
 export default function App() {
+  const dispatch = useDispatch()
+  useEffect(() => {
+      const updateToken = async () => {
+        const data = await dispatch(fetchProfile())
+        //console.log(data)
+        if (data.payload && 'accessToken' in data.payload) {
+          window.localStorage.setItem('accessToken', data.payload.accessToken)
+      }
+    }
+    updateToken()
+  }, [dispatch])
   return (
     <BrowserRouter>
       <Header/>

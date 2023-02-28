@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchLogin, fetchLogout } from "./authActions";
+import { fetchLogin, fetchLogout, fetchProfile } from "./authActions";
 
 const userToken = localStorage.getItem('accessToken')
   ? localStorage.getItem('accessToken')
@@ -16,7 +16,11 @@ const initialState = {
 const authSlice = createSlice({
     name: 'auth',
     initialState,
-    reducers: {},
+    reducers: {
+        setCredentials: (state, { payload }) => {
+            state.userInfo = payload
+        },      
+    },
     extraReducers: (builder) => {
         // login user
         builder
@@ -32,6 +36,22 @@ const authSlice = createSlice({
             state.error = null
         })
         .addCase(fetchLogin.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload
+            state.success = false
+        })
+        .addCase(fetchProfile.pending, (state, action) => {
+            state.loading = true
+            state.error = null
+        })
+        .addCase(fetchProfile.fulfilled, (state, action) => {
+            state.loading = false
+            state.userInfo = action.payload
+            state.userToken = action.payload.userToken
+            state.success = true
+            state.error = null
+        })
+        .addCase(fetchProfile.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
             state.success = false
@@ -66,3 +86,4 @@ const authSlice = createSlice({
 })
 
 export const authReducer = authSlice.reducer
+export const { setCredentials } = authSlice.actions

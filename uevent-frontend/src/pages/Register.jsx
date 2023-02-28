@@ -7,11 +7,11 @@ import styled from 'styled-components';
 import { useNavigate, NavLink } from 'react-router-dom';
 
 export default function Register() {
-  const [firstName, setFirstName] = useState("");
+  const [login, setLogin] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
-  const { loading, error, success } = useSelector((state) => state.register)
+  const { loading, success } = useSelector((state) => state.register)
   const { userInfo } = useSelector((state) => state.auth)
 
   const dispatch = useDispatch();
@@ -29,29 +29,33 @@ export default function Register() {
     // redirect user to login page if registration was successful
     if (success) navigate('/login')
     // redirect authenticated user to profile screen
-    if (Object.keys(userInfo).length !==0) navigate(`/users/${userInfo.id}`)
+    if (Object.keys(userInfo).length !==0) navigate(`/user-profile`)
   }, [navigate, userInfo, success])
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if(handleValidation()) {
-        const data = await dispatch(fetchRegister(firstName, email, password, passwordConfirm))
-        console.log(data?.payload)
+        const response = await dispatch(fetchRegister({login, email, password}))
+        console.log(response)
+        if(response.type === 'auth/fetchRegister/rejected') {
+          throw(response.payload)
+        }
       }
     } catch (error) {
-      handleValidation()
+      handleValidation(error)
     }
+
   };
 
-  const handleValidation = () => {
+  const handleValidation = (error) => {
     if (password !== passwordConfirm) {
       toast.error(
         "Password and confirm password should be same.",
         toastOptions
       );
       return false;
-    } else if (firstName.length < 3) {
+    } else if (login.length < 3) {
       toast.error(
         "Username should be greater than 3 characters.",
         toastOptions
@@ -78,7 +82,7 @@ export default function Register() {
         <div className='formName'>Register</div>
         <form onSubmit={handleSubmit}>
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
-          <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First name" />
+          <input type="text" value={login} onChange={(e) => setLogin(e.target.value)} placeholder="Username" />
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password"/>
           <input type="password" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} placeholder="Repeat password"/>
           <button type="submit" disabled={loading}>

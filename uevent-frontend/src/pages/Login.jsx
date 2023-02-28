@@ -7,8 +7,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import styled from 'styled-components';
 
 export default function Login() {
-  const { loading, userInfo, error } = useSelector((state) => state.auth)
-  const [email, setEmail] = useState("");
+  const { loading, userInfo } = useSelector((state) => state.auth)
+  const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -23,7 +23,7 @@ export default function Login() {
 
   useEffect( () => {
     if(Object.keys(userInfo).length !== 0) {
-      navigate(`/users/${userInfo.id}`)
+      navigate(`/user-profile`)
     }
   }, [navigate, userInfo] )
 
@@ -31,23 +31,26 @@ export default function Login() {
     e.preventDefault();
     try {
       if(handleValidation()) {
-        const data = await dispatch(fetchLogin(email, password))
-        console.log(data?.payload)
+        const response = await dispatch(fetchLogin({login, password}))
+        // console.log(response)
+        if(response.type === 'auth/fetchLogin/rejected') {
+          throw(response.payload)
+        }
       }
     } catch (error) {
-      handleValidation()
+      handleValidation(error)
     }
   };
 
-  const handleValidation = () => {
-    if (email === "") {
-      toast.error("Email and Password is required.", toastOptions);
+  const handleValidation = (serverError) => {
+    if (login === "") {
+      toast.error("Login and Password is required.", toastOptions);
       return false;
     } else if (password === "") {
-      toast.error("Email and Password is required.", toastOptions);
+      toast.error("Login and Password is required.", toastOptions);
       return false;
-    } else if (error) {
-      toast.error(error, toastOptions);
+    } else if (serverError) {
+      toast.error(serverError, toastOptions);
       return false;
     }
     return true;
@@ -58,7 +61,7 @@ export default function Login() {
     <FormContainer>
       <div className='formName'>Login</div>
       <form onSubmit={handleSubmit}>
-        <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
+        <input type="text" value={login} onChange={(e) => setLogin(e.target.value)} placeholder="Login" />
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password"/>
         <button type="submit" disabled={loading}>
           {loading ? 'Logging in...' : 'Log in'}
