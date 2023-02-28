@@ -1,10 +1,14 @@
-const db = require('knex')(require('../knexfile'));
-const USERS_TABLE = 'users'
-const ROLE_TABLE = 'role'
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
-const {validationResult} = require('express-validator')
-const {secret_access, secret_refresh} = require('../config')
+const   db = require('knex')(require('../knexfile')),
+        USERS_TABLE = 'users',
+        ROLE_TABLE = 'role',
+        bcrypt = require('bcryptjs'),
+        jwt = require('jsonwebtoken'),
+        {validationResult} = require('express-validator'),
+        {secret_access, secret_refresh} = require('../config'),
+        Mailer = require('../middleware/mailer');
+//
+
+const mailer = new Mailer();
 
 
 const generateAccessToken = (user, hours) => {
@@ -33,23 +37,38 @@ class authController{
             if(! errors.isEmpty()){
                 return res.status(400).json({message:"Error during registration"})
             }
-            console.log('registration')
+            console.log('registration');
+
             const {login, password, email} = req.body
-            const candidate = await db(USERS_TABLE).select('*').where('login',login).orWhere('email',email).first()
+            const candidate = await db(USERS_TABLE).select('*')
+                .where('login',login)
+                .orWhere('email', 'like', `%${email}%`)
+                .first()
             if(candidate){
-                return res.status(400).json({message:"User with this login/email already exist"})
+                if(candidate.login === login)
+                    return res.status(400).json({message:"User with this login already exist"});
+                return res.status(400).json({message:"User with this email already exist"});
             }
+
             const userRole = await db(ROLE_TABLE).select('*').where('value','USER').first()
             const hashedPassword = bcrypt.hashSync(password,8)
             const user = {
                 login: login,
                 password: hashedPassword,
-                email: email,
+                email: 'unconfirmed@@' + email,
                 role: userRole.value
             }
+
             await db(USERS_TABLE).insert(user)
             .then((result)=>{console.log(`Inserted ${result.rowCount} new user`)})
             .catch((error)=>{console.error(`Error inserting new user:`, error)})
+
+            // Move all token stuff to another file
+            mailer.sendConfirmEmail(email, jwt.sign({
+                email: email,
+                login: login
+            }, secret_access, {expiresIn: '1h'}))
+
             return res.json({user})
         }catch(e){
             console.log(e)
@@ -57,6 +76,21 @@ class authController{
         }
 
     }
+
+    async confirmEmail(req, res) {
+        try{
+            const {token} = req.params;
+            const payload = jwt.verify(token, secret_access);
+            await db(USERS_TABLE).select('*')
+                .where('login', payload.login)
+                .update({email: payload.email});
+            res.status(200).json({message: 'Email confirmed successfuly!'});
+        }catch(e){
+            console.log(e)
+            res.status(400).json({message: 'Email confirmation error'})
+        }
+    }
+
     async login(req, res){
         try{
             const {login, password} = req.body
