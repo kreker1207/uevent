@@ -6,6 +6,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-validator": "^6.15.0",
     "jsonwebtoken": "^9.0.0",
@@ -17,7 +18,7 @@
   "scripts": {
     "start": "node app.js",
     "migrate": "node migrations/20230224182758_my-first-migration.js",
-    "seed": "node seeds/roleSeed.js"
+    "seed": "node seeds/seedRole.js"
   },
   "keywords": [],
   "author": "",

@@ -1,3 +1,4 @@
 module.exports ={
-    secret: "bururi"
+    secret_access: "bururi_ac",
+    secret_refresh: "bururi_re"
 }

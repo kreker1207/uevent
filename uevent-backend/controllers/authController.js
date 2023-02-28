@@ -4,17 +4,26 @@ const ROLE_TABLE = 'role'
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const {validationResult} = require('express-validator')
-const {secret} = require('../config')
+const {secret_access, secret_refresh} = require('../config')
 
 
-const generateToken = (user,hours) => {
+const generateAccessToken = (user, hours) => {
     const payload = {
         id:user._id,
         login:user.login,
         email:user.email,
         role:user.role
     }
-    return jwt.sign(payload,secret,{expiresIn: hours})
+    return jwt.sign(payload, secret_access, {expiresIn: hours})
+}
+const generateRefreshToken = (user, hours) => {
+    const payload = {
+        id:user._id,
+        login:user.login,
+        email:user.email,
+        role:user.role
+    }
+    return jwt.sign(payload, secret_refresh, {expiresIn: hours})
 }
 
 class authController{
@@ -25,7 +34,7 @@ class authController{
                 return res.status(400).json({message:"Error during registration"})
             }
             console.log('registration')
-            const {login, password,email} = req.body
+            const {login, password, email} = req.body
             const candidate = await db(USERS_TABLE).select('*').where('login',login).orWhere('email',email).first()
             if(candidate){
                 return res.status(400).json({message:"User with this login/email already exist"})
@@ -50,7 +59,8 @@ class authController{
     }
     async login(req, res){
         try{
-            const {login,password} = req.body
+            const {login, password} = req.body
+            console.log(login, password)
             const user = await db(USERS_TABLE).select().where('login',login).first()
             if(!user){
                 return res.status(400).json({message:`User with ${login} not found`})
@@ -59,40 +69,40 @@ class authController{
             if (!validPassword){
                 return res.status(400).json({message: `Wrong password`})
             }
-            const accessToken = generateToken(user,"15m")
-            const refreshToken = generateToken(user,"60d")
-            res.cookie('token', refreshToken.toString(), {
-                maxAge: 5000*1000,
-                httpOnly: true, 
+            const accessToken = generateAccessToken(user,"1m")
+            const refreshToken = generateRefreshToken(user,"1d")
+            res.cookie('refreshToken', refreshToken, {
+                httpOnly: true,
+                maxAge: 5184000,
                 credentials: "include"
-              });
-            res.send(`${accessToken}`);
-
+            });
+            res.status(200).json({...user, accessToken, password: ''});
         }catch(e){
             console.log(e)
             res.status(400).json({message: 'Login error'})
         }
 
     }
-    async refresh(req, res){
-        const token = req.cookies.token;
-        console.log(token)
-        if (!token) {
+
+    async profile(req, res) {
+        const { refreshToken } = req.cookies;
+        if (!refreshToken) {
             return res.status(401).json({ error: 'Unauthorized' });
         }
-
         try {
-            const decoded = jwt.verify(token, secret, { ignoreExpiration: true });
+            const decoded = jwt.verify(refreshToken, secret_refresh, { ignoreExpiration: true });
             if (decoded.exp > Date.now()) {
                 return res.status(401).json({ error: 'Unauthorized' });
             }
-            const newToken = generateToken(decoded,"60d")
-            res.cookie('token', newToken.toString(), {
-                maxAge: 5000*1000,
-                httpOnly: true, 
-                credentials: "include"
-              });
-            return res.json({ token: newToken });
+
+            try {
+                jwt.verify(req.headers.authorization, secret_access)
+                return res.status(200).json({...decoded});
+            } catch (e) {
+                const accessToken = generateAccessToken(decoded, "1m")
+                return res.status(200).json({...decoded, password: '', accessToken});
+            }
+
         } catch (error) {
             console.error(error);
             return res.status(500).json({ error: 'Internal Server Error' });
