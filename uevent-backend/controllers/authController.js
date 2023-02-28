@@ -69,7 +69,7 @@ class authController{
             if (!validPassword){
                 return res.status(400).json({message: `Wrong password`})
             }
-            const accessToken = generateAccessToken(user,"1m")
+            const accessToken = generateAccessToken(user,"15m")
             const refreshToken = generateRefreshToken(user,"1d")
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
@@ -99,7 +99,7 @@ class authController{
                 jwt.verify(req.headers.authorization, secret_access)
                 return res.status(200).json({...decoded});
             } catch (e) {
-                const accessToken = generateAccessToken(decoded, "1m")
+                const accessToken = generateAccessToken(decoded, "15m")
                 return res.status(200).json({...decoded, password: '', accessToken});
             }
 
