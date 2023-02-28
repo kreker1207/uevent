@@ -66,13 +66,6 @@ export const fetchProfile = createAsyncThunk(
     // eslint-disable-next-line
     async (_, { rejectWithValue }) => {
         try {  
-            const config = {
-                credentials: 'include',   
-                withCredentials: true,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            }
             const {data}  = await api.get(
                 '/profile'
             )
@@ -91,16 +84,10 @@ export const fetchProfile = createAsyncThunk(
 export const fetchLogout = createAsyncThunk(
     'auth/fetchLogout',
     // eslint-disable-next-line
-    async ({}, { rejectWithValue }) => {
+    async (_, { rejectWithValue }) => {
         try {
-            const config = {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            }
-            await axios.post(
-                `${backendURL}/api/auth/logout`,
-                config
+            await api.post(
+                `/logout`,
             )
             window.localStorage.removeItem('accessToken')
         } catch (error) {

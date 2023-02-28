@@ -108,5 +108,14 @@ class authController{
             return res.status(500).json({ error: 'Internal Server Error' });
         }
     }
+
+    async logout (req, res) {
+        if(!req.cookies.refreshToken) 
+            res.status(401).json({message: "Unauthorised"});
+        else 
+            res.status(200).clearCookie('refreshToken', {path: '/'}).json({message: "Logged out"});
+    }
+
+    
 }
 module.exports = new authController()

@@ -11,5 +11,6 @@ router.post('/registration', [
     check('email',"Not valid email").isEmail()
 ] ,controller.registration)
 router.post('/login',controller.login)
+router.post('/logout',controller.logout)
 
 module.exports = router

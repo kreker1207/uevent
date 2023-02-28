@@ -1,12 +1,14 @@
 import React, {useState} from 'react'
 import styled from 'styled-components';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchLogout } from '../utils/authActions';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const { userInfo } = useSelector((state) => state.auth)
   const [activeIndex, setActiveIndex] = useState(null);
+  const dispatch = useDispatch()
 
   const navigate = useNavigate()
   const handleOnClick = (index) => {
@@ -23,13 +25,14 @@ export default function Header() {
 
 
   const handleSign = async (e) => {
-    if(Object.keys(userInfo).length !== 0) {
+    if(Object.keys(userInfo).length === 0) {
       if(isOpen) {
         setIsOpen(!isOpen)
       }
       navigate('/login')
     } else {
-        //await dispatch(fetchLogout)
+        const data = await dispatch(fetchLogout())
+        console.log(data)
         if(isOpen) 
           setIsOpen(!isOpen)
         navigate('/login')
