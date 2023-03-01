@@ -12,20 +12,23 @@ import Basket from './pages/Basket'
 import Orders from './pages/Orders'
 import Companies from './pages/Companies'
 
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { fetchProfile } from './utils/authActions'
+import { EmailActivation } from './pages/EmailConfirmation'
 
 export default function App() {
   const dispatch = useDispatch()
+  const { userInfo } = useSelector(state => state.auth)
   useEffect(() => {
       const updateToken = async () => {
         const data = await dispatch(fetchProfile())
-        //console.log(data)
-        if (data.payload && 'accessToken' in data.payload) {
+        console.log(data)
+        if (Object.keys(userInfo).length !== 0 && 'accessToken' in userInfo) {
           window.localStorage.setItem('accessToken', data.payload.accessToken)
-      }
+        } 
     }
     updateToken()
+    // eslint-disable-next-line
   }, [dispatch])
   return (
     <BrowserRouter>
@@ -35,6 +38,8 @@ export default function App() {
           <Route path='/' element={<MainPage/>}/>
           <Route path='/register' element={<Register/>}/>
           <Route path='/login' element={<Login/>}/>
+          <Route exact path='/confirmEmail/:activationToken' element={ <EmailActivation/> } />
+
           <Route path='/events/:id' element={<EventPage/>}/>
           <Route path='/companies' element={<Companies/>}/>
           <Route element = {<ProtectedRoute/>}>

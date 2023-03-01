@@ -41,6 +41,7 @@ export default function Register() {
         if(response.type === 'auth/fetchRegister/rejected') {
           throw(response.payload)
         }
+        alert('Please, confirm your email')
       }
     } catch (error) {
       handleValidation(error)
