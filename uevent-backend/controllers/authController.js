@@ -1,15 +1,14 @@
-const   db = require('knex')(require('../knexfile')),
+const   db = require('knex')(require('../db/knexfile')),
         USERS_TABLE = 'users',
-        ROLE_TABLE = 'role',
         bcrypt = require('bcryptjs'),
         jwt = require('jsonwebtoken'),
         {validationResult} = require('express-validator'),
         {secret_access, secret_refresh} = require('../config'),
-        Mailer = require('../middleware/mailer');
+        User = require('../models/user'),
+        Mailer = require('../middleware/mailer'),
+        {CustomError, errorReplier} = require('../models/error');
 //
-
 const mailer = new Mailer();
-
 
 const generateAccessToken = (user, hours) => {
     const payload = {
@@ -35,44 +34,35 @@ class authController{
         try{
             const errors = validationResult(req)
             if(! errors.isEmpty()){
-                return res.status(400).json({message:"Error during registration"})
+                throw new CustomError(10);
             }
-            console.log('registration');
 
-            const {login, password, email} = req.body
-            const candidate = await db(USERS_TABLE).select('*')
-                .where('login',login)
-                .orWhere('email', 'like', `%${email}%`)
-                .first()
+            const {login, password, email} = req.body;
+            const user = new User(USERS_TABLE);
+            const candidate = await user.get(login, email);
             if(candidate){
+                console.log(candidate)
                 if(candidate.login === login)
-                    return res.status(400).json({message:"User with this login already exist"});
-                return res.status(400).json({message:"User with this email already exist"});
+                    throw new CustomError(1004);
+                throw new CustomError(1005);
             }
 
-            const userRole = await db(ROLE_TABLE).select('*').where('value','USER').first()
             const hashedPassword = bcrypt.hashSync(password,8)
-            const user = {
+            const userData = {
                 login: login,
                 password: hashedPassword,
                 email: 'unconfirmed@@' + email,
-                role: userRole.value
             }
+            await user.set(userData);
 
-            await db(USERS_TABLE).insert(user)
-            .then((result)=>{console.log(`Inserted ${result.rowCount} new user`)})
-            .catch((error)=>{console.error(`Error inserting new user:`, error)})
-
-            // Move all token stuff to another file
             mailer.sendConfirmEmail(email, jwt.sign({
                 email: email,
                 login: login
             }, secret_access, {expiresIn: '1h'}))
-
-            return res.json({user})
+            return res.json({userData})
         }catch(e){
-            console.log(e)
-            res.status(400).json({message: 'Registration error'})
+            e.addMessage = 'registration';
+            errorReplier(e, res);
         }
 
     }
@@ -81,13 +71,12 @@ class authController{
         try{
             const {token} = req.params;
             const payload = jwt.verify(token, secret_access);
-            await db(USERS_TABLE).select('*')
-                .where('login', payload.login)
-                .update({email: payload.email});
+            const user = new User(USERS_TABLE);
+            await user.set({login: payload.login, email: payload.email});
             res.status(200).json({message: 'Email confirmed successfuly!'});
         }catch(e){
-            console.log(e)
-            res.status(400).json({message: 'Email confirmation error'})
+            e.addMessage = 'Email confirmation';
+            errorReplier(e, res);
         }
     }
 
@@ -95,11 +84,13 @@ class authController{
         try{
             const {login, password} = req.body
             console.log(login, password)
-            const user = await db(USERS_TABLE).select().where('login',login).first()
-            if(!user){
+            const user = new User(USERS_TABLE);
+            const pawn = await user.get(login);
+
+            if(!pawn){
                 return res.status(400).json({message:`User with ${login} not found`})
             }
-            const validPassword = bcrypt.compareSync(password,user.password)
+            const validPassword = bcrypt.compareSync(password,pawn.password)
             if (!validPassword){
                 return res.status(400).json({message: `Wrong password`})
             }
@@ -112,8 +103,8 @@ class authController{
             });
             res.status(200).json({...user, accessToken, password: ''});
         }catch(e){
-            console.log(e)
-            res.status(400).json({message: 'Login error'})
+            e.addMessage = 'login';
+            errorReplier(e, res);
         }
 
     }
@@ -132,14 +123,14 @@ class authController{
             try {
                 jwt.verify(req.headers.authorization, secret_access)
                 return res.status(200).json({...decoded});
-            } catch (e) {
+            } catch (error) {
                 const accessToken = generateAccessToken(decoded, "15m")
                 return res.status(200).json({...decoded, password: '', accessToken});
             }
 
-        } catch (error) {
-            console.error(error);
-            return res.status(500).json({ error: 'Internal Server Error' });
+        } catch (e) {
+            e.addMessage = 'registration';
+            errorReplier(e, res);
         }
     }
 
