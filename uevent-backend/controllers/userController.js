@@ -1,31 +1,50 @@
-const db = require('knex')(require('../knexfile'));
-const USERS_TABLE = 'users'
-
+const   USERS_TABLE = 'users',
+        User = require('../models/user'),
+        Mailer = require('../middleware/mailer'),
+        {CustomError, errorReplier} = require('../models/error');
+//
 
 class userController{
-    async getUsers(req,res){
+    async get(req,res){
         try{
-            const users = await db('users').select()
-            res.json(users)
-        }catch(e){
-            console.log(e)
+            const user = new User(USERS_TABLE);
+            const pawns = await user.getAll();
+            res.json(pawns)
+        } catch(e){
+            e.addMessage = 'Get users';
+            errorReplier(e, res);
         }
     }
-    async getUserById(req,res){
+
+    async getById(req,res){
         try{
-            const user = await db(USERS_TABLE).select().where('id',req.params.id).first()
-            res.json(user)
-        }catch(e){
-            console.log(e)
+            const user = new User(USERS_TABLE);
+            const pawn = await user.getById(req.params.id);
+            res.json(pawn)
+        } catch(e){
+            e.addMessage = 'Get user by id';
+            errorReplier(e, res);
         }
 
     }
-    async deleteUserById(req,res){
+
+    async edit(req, res) {
         try{
-            const deleteUser = await db('users').where('id', req.params.id).del()
-            res.json(deleteUser)
-        }catch(e){
-            console.log(e)
+            console.log(req);
+            res.json('sosi')
+        } catch(e){
+
+        }
+    }
+
+    async deleteById(req,res){
+        try{
+            const user = new User(USERS_TABLE);
+            const pawn = await user.del({id: req.params.id});
+            res.json(pawn)
+        } catch(e){
+            e.addMessage = 'Delete user by id';
+            errorReplier(e, res);
         }
     }
 

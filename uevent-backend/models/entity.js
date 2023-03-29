@@ -25,9 +25,12 @@ module.exports = class Entity {
     }
 
     async set(setObj) {
-        return await this.table().insert(setObj).onConflict('id').merge(setObj)
-        .then((result)=>{console.log(`Inserted ${result.rowCount} into ${this.tableName}`)})
-        .catch((error)=>{console.error(`Error inserting into ${this.tableName}:`, error)});
+        if (setObj.id) {
+            return await this.table().returning('*').update(setObj)
+            .catch((error)=>{console.error(`Error inserting into ${this.tableName}:`, error); throw error});
+        }
+        return await this.table().returning('*').insert(setObj)
+        .catch((error)=>{console.error(`Error inserting into ${this.tableName}:`, error); throw error});
     }
 
     async del(searchObj) {

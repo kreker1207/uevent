@@ -1,5 +1,4 @@
-const   db = require('knex')(require('../db/knexfile')),
-        USERS_TABLE = 'users',
+const   USERS_TABLE = 'users',
         bcrypt = require('bcryptjs'),
         jwt = require('jsonwebtoken'),
         {validationResult} = require('express-validator'),
@@ -53,11 +52,13 @@ class authController{
                 password: hashedPassword,
                 email: 'unconfirmed@@' + email,
             }
-            await user.set(userData);
+            const [pawn] = await user.set(userData);
+            console.log(pawn)
 
             mailer.sendConfirmEmail(email, jwt.sign({
                 email: email,
-                login: login
+                login: login,
+                id: pawn.id
             }, secret_access, {expiresIn: '1h'}))
             return res.json({userData})
         }catch(e){
@@ -72,7 +73,7 @@ class authController{
             const {token} = req.params;
             const payload = jwt.verify(token, secret_access);
             const user = new User(USERS_TABLE);
-            await user.set({login: payload.login, email: payload.email});
+            await user.set({id: payload.id, login: payload.login, email: payload.email});
             res.status(200).json({message: 'Email confirmed successfuly!'});
         }catch(e){
             e.addMessage = 'Email confirmation';
@@ -93,6 +94,9 @@ class authController{
             const validPassword = bcrypt.compareSync(password,pawn.password)
             if (!validPassword){
                 return res.status(400).json({message: `Wrong password`})
+            }
+            if (pawn.email.startsWith('unconfirmed@@')) {
+                return res.status(400).json({message: `You need to confirm your email first`})
             }
             const accessToken = generateAccessToken(user,"15m")
             const refreshToken = generateRefreshToken(user,"1d")
