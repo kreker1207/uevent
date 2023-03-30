@@ -30,7 +30,7 @@ class userController{
 
     async edit(req, res) {
         try{
-            console.log(req);
+            console.log(req.user);
             res.json('sosi')
         } catch(e){
 

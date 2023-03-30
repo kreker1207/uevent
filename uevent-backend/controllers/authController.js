@@ -20,10 +20,9 @@ const generateAccessToken = (user, hours) => {
 }
 const generateRefreshToken = (user, hours) => {
     const payload = {
-        id:user._id,
+        id:user.id,
         login:user.login,
-        email:user.email,
-        role:user.role
+        email:user.email
     }
     return jwt.sign(payload, secret_refresh, {expiresIn: hours})
 }
@@ -98,14 +97,14 @@ class authController{
             if (pawn.email.startsWith('unconfirmed@@')) {
                 return res.status(400).json({message: `You need to confirm your email first`})
             }
-            const accessToken = generateAccessToken(user,"15m")
-            const refreshToken = generateRefreshToken(user,"1d")
+            const accessToken = generateAccessToken(pawn,"15m")
+            const refreshToken = generateRefreshToken(pawn,"1d")
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 maxAge: 5184000,
                 credentials: "include"
             });
-            res.status(200).json({...user, accessToken, password: ''});
+            res.status(200).json({...pawn, accessToken, password: ''});
         }catch(e){
             e.addMessage = 'login';
             errorReplier(e, res);

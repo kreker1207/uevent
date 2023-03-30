@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser')
 const authRouter = require('./routes/authRouter')
 const userRouter = require('./routes/userRouter')
 const cors = require('cors')
+const authMid = require('./middleware/authMiddleware')
 
 
 const PORT = process.env.PORT || 8080
@@ -21,7 +22,11 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cors({origin: 'http://localhost:3000', credentials: true }))
 app.use(cookieParser())
 
-app.use('/api',userRouter,errorHandler)
-app.use('/api',authRouter,errorHandler)
+app.use('/api', authRouter,errorHandler)
+
+app.use(authMid);
+
+app.use('/api', userRouter,errorHandler)
+
 
 app.listen(PORT, () => console.log(`Server up at http://localhost:${PORT}`))
