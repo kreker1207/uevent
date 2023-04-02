@@ -3,8 +3,11 @@ const router = new Router()
 const controller = require('../controllers/userController')
 const authMiddleware = require('../middleware/authMiddleware')
 
-router.get('/users', controller.get)
-router.get('/users/:id',controller.getById)
+router.get('/users', controller.get);
+router.get('/users/avatar/:avatarName',controller.getAvatar);
+router.get('/users/:id',controller.getById);
+
 router.post('/users', controller.edit);
-router.delete('/users/:id',authMiddleware,controller.deleteById)
+router.post('/users/avatar', controller.editAvatar);
+router.delete('/users',authMiddleware,controller.delete);
 module.exports = router

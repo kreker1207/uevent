@@ -2,7 +2,7 @@ const   USERS_TABLE = 'users',
         bcrypt = require('bcryptjs'),
         jwt = require('jsonwebtoken'),
         {validationResult} = require('express-validator'),
-        {secret_access, secret_refresh} = require('../config'),
+        {secret_access, secret_refresh, secret_mails} = require('../config'),
         User = require('../models/user'),
         Mailer = require('../middleware/mailer'),
         {CustomError, errorReplier} = require('../models/error');
@@ -58,7 +58,7 @@ class authController{
                 email: email,
                 login: login,
                 id: pawn.id
-            }, secret_access, {expiresIn: '1h'}))
+            }, secret_mails, {expiresIn: '1h'}))
             return res.json({userData})
         }catch(e){
             e.addMessage = 'registration';
@@ -70,9 +70,9 @@ class authController{
     async confirmEmail(req, res) {
         try{
             const {token} = req.params;
-            const payload = jwt.verify(token, secret_access);
+            const payload = jwt.verify(token, secret_mails);
             const user = new User(USERS_TABLE);
-            await user.set({id: payload.id, login: payload.login, email: payload.email});
+            await user.set({id: payload.id, email: payload.email});
             res.status(200).json({message: 'Email confirmed successfuly!'});
         }catch(e){
             e.addMessage = 'Email confirmation';

@@ -1,6 +1,7 @@
 const express = require('express')
 const morgan = require('morgan')
 const cookieParser = require('cookie-parser')
+const fileUpload = require('express-fileupload')
 const authRouter = require('./routes/authRouter')
 const userRouter = require('./routes/userRouter')
 const cors = require('cors')
@@ -18,6 +19,7 @@ const errorHandler = async (err, req, res, next) => {
 app.use(morgan('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+app.use(fileUpload());
 
 app.use(cors({origin: 'http://localhost:3000', credentials: true }))
 app.use(cookieParser())

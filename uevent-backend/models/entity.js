@@ -17,16 +17,16 @@ module.exports = class Entity {
 
     // i guess it d be better to delete this
     async getById(id) {
-        return await this.get({id})
+        return await this.table().select('*').where({id: id}).first();
     }
 
     async getAll() {
-        return await this.get({}, true);
+        return await this.table().select('*');
     }
 
     async set(setObj) {
         if (setObj.id) {
-            return await this.table().returning('*').update(setObj)
+            return await this.table().returning('*').where({id: setObj.id}).update(setObj)
             .catch((error)=>{console.error(`Error inserting into ${this.tableName}:`, error); throw error});
         }
         return await this.table().returning('*').insert(setObj)
