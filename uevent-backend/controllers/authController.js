@@ -1,9 +1,8 @@
-const   db = require('knex')(require('../db/knexfile')),
-        USERS_TABLE = 'users',
+const   USERS_TABLE = 'users',
         bcrypt = require('bcryptjs'),
         jwt = require('jsonwebtoken'),
         {validationResult} = require('express-validator'),
-        {secret_access, secret_refresh} = require('../config'),
+        {secret_access, secret_refresh, secret_mails} = require('../config'),
         User = require('../models/user'),
         Mailer = require('../middleware/mailer'),
         {CustomError, errorReplier} = require('../models/error');
@@ -21,10 +20,9 @@ const generateAccessToken = (user, hours) => {
 }
 const generateRefreshToken = (user, hours) => {
     const payload = {
-        id:user._id,
+        id:user.id,
         login:user.login,
-        email:user.email,
-        role:user.role
+        email:user.email
     }
     return jwt.sign(payload, secret_refresh, {expiresIn: hours})
 }
@@ -53,12 +51,14 @@ class authController{
                 password: hashedPassword,
                 email: 'unconfirmed@@' + email,
             }
-            await user.set(userData);
+            const [pawn] = await user.set(userData);
+            console.log(pawn)
 
             mailer.sendConfirmEmail(email, jwt.sign({
                 email: email,
-                login: login
-            }, secret_access, {expiresIn: '1h'}))
+                login: login,
+                id: pawn.id
+            }, secret_mails, {expiresIn: '1h'}))
             return res.json({userData})
         }catch(e){
             e.addMessage = 'registration';
@@ -70,9 +70,9 @@ class authController{
     async confirmEmail(req, res) {
         try{
             const {token} = req.params;
-            const payload = jwt.verify(token, secret_access);
+            const payload = jwt.verify(token, secret_mails);
             const user = new User(USERS_TABLE);
-            await user.set({login: payload.login, email: payload.email});
+            await user.set({id: payload.id, email: payload.email});
             res.status(200).json({message: 'Email confirmed successfuly!'});
         }catch(e){
             e.addMessage = 'Email confirmation';
@@ -94,14 +94,17 @@ class authController{
             if (!validPassword){
                 return res.status(400).json({message: `Wrong password`})
             }
-            const accessToken = generateAccessToken(user,"15m")
-            const refreshToken = generateRefreshToken(user,"1d")
+            if (pawn.email.startsWith('unconfirmed@@')) {
+                return res.status(400).json({message: `You need to confirm your email first`})
+            }
+            const accessToken = generateAccessToken(pawn,"15m")
+            const refreshToken = generateRefreshToken(pawn,"1d")
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 maxAge: 5184000,
                 credentials: "include"
             });
-            res.status(200).json({...user, accessToken, password: ''});
+            res.status(200).json({...pawn, accessToken, password: ''});
         }catch(e){
             e.addMessage = 'login';
             errorReplier(e, res);

@@ -25,12 +25,12 @@ class CustomError extends Error {
 const errorReplier = function(error, res) {
     console.log(error);
     if(!error.status) {
-        res.status(500)
+        res.status(500);
         if (error.addMessage)
-            res.send('Totally unexpected Error at' + addMessage);
-        res.send('Totally unexpected Error!');
+            res.send('Totally unexpected Error at ' + error.addMessage);
+        else res.send('Totally unexpected Error!');
     }
-    res.status(error.status).send(error);
+    else res.status(error.status).send(error);
 }
 
 module.exports = {CustomError, errorReplier};

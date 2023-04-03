@@ -1,17 +1,25 @@
 const jwt = require('jsonwebtoken')
-const {secret_access} = require('../config')
+const {secret_access, secret_refresh} = require('../config')
+
 module.exports = function(req,res, next){
-    if(req.method === "OPTIONS"){
-        next()
-    }
     try{
-        const token = req.headers.authorization;
-        if(!token){
-            return res.status(401).json({message:"User is not authorized"})
+        if(req.method === "OPTIONS") next();
+        // For normal front vvv
+        /*const token = req.headers.authorization;
+        if(token) {
+            const {iat, exp, ...pawn} = jwt.verify(token, secret_access);
+            req.user = pawn;
+        }*/
+        // For postman vvv
+        const { refreshToken } = req.cookies;
+        if (refreshToken) {
+            const {iat, exp, ...pawn} = jwt.verify(refreshToken, 
+                secret_refresh, { ignoreExpiration: true });
+            req.user = pawn;
         }
-        const decodeData = jwt.verify(token, secret_access)
-        req.user = decodeData
-        next()
+
+        console.log(req.user);
+        next();
     }catch(e){
         console.log(e)
         return res.status(401).json({message:"User is not authorized" })

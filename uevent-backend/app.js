@@ -1,9 +1,11 @@
 const express = require('express')
 const morgan = require('morgan')
 const cookieParser = require('cookie-parser')
+const fileUpload = require('express-fileupload')
 const authRouter = require('./routes/authRouter')
 const userRouter = require('./routes/userRouter')
 const cors = require('cors')
+const authMid = require('./middleware/authMiddleware')
 
 
 const PORT = process.env.PORT || 8080
@@ -17,11 +19,16 @@ const errorHandler = async (err, req, res, next) => {
 app.use(morgan('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+app.use(fileUpload());
 
 app.use(cors({origin: 'http://localhost:3000', credentials: true }))
 app.use(cookieParser())
 
-app.use('/api',userRouter,errorHandler)
-app.use('/api',authRouter,errorHandler)
+app.use('/api', authRouter,errorHandler)
+
+app.use(authMid);
+
+app.use('/api', userRouter,errorHandler)
+
 
 app.listen(PORT, () => console.log(`Server up at http://localhost:${PORT}`))
