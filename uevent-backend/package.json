@@ -17,7 +17,7 @@
     "sequelize": "^6.28.2"
   },
   "scripts": {
-    "start": "node app.js",
+    "start": "nodemon app.js",
     "migrate": "node migrations/20230224182758_my-first-migration.js",
     "seed": "node seeds/seedRole.js"
   },
@@ -25,6 +25,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "sequelize-cli": "^6.6.0"
+    "sequelize-cli": "^6.6.0",
+    "nodemon": "^2.0.22"
   }
 }
