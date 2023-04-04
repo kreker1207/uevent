@@ -8,10 +8,17 @@ export default function ProtectedRoute () {
 
     if(Object.keys(userInfo).length === 0) {
         return (
-            <div className='unauthorized' style={{width: 'fit-content', margin: '0 auto', textAlign: 'center'}}>
+            <div className='unauthorized' style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: 'fit-content', 
+                margin: '0 auto', 
+                textAlign: 'center'}}>
                 <h1>Unauthorized :&#40;</h1>
                 <span>
-                    <NavLink to='/login'>Login</NavLink> to gain access
+                    <NavLink style={{color: "#FFD100", textDecoration: "underline"}} to='/login'>Login</NavLink> to gain access
                 </span>
             </div>
         )

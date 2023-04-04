@@ -18,9 +18,7 @@ export default function Header() {
   const li = [
     { id: 1, label: "Events", path: '/'},
     { id: 2, label: "Companies", path: '/companies' },
-    { id: 3, label: "Orders", path: '/orders' },
-    { id: 4, label: "Account", path: '/user-profile' },
-    { id: 5, label: Object.keys(userInfo).length !== 0 ? 'Sign Out ' : 'Sign In' , path: '/login' }
+    { id: 3, label: "Account", path: '/user-profile' }
   ];
 
 
@@ -29,75 +27,81 @@ export default function Header() {
       if(isOpen) {
         setIsOpen(!isOpen)
       }
+      setActiveIndex(null);
       navigate('/login')
     } else {
         const data = await dispatch(fetchLogout())
         console.log(data)
-        if(isOpen) 
+        if(isOpen) {
           setIsOpen(!isOpen)
+        }
+        setActiveIndex(null)
         navigate('/login')
     }
   }
 
   return (
-    <header>
-      <Nav>
-        <img src={require('../assets/logo.png')} alt="logo" />
-        <ul className={`${isOpen && "open"}`}>
-          {
-            li.map(({ id, label, path }, index) => (
-              <li
-                key={id}
-                onClick=
-                {
-                  id !== 5 ?
-                    (
-                      isOpen ? 
-                      () => { setIsOpen(!isOpen); handleOnClick(index) } 
-                      : 
-                      () => handleOnClick(index)
-                    ) 
-                    : 
-                    (
-                      isOpen ? 
-                      () => { setIsOpen(!isOpen); handleOnClick(index); handleSign()} 
-                      : 
-                      () => { handleOnClick(index); handleSign()}
-                    )
-                }
-                className= {index === activeIndex ? "active" : ""}
-              >
-                {
-                  id !== 5 ? <NavLink to={path}>{label}</NavLink> : `${label}`
-                }
-              </li>
-            ))
-          }
-          {/* <li> <NavLink onClick={handleSign} to='/login'> {Object.keys(userInfo).length !== 0 ? 'Sign Out ' : 'Sign In' }</NavLink></li> */}
-          <div onClick={() => setIsOpen(!isOpen)}>
-            <NavLink to='/basket'>
-              <img src={require('../assets/basket.png')} alt="logo" />
-              <div className= {Object.keys(userInfo).length !== 0 ? 'auth' : ''}><p>2</p></div>
-            </NavLink>
-            </div>
-        </ul>
-        <div
-          className={`nav-toggle ${isOpen && "open"}`}
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <div className="bar"></div>
+    <Head>
+      <img src={require('../assets/logo.png')} alt="logo" />
+      <ul className={`${isOpen && "open"}`}>
+        <div className="search-box">
+          <input type="search"/>
+          <img src={require('../assets/search-icon.png')} alt="search" />
         </div>
-      </Nav>
-    </header>
+        {
+          li.map(({ id, label, path }, index) => (
+            <li
+              key={id}
+              onClick=
+              {
+                id !== 5 ?
+                  (
+                    isOpen ? 
+                    () => { setIsOpen(!isOpen); handleOnClick(index) } 
+                    : 
+                    () => handleOnClick(index)
+                  ) 
+                  : 
+                  (
+                    isOpen ? 
+                    () => { setIsOpen(!isOpen); handleOnClick(index); handleSign()} 
+                    : 
+                    () => { handleOnClick(index); handleSign()}
+                  )
+              }
+              className= {index === activeIndex ? "active" : ""}
+            >
+              <NavLink to={path}>{label}</NavLink>
+              {/* {
+                id !== 5 ? <NavLink to={path}>{label}</NavLink> : `${label}`
+              } */}
+            </li>
+          ))
+        }
+        <button> <NavLink onClick={handleSign} to='/login'> {Object.keys(userInfo).length !== 0 ? 'Sign Out ' : 'Sign In' }</NavLink></button>
+      </ul>
+      <div
+        className={`nav-toggle ${isOpen && "open"}`}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="bar"></div>
+      </div>
+    </Head>
   )
 }
 
-const Nav = styled.nav`
-  width: 100%;
+const Head = styled.nav`
+  max-width: 1480px;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 0px 10px;
+  margin-top: 35px;
+  margin-bottom: 115px;
+  font-weight: 700;
   ul {
+    z-index: 10;
     display: flex;
     align-items: center;
     div {
@@ -130,7 +134,6 @@ const Nav = styled.nav`
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            color: #ffffff;
             background-color: red;
           }
         }
@@ -143,7 +146,6 @@ const Nav = styled.nav`
       list-style: none;
       margin: 10px 30px;
       cursor: pointer;
-      color: black;
       &.active {
           &::after {
           content: "";
@@ -164,6 +166,7 @@ const Nav = styled.nav`
           width: 100%;
         }
       }
+
       &::after {
         content: "";
         position: absolute;
@@ -174,31 +177,77 @@ const Nav = styled.nav`
         background: #ffffff;
         transition: all 0.45s;
       }
+
       a {
         text-decoration: none;
-        color: black;
+      }
+    }
+
+    div {
+      &.search-box {
+        position: relative;
+        input {
+          outline: none;
+          background: transparent;
+          padding: 8px 12px;
+          border: none;
+          border-bottom: 1px solid #ccc; 
+          font-size: 16px; 
+          color: #fff; 
+          box-shadow: none;
+          appearance: none;
+          &::-webkit-search-cancel-button {
+            -webkit-appearance: none;
+          }
+        }
+        img {
+          position: absolute;
+          top: 50%;
+          right: 10px;
+          transform: translateY(-50%);
+          width: 20px;
+          height: 20px;
+          background-image: url("../assets/search-icon.png");
+          background-size: cover;
+        }
+
+      }
+    }
+
+    button{
+      padding: 8px 30px;
+      background-color: #FFD100;
+      margin: 10px 30px;
+      border: none;
+      a {
+        text-decoration: none;
+        font-weight: 700;
       }
     }
   }
   
   .nav-toggle {
-    display: none
+    display: none;
+    z-index: 10;
   }
 
-  @media (max-width: 800px) {
+  @media (max-width: 850px) {
     ul {
+      z-index: 10;
       position: absolute;
-      top: 92px;
+      top: 0;
+      left: 0;
+      padding-top: 120px;
+      padding-left: 0px !important;
+      margin: 0;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      background: #cbc6c0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      background: rgb(32, 32, 32);
+      width: 100vw;
+      height: 100vh;
       transform: translateX(-100%);
       transition: all .45s;
-      padding-top: 20px;
 
       li {
         &::before {
@@ -264,6 +313,7 @@ const Nav = styled.nav`
   }
 
   img {
+    z-index: 12;
     width: 72px;
     height: 72px;
   }

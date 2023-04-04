@@ -1,39 +1,54 @@
-@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap');
 
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
-  font-family: 'Josefin Sans', sans-serif;
 }
 
 body {
-  background-color: #f0f0f0;
-  height: 100vh;
-  width: 100vw;
+  margin: 0;
+  background-color: rgb(32, 32, 32);
+
+  color: #fff;
+}
+
+body, button, input {
+  font-family: 'Kanit', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
 }
 
 #root {
-  display: flex;
-  flex-direction: column;
-  justify-content:space-between;
-  height: 100vh;
+  min-height: calc(100vh - 70px);
 }
 
-header {
-  background-color: #cbc6c0;
+#footer {
+  position: relative;
+  height: 70px;
+  margin-top: 140px;
+  text-align: center;
+}
+
+#footer::before {
+  content: "";
+  position: absolute;
+  left: 10vw;
+  top: -50px;
+  width: 80vw;
+  height: 2px;
+  background: #7A7A7A;
+}
+
+h1, p, h2 {
+  margin: 0;
+}
+
+a {
   color: #fff;
-  padding: 10px;
-  margin-bottom: 10px;
+  text-decoration: none;
 }
 
-main {
-  padding: 10px;
-}
-
-footer {
-  background-color: #cbc6c0;
-  color: #fff;
-  padding: 10px;
-  margin-top: 10px;
+.loading {
+  max-width: 1480px;
+  margin: 0 auto;
+  text-align: center;
 }
