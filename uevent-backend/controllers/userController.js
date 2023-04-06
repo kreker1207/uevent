@@ -1,4 +1,4 @@
-const   USERS_TABLE = 'users',
+const   USERS_TABLE = 'user',
         bcrypt = require('bcryptjs'),
         jwt = require('jsonwebtoken'),
         {secret_mails} = require('../config'),

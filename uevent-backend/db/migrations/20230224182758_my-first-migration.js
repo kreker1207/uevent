@@ -4,51 +4,67 @@
  */
 exports.up = function(knex) {
     return Promise.all([
-        knex.schema.createTable('users', function(table) {
+        knex.schema.createTable('user', (table) => {
           table.increments('id').primary();
-          table.string('login').notNullable().unique();
-          table.string('email').notNullable().unique();
-          table.string('password').notNullable();
-          table.string('profile_pic').defaultTo('none.png');
+          table.string('login', 40).notNullable().unique();
+          table.string('email', 80).notNullable().unique();
+          table.string('password', 128).notNullable();
+          table.string('profile_pic', 128).defaultTo('none.png');
           table.boolean('is_active').defaultTo(true);
           table.timestamps(true, true);
         }),
 
-        knex.schema.createTable('organizations', function(table) {
+        knex.schema.createTable('organization', (table) => {
             table.increments('id').primary();
             table.integer('admin_id').unsigned().notNullable();
             table.string('title', 60).notNullable();
-            // Do we really need type?
-            //table.string('type')
-            table.text('description');
-            table.string('location', 60);
+            table.text('description').notNullable();
+            table.string('location', 60).defaultTo(null);
             
-            table.foreign('admin_id').references('id').inTable('users')
+            table.foreign('admin_id').references('id').inTable('user')
         }),
     
-        knex.schema.createTable('events', function(table) {
+        knex.schema.createTable('event', (table) => {
             table.increments('id').primary();
             table.integer('organizer_id').unsigned().notNullable();
             table.string('title', 40).notNullable();
-            table.text('description');
-            table.timestamp('event-datetime')
+            table.text('description').notNullable();
+            table.enu('column', ['concert', 'meet_up', 'festival', 'show', 'custom'],
+                { useNative: true, enumName: 'format' }).defaultTo('custom');
+            table.string('location', 256).notNullable();
+            table.timestamp('event-datetime').notNullable();
       
-            table.foreign('organizer_id').references('id').inTable('organizations')
+            table.foreign('organizer_id').references('id').inTable('organization')
         }),
 
-        knex.schema.createTable('seats', function(table) {
+        knex.schema.createTable('seat', (table) => {
             table.increments('id').primary();
             table.integer('event_id').unsigned().notNullable();
             table.integer('number').notNullable();
-            table.integer('row');
-            table.string('price', 20);
+            table.integer('row').defaultTo(null);
+            table.string('price', 20).defaultTo(null);
             table.boolean('is_available').defaultTo(true);
       
-            table.foreign('event_id').references('id').inTable('events');
+            table.foreign('event_id').references('id').inTable('event');
+        }),
+
+        knex.schema.createTable('theme', (table) => {
+            table.increments('id').primary();
+            table.string('name', 30).notNullable();
+            table.text('description').defaultTo(null);
+        }),
+
+        knex.schema.createTable('event_theme', (table) => {
+            table.increments('id').primary();
+            table.integer('event_id').unsigned().notNullable();
+            table.integer('theme_id').unsigned().notNullable();
+
+            table.foreign('event_id').references('id').inTable('event');
+            table.foreign('theme_id').references('id').inTable('theme');
         }),
 
 
-        knex.schema.createTable('comments', function(table) {
+        knex.schema.createTable('comment', (table) => {
             table.increments('id').primary();
             table.text('content').notNullable();
 
@@ -59,12 +75,12 @@ exports.up = function(knex) {
             table.integer('event_id').unsigned().defaultTo(null);
             table.integer('comment_id').unsigned().defaultTo(null);
 
-            table.foreign('author_id').references('id').inTable('users');
-            table.foreign('author_organization_id').references('id').inTable('organizations');
+            table.foreign('author_id').references('id').inTable('user');
+            table.foreign('author_organization_id').references('id').inTable('organization');
             
-            table.foreign('organization_id').references('id').inTable('organizations');
-            table.foreign('event_id').references('id').inTable('events');
-            table.foreign('comment_id').references('id').inTable('comments');
+            table.foreign('organization_id').references('id').inTable('organization');
+            table.foreign('event_id').references('id').inTable('event');
+            table.foreign('comment_id').references('id').inTable('comment');
 
             table.check('((?? is not null):: integer + (?? is not null):: integer) = 1', 
                 ['author_organization_id', 'author_id']);
