@@ -35,7 +35,7 @@ exports.up = function(knex) {
             table.integer('organizer_id').unsigned().notNullable();
             table.string('title', 40).notNullable();
             table.text('description').notNullable();
-            table.timestamp('event-datetime').notNullable();
+            table.timestamp('event_datetime').notNullable();
             table.enu('column', ['concert', 'meet_up', 'festival', 'show', 'custom'],
                 { useNative: true, enumName: 'format' }).defaultTo('custom');
             table.string('location', 256).notNullable();

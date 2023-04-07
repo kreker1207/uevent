@@ -1,4 +1,4 @@
-const   USERS_TABLE = 'user',
+const   USERS_TABLE = 'users',
         bcrypt = require('bcryptjs'),
         jwt = require('jsonwebtoken'),
         {validationResult} = require('express-validator'),

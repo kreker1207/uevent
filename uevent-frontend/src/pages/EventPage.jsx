@@ -10,7 +10,10 @@ export default function EventPage() {
   const inputRef = useRef(null);
   const { id } = useParams();
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadingComments, setLoadingComments] = useState(true);
+  const [loadingCommentsNames, setLoadingCommentsNames] = useState(true);
+  const [loadingCommentsSub, setLoadingCommentsSub] = useState(true);
   const [event, setEvent] = useState({
     id: 1,
     title: "Event Name",
@@ -24,7 +27,8 @@ export default function EventPage() {
   // function replacePlusesWithSpaces(str) {
   //   return str.replace(/\+/g, ' ');
   // }
-
+  const [comments, setComments] = useState([])
+ /*
   const [comments, setComments] = useState([
     {
       id: 1,
@@ -59,7 +63,8 @@ export default function EventPage() {
       content: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sed soluta magnam dolorem blanditiis quam voluptatum fugit aut non nesciunt dolores rem repudiandae delectus eos consequuntur repellat quo, ad provident ab?",
       commentsInside: []
     }
-  ])
+  ])*/ 
+
 
   const [users, setUsers] = useState([])
 
@@ -70,8 +75,9 @@ export default function EventPage() {
   useEffect(() => {
     api.get(`/event/${id}`)
       .then(function (response) {
-        console.log(response.data)
+        console.log(response)
         setEvent(response.data)
+        setLoading(false)
       })
       .catch(function(error) {
         console.log(error.message)
@@ -83,7 +89,7 @@ export default function EventPage() {
       .then(function (response) {
         console.log(response.data)
         setComments(response.data)
-        setLoading(false)
+        setLoadingComments(false)
       })
       .catch(function(error) {
         console.log(error.message)
@@ -109,17 +115,18 @@ export default function EventPage() {
           };
         });
         setComments(updatedComments);
+        setLoadingCommentsNames(true);
       })
       .catch(error => {
         console.error(error);
       });
-  }, [comments])
+  }, [])
 
 
 
   useEffect(() => {
     const newCommentsPromisses = comments.map((item) => {
-      const subItems = item.commentsInside.map(itemInside => {
+      const subItems = item.replies.map(itemInside => {
         return api.get(`/users/${itemInside.author_id}`)
       })
       return subItems
@@ -131,24 +138,25 @@ export default function EventPage() {
 
           const data = response.data;
 
-          const updatedSubComments = comments[index].commentsInside.map(item => {
+          const updatedSubComments = comments[index].replies.map(item => {
             return {
               ...item,
-              username: data.login,
+              login: data.login,
               profile_pic: data.profile_pic,
             }
           })
           return {
             ...comments,
-            commentsInside: updatedSubComments
+            replies: updatedSubComments
           }
         });
         setComments(updatedComments);
+        setLoadingCommentsSub(true);
       })
       .catch(error => {
         console.error(error);
       });
-  }, [comments])
+  }, [])
 
   const handleCommentFocus = (receiverName, receiverCommentId) => {
     if (inputRef.current) {
@@ -180,7 +188,7 @@ export default function EventPage() {
         })
     }
   }
-
+  console.log(comments)
   return (
     <Container>
       <div className="description-block">
@@ -219,7 +227,7 @@ export default function EventPage() {
           <h2>Comments</h2>
           <div className="comments-inner">
             {
-              loading ? 
+              loading && loadingComments && loadingCommentsSub && loadingCommentsNames ? 
               <div className="loading">Loading...</div>
               :
               comments.map((item, index) => {
@@ -229,22 +237,26 @@ export default function EventPage() {
                         <div className="photo">
                           <div><img src={require("../assets/company.jpg")} alt="userlogo" /></div>
                           <div className="name">
-                            <h4>{item.username}</h4>
-                            <p>{item.date}</p>
+                            <h4>{item.login}</h4>
+                            <p>{item.event_datetime}</p>
                           </div>
                         </div>
                         <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px", cursor: "pointer" } }}>
                           <div className="arrow">
-                            <FaReply onClick={() => handleCommentFocus(item.username, item.id)}/>
+                            <FaReply onClick={() => handleCommentFocus(item.login,item.id)}/>
                           </div>
                         </IconContext.Provider>
                     </div>
                     <div className="comment-text">
                       {item.content}
                     </div>
+                    {
+                    loading ? 
+                    <div className='loading'>Loading...</div> 
+                    :
                     <div className="replies">
                       {
-                        item.commentsInside.map((itemInner, index) => {
+                        item.replies.map((itemInner, index) => {
                           return (
                             <div key={index} className="comment">
                               <div className="userinfo">
@@ -269,6 +281,7 @@ export default function EventPage() {
                         })
                       }
                     </div>
+                    }
                   </div>
                 )
               })

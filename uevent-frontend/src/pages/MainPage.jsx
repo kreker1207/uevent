@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { IconContext } from 'react-icons';
 import { FaClock, FaMapMarkerAlt } from "react-icons/fa";
+import axios from 'axios';
 
 export default function MainPage() {
   const navigate = useNavigate()
@@ -49,14 +50,16 @@ export default function MainPage() {
   }
 
   useEffect(() => {
-    // api.get(`/events`)
-    // .then(function(response) {
-    //   setEvents(response.data)
-    //   setIsLoading(false)
-    // })
-    // .catch(function(error) {
-    //     console.log(error.message)
-    // })
+    api.get(`/events`)
+    .then(function(response) {
+      console.log(response.data)
+      setEvents(response.data.data)
+      setIsLoading(false)
+    
+    })
+    .catch(function(error) {
+        console.log(error.message)
+    })
   }, [])
 
   return (
