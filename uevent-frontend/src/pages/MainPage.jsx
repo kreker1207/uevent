@@ -13,38 +13,39 @@ export default function MainPage() {
   const [events, setEvents] = useState([
     {
       id: 1,
-      location: 'Kharkov',
-      date: '15.03.2023',
-      time: '15:30',
-      name: 'Event Name',
+      title: 'Event Name',
       description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore, vitae libero. Dolore, quasi. Facilis cumque doloremque ab ipsam? Labore tenetur quis nulla possimus aut laboriosam suscipit doloribus quisquam saepe fugiat!',
+      location: 'Kharkov',
+
+      date: '15.03.2023 15:30',
       price: 340
     },
     {
       id: 2,
-      location: 'Kharkov',
-      date: '15.03.2023',
-      time: '15:30',
-      name: 'Event Name',
+      title: 'Event Name',
       description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore, vitae libero. Dolore, quasi. Facilis cumque doloremque ab ipsam? Labore tenetur quis nulla possimus aut laboriosam suscipit doloribus quisquam saepe fugiat!',
+      location: 'Kharkov',
+
+      date: '15.03.2023 15:30',
       price: 340
     },
     {
       id: 3,
-      location: 'Kharkov',
-      date: '15.03.2023',
-      time: '15:30',
-      name: 'Event Name',
+      title: 'Event Name',
       description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore, vitae libero. Dolore, quasi. Facilis cumque doloremque ab ipsam? Labore tenetur quis nulla possimus aut laboriosam suscipit doloribus quisquam saepe fugiat!',
+      location: 'Kharkov',
+
+      date: '15.03.2023 15:30',
       price: 340
     }
   ])
+
+  const handleCreateEvent = () => {
+    navigate(`/create-event`)
+  }
   
   const handleEventClick = (id) => {
     navigate(`/events/${id}`)
-  }
-  const handleCreateEvent = () => {
-    navigate(`/create-event`)
   }
 
   useEffect(() => {
@@ -120,12 +121,12 @@ export default function MainPage() {
                 </IconContext.Provider>
                 <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
                   <p>
-                    <FaClock/>{item.date} {item.time}
+                    <FaClock/>{item.date}
                   </p>
                 </IconContext.Provider>
               </div>
               <div className='description'>
-                <h2>{item.name}</h2>
+                <h2>{item.title}</h2>
                 <p>{item.description}</p>
               </div>
               <div className='price'>

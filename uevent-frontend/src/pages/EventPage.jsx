@@ -1,12 +1,15 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components'
 
 import { IconContext } from 'react-icons';
 import { FaClock, FaMapMarkerAlt, FaReply, FaUser } from "react-icons/fa";
+import api from '../utils/apiSetting';
 
 export default function EventPage() {
   const inputRef = useRef(null);
-  // const [selectedPlace, setSelectedPlace] = useState({lat: 0, lng: 0});
+  const { id } = useParams();
+
   const [loading, setLoading] = useState(false);
   const [event, setEvent] = useState({
     id: 1,
@@ -18,11 +21,9 @@ export default function EventPage() {
     description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Officiis quis, veritatis esse dolores asperiores fugit necessitatibus doloremque. Totam voluptates a sunt architecto nostrum reprehenderit temporibus, similique, hic cupiditate maiores ratione?"
   })
 
-
-  function replacePlusesWithSpaces(str) {
-    return str.replace(/\+/g, ' ');
-  }
-
+  // function replacePlusesWithSpaces(str) {
+  //   return str.replace(/\+/g, ' ');
+  // }
 
   const [comments, setComments] = useState([
     {
@@ -60,26 +61,124 @@ export default function EventPage() {
     }
   ])
 
+  const [users, setUsers] = useState([])
+
   const [receiverName, setReceiverName] = useState('')
+  const [receiverCommentId, setReceiverCommentId] = useState(-1)
+  const [description, setDescription] = useState('')
 
-  //comment to event
-  
-  //comment to comment
+  useEffect(() => {
+    api.get(`/event/${id}`)
+      .then(function (response) {
+        console.log(response.data)
+        setEvent(response.data)
+      })
+      .catch(function(error) {
+        console.log(error.message)
+      })
+  }, [id])
 
-  // const handleMapCoordinates = (selectedPlace) => {
-  //   setSelectedPlace(selectedPlace);
-  // };
+  useEffect(() => {
+    api.get(`/comments/event/${id}`)
+      .then(function (response) {
+        console.log(response.data)
+        setComments(response.data)
+        setLoading(false)
+      })
+      .catch(function(error) {
+        console.log(error.message)
+      })
+  }, [id])
 
-  const handleCommentFocus = (receiverName) => {
+
+
+  useEffect(() => {
+    const newCommentsPromisses = comments.map((item) => {
+      return api.get(`/users/${item.author_id}`)
+    })
+
+    Promise.all(newCommentsPromisses)
+      .then(responses => {
+        const updatedComments = responses.map((response, index) => {
+          // обновляем объект, используя данные из ответа
+          const data = response.data;
+          return {
+            ...comments[index],
+            login: data.login,
+            profile_pic: data.profile_pic,
+          };
+        });
+        setComments(updatedComments);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }, [comments])
+
+
+
+  useEffect(() => {
+    const newCommentsPromisses = comments.map((item) => {
+      const subItems = item.commentsInside.map(itemInside => {
+        return api.get(`/users/${itemInside.author_id}`)
+      })
+      return subItems
+    })
+
+    Promise.all(newCommentsPromisses)
+      .then(responses => {
+        const updatedComments = responses.map((response, index) => {
+
+          const data = response.data;
+
+          const updatedSubComments = comments[index].commentsInside.map(item => {
+            return {
+              ...item,
+              username: data.login,
+              profile_pic: data.profile_pic,
+            }
+          })
+          return {
+            ...comments,
+            commentsInside: updatedSubComments
+          }
+        });
+        setComments(updatedComments);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }, [comments])
+
+  const handleCommentFocus = (receiverName, receiverCommentId) => {
     if (inputRef.current) {
       inputRef.current.focus();
       const textarea = document.getElementById("textarea")
       textarea.placeholder = `Reply to ${receiverName}`
+
+      setReceiverName(receiverName)
+      setReceiverCommentId(receiverCommentId)
     }
   };
 
   const handleCommentSend = () => {
-
+    if(receiverName!=='' && receiverCommentId !== -1) {
+      api.post(`api/comments/event/${event.id}/reply/${receiverCommentId}`, {content: description})
+        .then(function(response) {
+            console.log(response.data)
+          })
+          .catch(function(error) {
+            console.log(error.message)
+          })
+    } else {
+      api.post(`api/comments/event/${event.id}`)
+        .then(function(response) {
+          console.log(response.data)
+        })
+        .catch(function(error) {
+          console.log(error.message)
+        })
+    }
   }
 
   return (
@@ -123,7 +222,7 @@ export default function EventPage() {
               loading ? 
               <div className="loading">Loading...</div>
               :
-              comments.map((item ,index) => {
+              comments.map((item, index) => {
                 return (
                   <div key={index} className="comment">
                     <div className="userinfo">
@@ -136,7 +235,7 @@ export default function EventPage() {
                         </div>
                         <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px", cursor: "pointer" } }}>
                           <div className="arrow">
-                            <FaReply onClick={() => handleCommentFocus(item.username)}/>
+                            <FaReply onClick={() => handleCommentFocus(item.username, item.id)}/>
                           </div>
                         </IconContext.Provider>
                     </div>
@@ -145,25 +244,25 @@ export default function EventPage() {
                     </div>
                     <div className="replies">
                       {
-                        item.commentsInside.map((item ,index) => {
+                        item.commentsInside.map((itemInner, index) => {
                           return (
                             <div key={index} className="comment">
                               <div className="userinfo">
                                   <div className="photo">
                                     <div><img src={require("../assets/company.jpg")} alt="userlogo" /></div>
                                     <div className="name">
-                                      <h4>{item.senderName} <i style={{color: "#868686", fontSize: "12px"}}>replied to {item.receiverName}</i></h4>
-                                      <p>{item.date}</p>
+                                      <h4>{itemInner.login} <i style={{color: "#868686", fontSize: "12px"}}>replied to {itemInner.receiverName}</i></h4>
+                                      <p>{itemInner.date}</p>
                                     </div>
                                   </div>
                                   <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px", cursor: "pointer" } }}>
                                     <div className="arrow">
-                                      <FaReply onClick={() => handleCommentFocus(item.senderName)}/>
+                                      <FaReply onClick={() => handleCommentFocus(itemInner.login, item.id)}/>
                                     </div>
                                   </IconContext.Provider>
                               </div>
                               <div className="comment-text">
-                                {item.content}
+                                {itemInner.content}
                               </div>
                             </div>
                           )
@@ -175,7 +274,7 @@ export default function EventPage() {
               })
             }
             <div className="textarea">
-                <textarea id="textarea" ref={inputRef} placeholder="Type comment here..."></textarea>
+                <textarea value={description} id="textarea" ref={inputRef} placeholder="Type comment here..." onChange={(e)=>setDescription(e.target.value)}></textarea>
                 <button onClick={handleCommentSend} type="submit">Send</button>
             </div>
           </div>
@@ -337,3 +436,44 @@ const Container = styled.div`
       }
     }
 `
+
+
+
+    // comments.map((item) => {
+    //     api.get(`/users/${item.author_id}`)
+    //     .then(function (response) {
+
+    //       console.log(response.data)
+    //       const newItem = {
+    //         type: 'outside',
+    //         login: response.data.login,
+    //         profile_pic: response.data.prifole_pic
+    //       }
+    //       item.username = response.data.login
+    //       item.
+
+    //       item.commentsInside.map((itemInside) => {
+    //         api.get(`/comments/${itemInside.comment_id}`)
+    //           .then(function (response) {
+    //             api.get(`/users/${response.data.author_id}`)
+    //               .then(function (response) {
+    //                 console.log(response.data)
+    //                 const newItem = {
+    //                   type: 'inside',
+    //                   login: response.data.login,
+    //                   profile_pic: response.data.prifole_pic
+    //                 }
+    //               })
+    //               .catch(function(error) {
+    //                 console.log(error.message)
+    //               })
+    //           })
+    //           .catch(function(error) {
+    //             console.log(error.message)
+    //           })
+    //       })
+    //     })
+    //     .catch(function(error) {
+    //       console.log(error.message)
+    //     })
+    // })
