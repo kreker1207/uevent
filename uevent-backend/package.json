@@ -7,9 +7,11 @@
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
     "express": "^4.17.1",
     "express-fileupload": "^1.4.0",
     "express-validator": "^6.15.0",
+    "helmet": "^6.0.1",
     "jsonwebtoken": "^9.0.0",
     "knex": "^2.4.2",
     "morgan": "^1.10.0",
@@ -21,7 +23,7 @@
   "scripts": {
     "start": "nodemon app.js",
     "migrate": "node migrations/20230224182758_my-first-migration.js",
-    "seed": "node seeds/seedRole.js"
+    "seed": "node db/seed/seedUser.js"
   },
   "keywords": [],
   "author": "",

@@ -14,4 +14,13 @@ module.exports = class User extends Entity {
         }
         return super.get({login: login});
     }
+    async getAllOrganizationsByUserId (userId){
+        if(userId){
+        return await super.table()
+          .join('organization', 'users.id', '=', 'organization.admin_id')
+          .select('organization.id', 'organization.title', 'organization.description', 'organization.location')
+          .where('users.id', userId);
+    
+        }else return [];
+      };
 }

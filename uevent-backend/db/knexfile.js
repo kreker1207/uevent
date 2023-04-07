@@ -8,7 +8,7 @@ module.exports = {
     connection: {
       database: 'uevent',
       user: 'postgres',
-      password: '0000'
+      password: '1234'
     },
     migrations: {
       tableName: 'knex_migrations',

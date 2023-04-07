@@ -26,6 +26,7 @@ class userController{
         try{
             const user = new User(USERS_TABLE);
             const pawn = await user.getById(req.params.id);
+            //array of user and its company
             res.json(pawn)
         } catch(e){
             e.addMessage = 'Get user by id';

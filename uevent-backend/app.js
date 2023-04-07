@@ -4,6 +4,11 @@ const cookieParser = require('cookie-parser')
 const fileUpload = require('express-fileupload')
 const authRouter = require('./routes/authRouter')
 const userRouter = require('./routes/userRouter')
+const eventRouter = require('./routes/eventRouter')
+const searchRouter = require('./routes/searchRouter')
+const commentRouter = require('./routes/commentRouter')
+const organizationRouter = require('./routes/orgRouter')
+
 const cors = require('cors')
 const authMid = require('./middleware/authMiddleware')
 
@@ -24,11 +29,15 @@ app.use(fileUpload());
 app.use(cors({origin: 'http://localhost:3000', credentials: true }))
 app.use(cookieParser())
 
-app.use('/api', authRouter,errorHandler)
+app.use('/api', authRouter,errorHandler);
 
 app.use(authMid);
 
-app.use('/api', userRouter,errorHandler)
+app.use('/api', userRouter,errorHandler);
+app.use('/api', eventRouter,errorHandler);
+app.use('/api', searchRouter,errorHandler);
+app.use('/api', organizationRouter,errorHandler);
+app.use('/api', commentRouter,errorHandler);
 
 
 app.listen(PORT, () => console.log(`Server up at http://localhost:${PORT}`))

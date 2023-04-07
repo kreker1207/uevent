@@ -14,63 +14,70 @@ exports.up = function(knex) {
           table.timestamps(true, true);
         }),
 
-        knex.schema.createTable('organizations', function(table) {
+        knex.schema.createTable('organization', function(table) {
             table.increments('id').primary();
             table.integer('admin_id').unsigned().notNullable();
+            // Unique!
+             //logo(img)512
             table.string('title', 60).notNullable();
-            // Do we really need type?
-            //table.string('type')
             table.text('description');
             table.string('location', 60);
             
             table.foreign('admin_id').references('id').inTable('users')
         }),
     
-        knex.schema.createTable('events', function(table) {
+        knex.schema.createTable('event', function(table) {
             table.increments('id').primary();
             table.integer('organizer_id').unsigned().notNullable();
             table.string('title', 40).notNullable();
+            //location(string)
+            //img base64
             table.text('description');
-            table.timestamp('event-datetime')
+            table.timestamp('event_datetime');
+            table.string('location', 240).notNullable();
       
-            table.foreign('organizer_id').references('id').inTable('organizations')
+            table.foreign('organizer_id').references('id').inTable('organization')
         }),
+        //Theme() format(fest, concert) 
 
-        knex.schema.createTable('seats', function(table) {
+        knex.schema.createTable('seat', function(table) {
             table.increments('id').primary();
             table.integer('event_id').unsigned().notNullable();
             table.integer('number').notNullable();
             table.integer('row');
             table.string('price', 20);
+            //publish date
             table.boolean('is_available').defaultTo(true);
       
-            table.foreign('event_id').references('id').inTable('events');
+            table.foreign('event_id').references('id').inTable('event');
         }),
 
 
-        knex.schema.createTable('comments', function(table) {
+        knex.schema.createTable('comment', function(table) {
             table.increments('id').primary();
             table.text('content').notNullable();
-
+            //sender
             table.integer('author_id').unsigned();
+            //organizator sender
             table.integer('author_organization_id').unsigned();
-
-            table.integer('organization_id').unsigned().defaultTo(null);
+            
+            // targets
             table.integer('event_id').unsigned().defaultTo(null);
+            table.integer('main_comment_id').unsigned().defaultTo(null);
             table.integer('comment_id').unsigned().defaultTo(null);
+            //
 
             table.foreign('author_id').references('id').inTable('users');
-            table.foreign('author_organization_id').references('id').inTable('organizations');
+            table.foreign('author_organization_id').references('id').inTable('organization');
             
-            table.foreign('organization_id').references('id').inTable('organizations');
-            table.foreign('event_id').references('id').inTable('events');
-            table.foreign('comment_id').references('id').inTable('comments');
+            table.foreign('event_id').references('id').inTable('event');
+            table.foreign('comment_id').references('id').inTable('comment');
+            table.foreign('main_comment_id').references('id').inTable('comment');
 
             table.check('((?? is not null):: integer + (?? is not null):: integer) = 1', 
                 ['author_organization_id', 'author_id']);
-            table.check('((?? is not null):: integer + (?? is not null):: integer + (?? is not null):: integer) = 1', 
-                ['organization_id', 'event_id', 'comment_id']);
         }),
+
     ]);
 };
 
@@ -81,9 +88,9 @@ exports.up = function(knex) {
 exports.down = function(knex) {
     return Promise.all([
         knex.schema.dropTable('event'),
+        knex.schema.dropTable('seat'),
         knex.schema.dropTable('organization'),
         knex.schema.dropTable('comment'),
-        knex.schema.dropTable('role'),
         knex.schema.dropTable('users')
     ]);
 };
