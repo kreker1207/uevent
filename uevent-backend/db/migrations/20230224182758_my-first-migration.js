@@ -4,69 +4,89 @@
  */
 exports.up = function(knex) {
     return Promise.all([
-        knex.schema.createTable('users', function(table) {
+        knex.schema.createTable('users', (table) => {
           table.increments('id').primary();
-          table.string('login').notNullable().unique();
-          table.string('email').notNullable().unique();
-          table.string('password').notNullable();
-          table.string('profile_pic').defaultTo('none.png');
+          table.string('login', 40).notNullable().unique();
+          table.string('email', 80).notNullable().unique();
+          table.string('password', 128).notNullable();
+          table.string('profile_pic', 128).notNullable().defaultTo('none.png');
           table.boolean('is_active').defaultTo(true);
           table.timestamps(true, true);
         }),
 
-        knex.schema.createTable('organization', function(table) {
+
+        knex.schema.createTable('organization', (table) => {
             table.increments('id').primary();
             table.integer('admin_id').unsigned().notNullable();
             // Unique!
              //logo(img)512
             table.string('title', 60).notNullable();
-            table.text('description');
-            table.string('location', 60);
+            table.text('description').notNullable();
+            table.string('location', 60).defaultTo(null);
+            table.string('phone_number', 20).defaultTo(null);
+            table.string('org_pic', 128).defaultTo('none.png');
+
             
             table.foreign('admin_id').references('id').inTable('users')
         }),
     
-        knex.schema.createTable('event', function(table) {
+        knex.schema.createTable('event', (table) => {
             table.increments('id').primary();
             table.integer('organizer_id').unsigned().notNullable();
             table.string('title', 40).notNullable();
-            //location(string)
-            //img base64
-            table.text('description');
-            table.timestamp('event_datetime');
-            table.string('location', 240).notNullable();
+            table.text('description').notNullable();
+            table.timestamp('event-datetime').notNullable();
+            table.enu('column', ['concert', 'meet_up', 'festival', 'show', 'custom'],
+                { useNative: true, enumName: 'format' }).defaultTo('custom');
+            table.string('location', 256).notNullable();
+            table.string('eve_pic', 128).defaultTo('none.png');
+
       
             table.foreign('organizer_id').references('id').inTable('organization')
         }),
         //Theme() format(fest, concert) 
 
-        knex.schema.createTable('seat', function(table) {
+
+        knex.schema.createTable('seat', (table) => {
             table.increments('id').primary();
             table.integer('event_id').unsigned().notNullable();
             table.integer('number').notNullable();
-            table.integer('row');
-            table.string('price', 20);
-            //publish date
+            table.integer('row').defaultTo(null);
+            table.string('price', 20).defaultTo(null);
+          
             table.boolean('is_available').defaultTo(true);
       
             table.foreign('event_id').references('id').inTable('event');
         }),
 
+        knex.schema.createTable('theme', (table) => {
+            table.increments('id').primary();
+            table.string('name', 30).notNullable();
+        }),
 
-        knex.schema.createTable('comment', function(table) {
+        knex.schema.createTable('event_theme', (table) => {
+            table.increments('id').primary();
+            table.integer('event_id').unsigned().notNullable();
+            table.integer('theme_id').unsigned().notNullable();
+
+            table.foreign('event_id').references('id').inTable('event');
+            table.foreign('theme_id').references('id').inTable('theme');
+        }),
+
+
+        knex.schema.createTable('comment', (table) => {
             table.increments('id').primary();
             table.text('content').notNullable();
-            //sender
-            table.integer('author_id').unsigned();
-            //organizator sender
-            table.integer('author_organization_id').unsigned();
+
+            table.integer('author_id').unsigned().defaultTo(null);
+            table.integer('author_organization_id').unsigned().defaultTo(null);
             
-            // targets
             table.integer('event_id').unsigned().defaultTo(null);
             table.integer('main_comment_id').unsigned().defaultTo(null);
             table.integer('comment_id').unsigned().defaultTo(null);
             //
 
+            table.string('receiver_name', 40).defaultTo(null);
             table.foreign('author_id').references('id').inTable('users');
             table.foreign('author_organization_id').references('id').inTable('organization');
             
