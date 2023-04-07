@@ -1,4 +1,7 @@
-const   ORGANIZATION_TABLE = 'organization',
+const User = require('../models/user');
+
+const   USER_TABLE = 'users',
+        ORGANIZATION_TABLE = 'organization',
         jwt = require('jsonwebtoken'),
         {secret_refresh} = require('../config'),      
         {validationResult} = require('express-validator'),
@@ -11,6 +14,16 @@ class OrganizationController{
         try{
             const organization = new Organization(ORGANIZATION_TABLE);
             const pawns = await organization.getAll();
+            res.json(pawns)
+        } catch(e){
+            e.addMessage = 'Get organizations';
+            errorReplier(e, res);
+            }
+    }
+    async getOrgsByUserId(req,res){
+        try{
+            const user = new User(USER_TABLE);
+            const pawns = await user.getAllOrganizationsByUserId(req.params.userId);
             res.json(pawns)
         } catch(e){
             e.addMessage = 'Get organizations';
