@@ -5,6 +5,7 @@ import DragAndDropImage from '../components/DragImage';
 import { FaTimesCircle, FaDollarSign } from 'react-icons/fa';
 import { IconContext } from 'react-icons';
 import { NavLink } from 'react-router-dom';
+import api from '../utils/apiSetting';
 
 function CreateEvent() {
     const [inputType1, setInputType1] = useState('text');
@@ -65,6 +66,13 @@ function CreateEvent() {
             tags
         }
         console.log(data)
+        // api.post(`/org/${companyId}/events`)
+        // .then(function(response) {
+        //   console.log(response.data)
+        // })
+        // .catch(function(error) {
+        //   console.log(error.message)
+        // })
     }
 
     function handleKeyPress(event) {

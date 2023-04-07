@@ -238,7 +238,7 @@ export default function EventPage() {
                           <div><img src={require("../assets/company.jpg")} alt="userlogo" /></div>
                           <div className="name">
                             <h4>{item.login}</h4>
-                            <p>{item.event_datetime}</p>
+                            <p>{item.created_at}</p>
                           </div>
                         </div>
                         <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px", cursor: "pointer" } }}>
@@ -264,7 +264,7 @@ export default function EventPage() {
                                     <div><img src={require("../assets/company.jpg")} alt="userlogo" /></div>
                                     <div className="name">
                                       <h4>{itemInner.login} <i style={{color: "#868686", fontSize: "12px"}}>replied to {itemInner.receiverName}</i></h4>
-                                      <p>{itemInner.date}</p>
+                                      <p>{itemInner.created_at}</p>
                                     </div>
                                   </div>
                                   <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px", cursor: "pointer" } }}>

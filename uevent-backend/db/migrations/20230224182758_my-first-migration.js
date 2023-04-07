@@ -25,7 +25,6 @@ exports.up = function(knex) {
             table.string('location', 60).defaultTo(null);
             table.string('phone_number', 20).defaultTo(null);
             table.string('org_pic', 128).defaultTo('none.png');
-
             
             table.foreign('admin_id').references('id').inTable('users')
         }),
@@ -41,7 +40,6 @@ exports.up = function(knex) {
             table.string('location', 256).notNullable();
             table.string('eve_pic', 128).defaultTo('none.png');
 
-      
             table.foreign('organizer_id').references('id').inTable('organization')
         }),
         //Theme() format(fest, concert) 
@@ -85,7 +83,7 @@ exports.up = function(knex) {
             table.integer('main_comment_id').unsigned().defaultTo(null);
             table.integer('comment_id').unsigned().defaultTo(null);
             //
-
+            table.timestamps(true, true);
             table.string('receiver_name', 40).defaultTo(null);
             table.foreign('author_id').references('id').inTable('users');
             table.foreign('author_organization_id').references('id').inTable('organization');
