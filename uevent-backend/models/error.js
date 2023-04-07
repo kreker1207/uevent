@@ -13,6 +13,7 @@ const ERROR_MAP = new Map ([
     [1007, { message: 'You are not able to create event', status: 403 }],
     [1008, { message: 'You are not able to call this endpoint', status: 403 }],
     [1009, { message: 'Event not found by ID', status: 404 }],
+    [1010, { message: 'Comment not found by ID', status: 404 }],
 ]);
 
 class CustomError extends Error {

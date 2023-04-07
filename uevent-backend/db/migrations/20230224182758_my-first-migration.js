@@ -33,7 +33,8 @@ exports.up = function(knex) {
             //location(string)
             //img base64
             table.text('description');
-            table.timestamp('event_datetime')
+            table.timestamp('event_datetime');
+            table.string('location', 240).notNullable();
       
             table.foreign('organizer_id').references('id').inTable('organization')
         }),
@@ -61,22 +62,20 @@ exports.up = function(knex) {
             table.integer('author_organization_id').unsigned();
             
             // targets
-            table.integer('organization_id').unsigned().defaultTo(null);
             table.integer('event_id').unsigned().defaultTo(null);
+            table.integer('main_comment_id').unsigned().defaultTo(null);
             table.integer('comment_id').unsigned().defaultTo(null);
             //
 
             table.foreign('author_id').references('id').inTable('users');
             table.foreign('author_organization_id').references('id').inTable('organization');
             
-            table.foreign('organization_id').references('id').inTable('organization');
             table.foreign('event_id').references('id').inTable('event');
             table.foreign('comment_id').references('id').inTable('comment');
+            table.foreign('main_comment_id').references('id').inTable('comment');
 
             table.check('((?? is not null):: integer + (?? is not null):: integer) = 1', 
                 ['author_organization_id', 'author_id']);
-            table.check('((?? is not null):: integer + (?? is not null):: integer + (?? is not null):: integer) = 1', 
-                ['organization_id', 'event_id', 'comment_id']);
         }),
 
     ]);

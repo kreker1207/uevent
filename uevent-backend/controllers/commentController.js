@@ -19,6 +19,16 @@ class CommentController{
             errorReplier(e, res);
             }
     }
+    async getCommentById(req,res){
+        try{
+            const comment = new Comment(COMMENT_TABLE);
+            const pawns = await comment.getById(req.params.id);
+            res.json(pawns)
+        } catch(e){
+            e.addMessage = 'Get comment by id';
+            errorReplier(e, res);
+            }
+    }
     async getCommentsByEventId(req,res){
         try{
             const comment = new Comment(COMMENT_TABLE);
@@ -36,7 +46,7 @@ class CommentController{
             if(! errors.isEmpty()){
                 throw new CustomError(10);
             }
-            const { content } = req.body;
+            const { content} = req.body;
             const comment = new Comment(COMMENT_TABLE);
             const eventTable = new Event(EVENT_TABLE);
             const event = await eventTable.getById(req.params.eventId);
@@ -78,7 +88,8 @@ class CommentController{
             if(! errors.isEmpty()){
                 throw new CustomError(10);
             }
-            const { content } = req.body;
+            const { content,comment_id } = req.body;
+            if(!comment_id)throw new CustomError(1010);
             const comment = new Comment(COMMENT_TABLE);
             const eventTable = new Event(EVENT_TABLE);
             const event = await eventTable.getById(req.params.eventId);
@@ -90,7 +101,9 @@ class CommentController{
                 const commenttData= {
                     content: content,
                     author_organization_id:event.organizer_id,
-                    comment_id: req.params.comId
+                    event_id: req.params.eventId,
+                    comment_id: comment_id,
+                    main_comment_id:req.params.mainComId
                 }
                 const [pawn] = await comment.set(commenttData);
                 console.log(pawn)
@@ -100,7 +113,9 @@ class CommentController{
                 const commentData= {
                     author_id: userId,
                     content: content,
-                    comment_id: req.params.comId
+                    event_id: req.params.eventId,
+                    comment_id: comment_id,
+                    main_comment_id:req.params.mainComId
                 }
                 const [pawn] = await comment.set(commentData);
                 console.log(pawn)

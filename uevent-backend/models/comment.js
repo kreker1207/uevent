@@ -16,14 +16,20 @@ module.exports = class Comment extends Entity {
 
     async getAllCommentsForEvent(eventId, parentId = null) {
         const comments = await super.table()
-            .where({ event_id: eventId || null, comment_id: parentId || null })
+          .where({ event_id: eventId || null, comment_id: parentId || null })
+          .orderBy('id', 'asc')
+          .select('*');
+        for (const comment of comments) {
+            const replies = await super.table()
+            .where({ main_comment_id: comment.id })
             .orderBy('id', 'asc')
             .select('*');
-        for (const comment of comments) {
-            const replies = await this.getAllCommentsForEvent(null, comment.id);
             comment.replies = replies;
         }
-    
         return comments;
     }
 }
+        
+          
+
+    
