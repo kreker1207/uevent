@@ -8,7 +8,11 @@ const ERROR_MAP = new Map ([
     [1002, { message: 'Passwords don\'t match!', status: 400 }],
     [1003, { message: 'You need to confirm email first', status: 403 }],
     [1004, { message: 'Login already exists!', status: 400 }],
-    [1005, { message: 'Email already in use', status: 400 }]
+    [1005, { message: 'Email already in use', status: 400 }],
+    [1006, { message: 'Organization not found by ID', status: 404 }],
+    [1007, { message: 'You are not able to create event', status: 403 }],
+    [1008, { message: 'You are not able to call this endpoint', status: 403 }],
+    [1009, { message: 'Event not found by ID', status: 404 }],
 ]);
 
 class CustomError extends Error {
