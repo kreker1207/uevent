@@ -36,7 +36,7 @@ class EventController{
             if(! errors.isEmpty()){
                 throw new CustomError(10);
             }
-            const {title, description, eventDatetime, seats} = req.body;
+            const {title, description, eventDatetime, seats, location} = req.body;
             const event = new Event(EVENT_TABLE);
             const organization = new Organization(ORGANIZATION_TABLE);
             const candidate = await organization.getById(req.params.orgId);
@@ -46,7 +46,9 @@ class EventController{
                 organizer_id: req.params.orgId,
                 title: title,
                 description: description,
-                event_datetime: eventDatetime
+                event_datetime: eventDatetime,
+                seats:seats,
+                location:location,
             }
             const [pawn] = await event.set(eventData);
             //Add aoutocreation of seats
