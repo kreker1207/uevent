@@ -1,34 +1,36 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
+import { useNavigate } from 'react-router-dom';
 import api from '../utils/apiSetting'
 
 export default function Companies() {
-  const [loading, setIsLoading] = useState(true);
+  const navigate = useNavigate()
+  const [loading, setIsLoading] = useState(false);
   const [companies, setCompanies] = useState([
     {
       id: 1,
-      name: 'Company Name',
+      title: 'Company Name',
       description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta nobis deleniti vitae commodi molestias magni aperiam eos, eligendi dolorem itaque hic odit rem neque amet voluptatem ut unde facilis omnis?',
       evNumbers: 34,
       adminEmail: 'example@gmail.com'
     },
     {
       id: 2,
-      name: 'Company Name',
+      title: 'Company Name',
       description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta nobis deleniti vitae commodi molestias magni aperiam eos, eligendi dolorem itaque hic odit rem neque amet voluptatem ut unde facilis omnis?',
       evNumbers: 34,
       adminEmail: 'example@gmail.com'
     },
     {
       id: 3,
-      name: 'Company Name',
+      title: 'Company Name',
       description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta nobis deleniti vitae commodi molestias magni aperiam eos, eligendi dolorem itaque hic odit rem neque amet voluptatem ut unde facilis omnis?',
       evNumbers: 34,
       adminEmail: 'example@gmail.com'
     },
     {
       id: 4,
-      name: 'Company Name',
+      title: 'Company Name',
       description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta nobis deleniti vitae commodi molestias magni aperiam eos, eligendi dolorem itaque hic odit rem neque amet voluptatem ut unde facilis omnis?',
       evNumbers: 34,
       adminEmail: 'example@gmail.com'
@@ -46,11 +48,15 @@ export default function Companies() {
     // })
   }, [])
 
+  const handleCreateCompany = () => {
+    navigate('/create-company')
+  }
+
   return (
     <Container>
       <div className="create-company">
         <h1>All Companies</h1>
-        <button>+ Create Company</button>
+        <button onClick={handleCreateCompany}>+ Create Company</button>
       </div>
       {
         loading ? 
@@ -65,7 +71,7 @@ export default function Companies() {
                   <img src={require("../assets/company.jpg")} alt="logo" />
                 </div>
                 <div className='company-content'>
-                  <h2>{item.name}</h2>
+                  <h2>{item.title}</h2>
                   <p className='description'>{item.description}</p>
                   <div className='additionals'>
                     <div>
