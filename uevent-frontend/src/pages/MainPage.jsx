@@ -2,11 +2,17 @@ import React, { useEffect } from 'react'
 import { useState } from 'react';
 import styled from 'styled-components';
 import api from '../utils/apiSetting';
+import { useNavigate } from 'react-router-dom';
+
+import { IconContext } from 'react-icons';
+import { FaClock, FaMapMarkerAlt } from "react-icons/fa";
 
 export default function MainPage() {
-  const [loading, setIsLoading] = useState(true);
+  const navigate = useNavigate()
+  const [loading, setIsLoading] = useState(false);
   const [events, setEvents] = useState([
     {
+      id: 1,
       location: 'Kharkov',
       date: '15.03.2023',
       time: '15:30',
@@ -15,6 +21,7 @@ export default function MainPage() {
       price: 340
     },
     {
+      id: 2,
       location: 'Kharkov',
       date: '15.03.2023',
       time: '15:30',
@@ -23,6 +30,7 @@ export default function MainPage() {
       price: 340
     },
     {
+      id: 3,
       location: 'Kharkov',
       date: '15.03.2023',
       time: '15:30',
@@ -31,6 +39,13 @@ export default function MainPage() {
       price: 340
     }
   ])
+  
+  const handleEventClick = (id) => {
+    navigate(`/events/${id}`)
+  }
+  const handleCreateEvent = () => {
+    navigate(`/create-event`)
+  }
 
   useEffect(() => {
     // api.get(`/events`)
@@ -85,7 +100,7 @@ export default function MainPage() {
             </div>
           </div>
         </div>
-        <button>+ New Event</button>
+        <button onClick={handleCreateEvent}>+ New Event</button>
       </div>
       {
         loading ? 
@@ -98,15 +113,23 @@ export default function MainPage() {
               <div className="event" key={index}>
               <img src={require("../assets/ev_img.jpg")} alt="" />
               <div className='time-location'>
-                <p>{item.location}</p>
-                <p>{item.date} {item.time}</p>
+                <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
+                  <p>
+                    <FaMapMarkerAlt/>{item.location}
+                  </p>
+                </IconContext.Provider>
+                <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
+                  <p>
+                    <FaClock/>{item.date} {item.time}
+                  </p>
+                </IconContext.Provider>
               </div>
               <div className='description'>
                 <h2>{item.name}</h2>
                 <p>{item.description}</p>
               </div>
               <div className='price'>
-                <button>More</button>
+                <button onClick={() => handleEventClick(item.id)}>More</button>
                 <p>{item.price}$</p>
               </div>
             </div>
@@ -322,6 +345,7 @@ const Container = styled.div`
               border: none;
               color: #fff;
               background-color: #FFD100;
+              cursor: pointer;
             }
             p {
               font-weight: 700;
