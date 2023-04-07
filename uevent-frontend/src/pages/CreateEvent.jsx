@@ -61,7 +61,8 @@ function CreateEvent() {
             title,
             description,
             "event_datetime": eventDate + ' ' + eventTime,
-            
+            seats,
+
             publishDate,
             evType,
             location: placeName,
@@ -70,7 +71,7 @@ function CreateEvent() {
             tags
         }
         console.log(data)
-        api.post(`/org/${companyId}/events`, {data})
+        api.post(`/org/${companyId}/events`, data)
         .then(function(response) {
           console.log(response.data)
         })

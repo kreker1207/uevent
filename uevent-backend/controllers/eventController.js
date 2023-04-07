@@ -36,7 +36,8 @@ class EventController{
             if(! errors.isEmpty()){
                 throw new CustomError(10);
             }
-            const {title, description, eventDatetime, seats, location} = req.body;
+            const {title, description, event_datetime, location} = req.body;
+            console.log(title + '\n' + description + '\n' + event_datetime + '\n' + location)
             const event = new Event(EVENT_TABLE);
             const organization = new Organization(ORGANIZATION_TABLE);
             const candidate = await organization.getById(req.params.orgId);
@@ -44,10 +45,9 @@ class EventController{
             checkEventAndRelation(candidate,refreshToken);
             const eventData= {
                 organizer_id: req.params.orgId,
-                title: title,
-                description: description,
-                event_datetime: eventDatetime,
-                seats:seats,
+                title,
+                description,
+                event_datetime,
                 location:location,
             }
             const [pawn] = await event.set(eventData);

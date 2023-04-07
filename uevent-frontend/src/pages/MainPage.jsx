@@ -118,12 +118,12 @@ export default function MainPage() {
               <img src={require("../assets/ev_img.jpg")} alt="" />
               <div className='time-location'>
                 <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
-                  <p>
+                  <p className='location'>
                     <FaMapMarkerAlt/>{item.location}
                   </p>
                 </IconContext.Provider>
                 <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
-                  <p>
+                  <p className='time'>
                     <FaClock/>{item.event_datetime}
                   </p>
                 </IconContext.Provider>
@@ -312,6 +312,27 @@ const Container = styled.div`
             display: flex;
             justify-content: space-between;
             align-items: center;
+            p {
+              width: 50%;
+            }
+            .time {
+              text-align: end;
+            }
+            .location {
+              margin: 0;
+              -ms-text-overflow: ellipsis;
+              -o-text-overflow: ellipsis;
+              text-overflow: ellipsis;
+              overflow: hidden;
+              -ms-line-clamp: 1;
+              -webkit-line-clamp: 1;
+              line-clamp: 1;
+              display: -webkit-box;
+              display: box;
+              word-wrap: break-word;
+              -webkit-box-orient: vertical;
+              box-orient: vertical;
+            }
           } 
           &.description {
             padding: 0px 25px;
