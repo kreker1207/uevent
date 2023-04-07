@@ -357,7 +357,7 @@ const Component = styled.div`
                     margin-left: 10px;
                     select {
                         outline: none;
-                        background: transparent;
+                        background: rgb(32,32,32);
                         border: none;
                         color: #fff;
                         margin: 0;
