@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { IconContext } from 'react-icons';
 import { FaClock, FaMapMarkerAlt } from "react-icons/fa";
-import axios from 'axios';
+
 
 export default function MainPage() {
   const navigate = useNavigate()
@@ -124,7 +124,7 @@ export default function MainPage() {
                 </IconContext.Provider>
                 <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
                   <p>
-                    <FaClock/>{item.date}
+                    <FaClock/>{item.event_datetime}
                   </p>
                 </IconContext.Provider>
               </div>

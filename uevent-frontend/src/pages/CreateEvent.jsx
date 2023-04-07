@@ -45,6 +45,9 @@ function CreateEvent() {
     const [format, setFormat] = useState('')
     const [seats, setSeats] = useState(0)
 
+    //test
+    const [companyId, setCompanyId] = useState(1)
+
     const handleMapCoordinates = (placeName) => {
         setPlaceName(placeName);
     };
@@ -56,23 +59,24 @@ function CreateEvent() {
     const handlePublish = () => {
         const data = {
             title,
+            description,
+            "event_datetime": eventDate + ' ' + eventTime,
+            
             publishDate,
-            "event-datetime": eventDate + ' ' + eventTime,
             evType,
             location: placeName,
-            description,
             format,
             companyName,
             tags
         }
         console.log(data)
-        // api.post(`/org/${companyId}/events`)
-        // .then(function(response) {
-        //   console.log(response.data)
-        // })
-        // .catch(function(error) {
-        //   console.log(error.message)
-        // })
+        api.post(`/org/${companyId}/events`, {data})
+        .then(function(response) {
+          console.log(response.data)
+        })
+        .catch(function(error) {
+          console.log(error.message)
+        })
     }
 
     function handleKeyPress(event) {

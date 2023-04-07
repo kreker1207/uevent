@@ -12,8 +12,7 @@ export default function EventPage() {
 
   const [loading, setLoading] = useState(true);
   const [loadingComments, setLoadingComments] = useState(true);
-  const [loadingCommentsNames, setLoadingCommentsNames] = useState(true);
-  const [loadingCommentsSub, setLoadingCommentsSub] = useState(true);
+
   const [event, setEvent] = useState({
     id: 1,
     title: "Event Name",
@@ -33,7 +32,7 @@ export default function EventPage() {
     {
       id: 1,
       username: "Roman Lytvynov",
-      date: "20.03.2023",
+      date: "20.03.2023 15:30",
       content: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sed soluta magnam dolorem blanditiis quam voluptatum fugit aut non nesciunt dolores rem repudiandae delectus eos consequuntur repellat quo, ad provident ab?",
       commentsInside: []
     },
@@ -69,6 +68,7 @@ export default function EventPage() {
   const [users, setUsers] = useState([])
 
   const [receiverName, setReceiverName] = useState('')
+  const [receiverMaintId, setMainCommentId] = useState(-1)
   const [receiverCommentId, setReceiverCommentId] = useState(-1)
   const [description, setDescription] = useState('')
 
@@ -85,93 +85,104 @@ export default function EventPage() {
   }, [id])
 
   useEffect(() => {
+    // Make API request to get the comments
     api.get(`/comments/event/${id}`)
-      .then(function (response) {
-        console.log(response.data)
-        setComments(response.data)
-        setLoadingComments(false)
-      })
-      .catch(function(error) {
-        console.log(error.message)
-      })
-  }, [id])
+      .then(response => {
+        const commentsData = response.data;
 
+        // Create an array of promises to get the additional fields for each comment object and its nestedArray
+        const commentPromises = commentsData.map(comment => {
+          const authorPromise = api.get(`/users/${comment.author_id}`);
+          const nestedArrayPromises = comment.replies.map(nested => api.get(`/users/${nested.author_id}`));
 
+          return Promise.all([authorPromise, ...nestedArrayPromises]).then(responses => {
+            const [authorResponse, ...nestedResponses] = responses;
+            const authorData = authorResponse.data;
+            const nestedData = nestedResponses.map(response => response.data);
 
-  useEffect(() => {
-    const newCommentsPromisses = comments.map((item) => {
-      return api.get(`/users/${item.author_id}`)
-    })
-
-    Promise.all(newCommentsPromisses)
-      .then(responses => {
-        const updatedComments = responses.map((response, index) => {
-          // обновляем объект, используя данные из ответа
-          const data = response.data;
-          return {
-            ...comments[index],
-            login: data.login,
-            profile_pic: data.profile_pic,
-          };
-        });
-        setComments(updatedComments);
-        setLoadingCommentsNames(true);
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  }, [])
-
-
-
-  useEffect(() => {
-    const newCommentsPromisses = comments.map((item) => {
-      const subItems = item.replies.map(itemInside => {
-        return api.get(`/users/${itemInside.author_id}`)
-      })
-      return subItems
-    })
-
-    Promise.all(newCommentsPromisses)
-      .then(responses => {
-        const updatedComments = responses.map((response, index) => {
-
-          const data = response.data;
-
-          const updatedSubComments = comments[index].replies.map(item => {
+            // Return the updated comment object with the additional fields
             return {
-              ...item,
-              login: data.login,
-              profile_pic: data.profile_pic,
-            }
-          })
-          return {
-            ...comments,
-            replies: updatedSubComments
-          }
+              ...comment,
+              login: authorData.login,
+              picture_img: authorData.picture_img,
+              replies: comment.replies.map((nested, index) => ({
+                ...nested,
+                login: nestedData[index].login,
+                picture_img: nestedData[index].picture_img,
+              })),
+            };
+          });
         });
-        setComments(updatedComments);
-        setLoadingCommentsSub(true);
+
+        // Wait for all the commentPromises to resolve and update the state with the updated comments
+        Promise.all(commentPromises)
+          .then(updatedComments => {
+            setComments(updatedComments);
+            setLoadingComments(false)
+          })
+          .catch(error => {
+            console.error(error);
+          });
       })
       .catch(error => {
         console.error(error);
       });
-  }, [])
+  }, [id]);
 
-  const handleCommentFocus = (receiverName, receiverCommentId) => {
+  // useEffect(() => {
+  //   if (comments) {
+  //     const newCommentsPromisses = comments.map((item) => {
+  //       const subItems = item.replies.map(itemInside => {
+  //         return api.get(`/users/${itemInside.author_id}`)
+  //       })
+  //       return subItems
+  //     })
+
+  //     Promise.all(newCommentsPromisses)
+  //       .then(responses => {
+  //         const updatedComments = responses.map((response, index) => {
+
+  //           const data = response.data;
+
+  //           const updatedSubComments = comments[index].replies.map(item => {
+  //             return {
+  //               ...item,
+  //               login: data.login,
+  //               profile_pic: data.profile_pic,
+  //             }
+  //           })
+  //           return {
+  //             ...comments,
+  //             replies: updatedSubComments
+  //           }
+  //         });
+  //         setComments(updatedComments);
+  //       })
+  //       .catch(error => {
+  //         console.error(error);
+  //       });
+  //   }
+  // }, [comments]);
+
+
+  const handleCommentFocus = (receiverName, receiverMaintId, receiverCommentId) => {
     if (inputRef.current) {
       inputRef.current.focus();
       const textarea = document.getElementById("textarea")
       textarea.placeholder = `Reply to ${receiverName}`
 
       setReceiverName(receiverName)
+      setMainCommentId(receiverMaintId)
       setReceiverCommentId(receiverCommentId)
     }
   };
 
+
+
   const handleCommentSend = () => {
     if(receiverName!=='' && receiverCommentId !== -1) {
-      api.post(`api/comments/event/${event.id}/reply/${receiverCommentId}`, {content: description})
+      console.log(receiverCommentId)
+      api.post(`/comments/event/${event.id}/reply/${receiverMaintId}`, {content: description, comment_id: receiverCommentId})
         .then(function(response) {
             console.log(response.data)
           })
@@ -179,9 +190,10 @@ export default function EventPage() {
             console.log(error.message)
           })
     } else {
-      api.post(`api/comments/event/${event.id}`)
+      api.post(`/comments/event/${event.id}`, {content: description})
         .then(function(response) {
           console.log(response.data)
+          console.log(event)
         })
         .catch(function(error) {
           console.log(error.message)
@@ -191,10 +203,10 @@ export default function EventPage() {
   console.log(comments)
   return (
     <Container>
-      <div className="description-block">
-        <div className="event-image">
+      <div className="event-image">
           <img src = {require("../assets/ev_img.jpg")} alt="" />
-        </div>
+      </div>
+      <div className="description-block">
         <div className="description">
           <h2>{event.title}</h2>
           <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
@@ -222,12 +234,17 @@ export default function EventPage() {
           </div> 
         </div>
       </div>
+
+
+
+
+
+
       <div className="comments-block">
-        <div className="comments">
           <h2>Comments</h2>
           <div className="comments-inner">
             {
-              loading && loadingComments && loadingCommentsSub && loadingCommentsNames ? 
+              loading && loadingComments ? 
               <div className="loading">Loading...</div>
               :
               comments.map((item, index) => {
@@ -243,7 +260,7 @@ export default function EventPage() {
                         </div>
                         <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px", cursor: "pointer" } }}>
                           <div className="arrow">
-                            <FaReply onClick={() => handleCommentFocus(item.login,item.id)}/>
+                            <FaReply onClick={() => handleCommentFocus(item.login, item.id, item.id)}/>
                           </div>
                         </IconContext.Provider>
                     </div>
@@ -263,13 +280,13 @@ export default function EventPage() {
                                   <div className="photo">
                                     <div><img src={require("../assets/company.jpg")} alt="userlogo" /></div>
                                     <div className="name">
-                                      <h4>{itemInner.login} <i style={{color: "#868686", fontSize: "12px"}}>replied to {itemInner.receiverName}</i></h4>
+                                      <h4>{itemInner.login} <i style={{color: "#868686", fontSize: "12px"}}>replied to {itemInner.receiver_name}</i></h4>
                                       <p>{itemInner.created_at}</p>
                                     </div>
                                   </div>
                                   <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px", cursor: "pointer" } }}>
                                     <div className="arrow">
-                                      <FaReply onClick={() => handleCommentFocus(itemInner.login, item.id)}/>
+                                      <FaReply onClick={() => handleCommentFocus(itemInner.login, item.id, itemInner.id)}/>
                                     </div>
                                   </IconContext.Provider>
                               </div>
@@ -286,26 +303,22 @@ export default function EventPage() {
                 )
               })
             }
-            <div className="textarea">
-                <textarea value={description} id="textarea" ref={inputRef} placeholder="Type comment here..." onChange={(e)=>setDescription(e.target.value)}></textarea>
-                <button onClick={handleCommentSend} type="submit">Send</button>
-            </div>
+          </div>
+          <div className="textarea">
+             <textarea value={description} id="textarea" ref={inputRef} placeholder="Type comment here..." onChange={(e)=>setDescription(e.target.value)}></textarea>
+            <button onClick={handleCommentSend} type="submit">Send</button>
           </div>
         </div>
+
         <div className="map">
           <iframe
             title='map'
-            width="600"
-            height="450"
-            style={{border: "0"}}
             loading="lazy"
             allowFullScreen=""
             referrerPolicy="no-referrer-when-downgrade"
             src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyDuHV2o8j_nfA8XMUC-15fN9vlDB9htW30
             &q=${event.location}`}>
           </iframe>
-          {/* <Map onChildStateChange={handleMapCoordinates}/> */}
-        </div>
       </div>
     </Container>
   )
@@ -315,79 +328,73 @@ const Container = styled.div`
     max-width: 1480px;
     margin: 0 auto;
     padding: 0px 20px;
-    .description-block {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 20px;
-      margin-bottom: 75px;
+
+    display: grid;
+    gap: 50px;
+    grid-template-columns: 1fr 1fr;
+
+    .event-image {
+      position: relative;
       img {
-        display: block;
-        width: 720px;
-        height: 520px;
+        width: 100%;
+        height: 100%;
         object-fit: cover;
       }
-      .info {
-        margin-bottom: 60px;
-        h3 {
-          margin-bottom: 0;
+    }
+
+
+
+    
+    .description-block {
+      position: relative;
+      .description {
+        width: 100%;
+        height: 100%;
+        .info {
+          margin-bottom: 60px;
+          h3 {
+            margin-bottom: 0;
+          }
         }
-      }
-      .price-block {
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        gap: 20px;
-        button {
-          cursor: pointer;
-          width: 188px;
-          height: 55px;
-          background: #FFD100;
-          border: none;
-          color: #fff;
+        .price-block {
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          gap: 20px;
+          button {
+            cursor: pointer;
+            width: 188px;
+            height: 55px;
+            background: #FFD100;
+            border: none;
+            color: #fff;
+          }
         }
       }
     }
+
+
     .comments-block {
+      position: relative;
+      width: 100%;
+      height: 100%;
+
       display: flex;
+      flex-direction: column;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 20px;
-      .comments {
-        h2 {
-          margin-bottom: 40px;
-        }
-        .comments-inner {
 
-          .textarea {
-            position: relative;
-            height: 200px;
-            textarea {
-              width: 100%;
-              height: 100%;
-              padding: 10px;
-              border: none;
-              resize: none; /* отключаем возможность изменения размеров */
-              outline: none;
-            }
-            button {
-              position: absolute;
-              right: 0;
-              top: 0;
-              height: 100%;
-              width: 100px;
+      h2 {
+        margin-bottom: 20px;
+      }
 
-              background: #FFD100;
-              border: none;
-              color: white;
-              font-weight: 700;
-              padding: 0;
-              cursor: pointer;
-            }
-          }
-        }
+      .comments-inner {
+        width: 100%;
+        height: 100%;
+        margin-bottom: 20px;
+
         .comment {
-          margin-bottom: 30px;
+          width: 100%;
           .replies {
             width: 90%;
             margin-left: 10%;
@@ -444,8 +451,47 @@ const Container = styled.div`
           }
         }
       }
-      .map{
-        
+
+      .textarea {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        textarea {
+          width: 100%;
+          height: 100%;
+          padding: 10px;
+          border: none;
+          resize: none; /* отключаем возможность изменения размеров */
+          outline: none;
+        }
+        button {
+          position: absolute;
+          right: 0;
+          top: 0;
+          height: 100%;
+          width: 100px;
+
+          background: #FFD100;
+          border: none;
+          color: white;
+          font-weight: 700;
+          padding: 0;
+          cursor: pointer;
+        }
+      }
+
+    }
+    .map{
+      position: relative;
+      width: 100%;
+      height: 100%;
+      iframe {
+        position: absolute;
+        border: none;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
       }
     }
 `
