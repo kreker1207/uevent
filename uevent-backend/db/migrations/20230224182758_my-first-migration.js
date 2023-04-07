@@ -4,7 +4,7 @@
  */
 exports.up = function(knex) {
     return Promise.all([
-        knex.schema.createTable('user', (table) => {
+        knex.schema.createTable('users', (table) => {
           table.increments('id').primary();
           table.string('login', 40).notNullable().unique();
           table.string('email', 80).notNullable().unique();
@@ -14,16 +14,20 @@ exports.up = function(knex) {
           table.timestamps(true, true);
         }),
 
+
         knex.schema.createTable('organization', (table) => {
             table.increments('id').primary();
             table.integer('admin_id').unsigned().notNullable();
+            // Unique!
+             //logo(img)512
             table.string('title', 60).notNullable();
             table.text('description').notNullable();
             table.string('location', 60).defaultTo(null);
             table.string('phone_number', 20).defaultTo(null);
             table.string('org_pic', 128).defaultTo('none.png');
+
             
-            table.foreign('admin_id').references('id').inTable('user')
+            table.foreign('admin_id').references('id').inTable('users')
         }),
     
         knex.schema.createTable('event', (table) => {
@@ -36,9 +40,12 @@ exports.up = function(knex) {
                 { useNative: true, enumName: 'format' }).defaultTo('custom');
             table.string('location', 256).notNullable();
             table.string('eve_pic', 128).defaultTo('none.png');
+
       
             table.foreign('organizer_id').references('id').inTable('organization')
         }),
+        //Theme() format(fest, concert) 
+
 
         knex.schema.createTable('seat', (table) => {
             table.increments('id').primary();
@@ -46,6 +53,7 @@ exports.up = function(knex) {
             table.integer('number').notNullable();
             table.integer('row').defaultTo(null);
             table.string('price', 20).defaultTo(null);
+          
             table.boolean('is_available').defaultTo(true);
       
             table.foreign('event_id').references('id').inTable('event');
@@ -72,25 +80,24 @@ exports.up = function(knex) {
 
             table.integer('author_id').unsigned().defaultTo(null);
             table.integer('author_organization_id').unsigned().defaultTo(null);
-
-            table.integer('organization_id').unsigned().defaultTo(null);
+            
             table.integer('event_id').unsigned().defaultTo(null);
+            table.integer('main_comment_id').unsigned().defaultTo(null);
             table.integer('comment_id').unsigned().defaultTo(null);
+            //
 
             table.string('receiver_name', 40).defaultTo(null);
-
-            table.foreign('author_id').references('id').inTable('user');
+            table.foreign('author_id').references('id').inTable('users');
             table.foreign('author_organization_id').references('id').inTable('organization');
             
-            table.foreign('organization_id').references('id').inTable('organization');
             table.foreign('event_id').references('id').inTable('event');
             table.foreign('comment_id').references('id').inTable('comment');
+            table.foreign('main_comment_id').references('id').inTable('comment');
 
             table.check('((?? is not null):: integer + (?? is not null):: integer) = 1', 
                 ['author_organization_id', 'author_id']);
-            table.check('((?? is not null):: integer + (?? is not null):: integer + (?? is not null):: integer) = 1', 
-                ['organization_id', 'event_id', 'comment_id']);
         }),
+
     ]);
 };
 
@@ -101,9 +108,9 @@ exports.up = function(knex) {
 exports.down = function(knex) {
     return Promise.all([
         knex.schema.dropTable('event'),
+        knex.schema.dropTable('seat'),
         knex.schema.dropTable('organization'),
         knex.schema.dropTable('comment'),
-        knex.schema.dropTable('role'),
         knex.schema.dropTable('users')
     ]);
 };

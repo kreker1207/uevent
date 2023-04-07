@@ -219,6 +219,7 @@ const Head = styled.nav`
       background-color: #FFD100;
       margin: 10px 30px;
       border: none;
+      cursor: pointer;
       a {
         text-decoration: none;
         font-weight: 700;

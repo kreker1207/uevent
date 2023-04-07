@@ -2,35 +2,51 @@ import React, { useEffect } from 'react'
 import { useState } from 'react';
 import styled from 'styled-components';
 import api from '../utils/apiSetting';
+import { useNavigate } from 'react-router-dom';
+
+import { IconContext } from 'react-icons';
+import { FaClock, FaMapMarkerAlt } from "react-icons/fa";
 
 export default function MainPage() {
-  const [loading, setIsLoading] = useState(true);
+  const navigate = useNavigate()
+  const [loading, setIsLoading] = useState(false);
   const [events, setEvents] = useState([
     {
-      location: 'Kharkov',
-      date: '15.03.2023',
-      time: '15:30',
-      name: 'Event Name',
+      id: 1,
+      title: 'Event Name',
       description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore, vitae libero. Dolore, quasi. Facilis cumque doloremque ab ipsam? Labore tenetur quis nulla possimus aut laboriosam suscipit doloribus quisquam saepe fugiat!',
+      location: 'Kharkov',
+
+      date: '15.03.2023 15:30',
       price: 340
     },
     {
-      location: 'Kharkov',
-      date: '15.03.2023',
-      time: '15:30',
-      name: 'Event Name',
+      id: 2,
+      title: 'Event Name',
       description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore, vitae libero. Dolore, quasi. Facilis cumque doloremque ab ipsam? Labore tenetur quis nulla possimus aut laboriosam suscipit doloribus quisquam saepe fugiat!',
+      location: 'Kharkov',
+
+      date: '15.03.2023 15:30',
       price: 340
     },
     {
-      location: 'Kharkov',
-      date: '15.03.2023',
-      time: '15:30',
-      name: 'Event Name',
+      id: 3,
+      title: 'Event Name',
       description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore, vitae libero. Dolore, quasi. Facilis cumque doloremque ab ipsam? Labore tenetur quis nulla possimus aut laboriosam suscipit doloribus quisquam saepe fugiat!',
+      location: 'Kharkov',
+
+      date: '15.03.2023 15:30',
       price: 340
     }
   ])
+
+  const handleCreateEvent = () => {
+    navigate(`/create-event`)
+  }
+  
+  const handleEventClick = (id) => {
+    navigate(`/events/${id}`)
+  }
 
   useEffect(() => {
     // api.get(`/events`)
@@ -85,7 +101,7 @@ export default function MainPage() {
             </div>
           </div>
         </div>
-        <button>+ New Event</button>
+        <button onClick={handleCreateEvent}>+ New Event</button>
       </div>
       {
         loading ? 
@@ -98,15 +114,23 @@ export default function MainPage() {
               <div className="event" key={index}>
               <img src={require("../assets/ev_img.jpg")} alt="" />
               <div className='time-location'>
-                <p>{item.location}</p>
-                <p>{item.date} {item.time}</p>
+                <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
+                  <p>
+                    <FaMapMarkerAlt/>{item.location}
+                  </p>
+                </IconContext.Provider>
+                <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
+                  <p>
+                    <FaClock/>{item.date}
+                  </p>
+                </IconContext.Provider>
               </div>
               <div className='description'>
-                <h2>{item.name}</h2>
+                <h2>{item.title}</h2>
                 <p>{item.description}</p>
               </div>
               <div className='price'>
-                <button>More</button>
+                <button onClick={() => handleEventClick(item.id)}>More</button>
                 <p>{item.price}$</p>
               </div>
             </div>
@@ -322,6 +346,7 @@ const Container = styled.div`
               border: none;
               color: #fff;
               background-color: #FFD100;
+              cursor: pointer;
             }
             p {
               font-weight: 700;
