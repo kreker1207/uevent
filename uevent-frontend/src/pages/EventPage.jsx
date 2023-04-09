@@ -200,7 +200,18 @@ export default function EventPage() {
         })
     }
   }
-  console.log(comments)
+
+  const [buyData, setBuyData] = useState({data: '', signature: '', isLoading: true});
+  
+
+  const buyClick = (event)=> {
+    api.post('/buy', {event_id: event.id}).
+    then((response) => {
+      console.log(response.data)
+      setBuyData({data: response.data.data, signature:  response.data.signature, isLoading: false})
+    })
+  }
+
   return (
     <Container>
       <div className="event-image">
@@ -229,7 +240,16 @@ export default function EventPage() {
             <p>{event.description}</p>
           </div> 
           <div className="price-block">
-            <button>Buy</button>
+            <button
+              onClick={buyClick}
+            >Buy</button>
+            <form method="POST" action="https://www.liqpay.ua/api/3/checkout" accept-charset="utf-8">
+              <input type="hidden" name="data" value={buyData.data}/>
+              <input type="hidden" name="signature" value={buyData.signature}/>
+              <input type="image" src="//static.liqpay.ua/buttons/p1en.radius.png" 
+              onClick={buyClick}
+              />
+            </form>
             <div className="price">430$</div>
           </div> 
         </div>
