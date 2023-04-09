@@ -130,41 +130,6 @@ export default function EventPage() {
       });
   }, [id]);
 
-  // useEffect(() => {
-  //   if (comments) {
-  //     const newCommentsPromisses = comments.map((item) => {
-  //       const subItems = item.replies.map(itemInside => {
-  //         return api.get(`/users/${itemInside.author_id}`)
-  //       })
-  //       return subItems
-  //     })
-
-  //     Promise.all(newCommentsPromisses)
-  //       .then(responses => {
-  //         const updatedComments = responses.map((response, index) => {
-
-  //           const data = response.data;
-
-  //           const updatedSubComments = comments[index].replies.map(item => {
-  //             return {
-  //               ...item,
-  //               login: data.login,
-  //               profile_pic: data.profile_pic,
-  //             }
-  //           })
-  //           return {
-  //             ...comments,
-  //             replies: updatedSubComments
-  //           }
-  //         });
-  //         setComments(updatedComments);
-  //       })
-  //       .catch(error => {
-  //         console.error(error);
-  //       });
-  //   }
-  // }, [comments]);
-
 
   const handleCommentFocus = (receiverName, receiverMaintId, receiverCommentId) => {
     if (inputRef.current) {
@@ -201,21 +166,33 @@ export default function EventPage() {
         })
     }
   }
-
   const [buyData, setBuyData] = useState({data: '', signature: '', isLoading: true});
-  
+
+  useEffect(() => {
+    if (!buyData.isLoading) {
+      const form = document.getElementById('liqPayId')
+      form.submit();
+    }
+  }, [buyData]);
 
   const buyClick = (event)=> {
     try {
       event.preventDefault()
-      api.post('/buy', {event_id: event.id}).then((response)=> {
-        console.log(response.data)
-        setBuyData(response.data)
-        setTimeout(()=> {
-          const form = document.getElementById('liqPayId')
-          form.submit();
-        }, 100);
-      });
+      api.post('/buy', {event_id: event.id})
+        .then(response => {
+          setBuyData({
+            data: response.data.data,
+            signature: response.data.signature,
+            isLoading: false
+          })
+        })
+        .catch ((error) => {
+          console.log(error)
+        } )
+        // setTimeout(()=> {
+        //   const form = document.getElementById('liqPayId')
+        //   form.submit();
+        // }, 100);
     } catch (error) {
       console.log(error)
     }
@@ -253,7 +230,7 @@ export default function EventPage() {
             <button
               onClick={buyClick}
             >Buy</button>
-            <form id="liqPayId" method="POST" action="https://www.liqpay.ua/api/3/checkout" accept-charset="utf-8">
+            <form id="liqPayId" method="POST" action="https://www.liqpay.ua/api/3/checkout" acceptCharset="utf-8">
               <input type="hidden" name="data" value={buyData.data}/>
               <input type="hidden" name="signature" value={buyData.signature}/>
               <input type="image" src="//static.liqpay.ua/buttons/p1en.radius.png" 
