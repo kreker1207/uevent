@@ -12,7 +12,7 @@ class EventController{
     async getEvents(req,res){
         try{
             const event = new Event(EVENT_TABLE);
-            const pawns = await event.getAll();
+            const pawns = await event.getAll(req.params.page, 2);
             res.json(pawns)
         } catch(e){
             e.addMessage = 'Get events';
