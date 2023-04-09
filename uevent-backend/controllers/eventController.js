@@ -12,7 +12,8 @@ class EventController{
     async getEvents(req,res){
         try{
             const event = new Event(EVENT_TABLE);
-            const pawns = await event.getAll();
+            const pawns = await event.getAll(req.params.curPage,1);
+            //org name and id
             res.json(pawns)
         } catch(e){
             e.addMessage = 'Get events';
@@ -51,6 +52,7 @@ class EventController{
                 location:location,
             }
             const [pawn] = await event.set(eventData);
+            // tags
             //Add aoutocreation of seats
             console.log(pawn)
             return res.json({eventData})

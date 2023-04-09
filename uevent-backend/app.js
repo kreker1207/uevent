@@ -41,3 +41,6 @@ app.use('/api', commentRouter,errorHandler);
 
 
 app.listen(PORT, () => console.log(`Server up at http://localhost:${PORT}`))
+
+//price
+//9 elements pagination

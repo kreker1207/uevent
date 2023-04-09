@@ -23,9 +23,13 @@ module.exports = class Entity {
         return await this.table().select('*').where({id: id}).first();
     }
 
-    async getAll(offset = 0, limit = 20) {
-        return await this.table().paginate({isLengthAware: true, perPage: limit, currentPage: offset});
-    }
+    async getAll(page = null, limit = 20) {
+        // Set page to 0 if it's null or undefined
+        if (page === null || page === undefined) {
+          page = 0;
+        }
+        return await this.table().paginate({ isLengthAware: true, perPage: limit, currentPage: page });
+      }
 
     async set(setObj) {
         if (setObj.id) {
