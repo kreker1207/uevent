@@ -29,7 +29,8 @@ module.exports = class Entity {
           page = 0;
         }
         return await this.table().paginate({ isLengthAware: true, perPage: limit, currentPage: page });
-    }
+
+      }
 
     async set(setObj) {
         if (setObj.id) {

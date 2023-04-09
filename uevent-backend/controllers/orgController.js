@@ -15,6 +15,9 @@ class OrganizationController{
             const organization = new Organization(ORGANIZATION_TABLE);
             const pawns = await organization.getAll();
             res.json(pawns)
+            // number of events
+            // mail of admin
+            //pagination 8
         } catch(e){
             e.addMessage = 'Get organizations';
             errorReplier(e, res);
@@ -25,6 +28,9 @@ class OrganizationController{
             const user = new User(USER_TABLE);
             const pawns = await user.getAllOrganizationsByUserId(req.params.userId);
             res.json(pawns)
+            // number of events
+            // mail of admin
+            //pagination 8
         } catch(e){
             e.addMessage = 'Get organizations';
             errorReplier(e, res);
