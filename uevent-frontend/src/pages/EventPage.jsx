@@ -71,6 +71,8 @@ export default function EventPage() {
   const [receiverMaintId, setMainCommentId] = useState(-1)
   const [receiverCommentId, setReceiverCommentId] = useState(-1)
   const [description, setDescription] = useState('')
+  const [buyData, setBuyData] = useState({data: '', signature: '', isLoading: true});
+
 
   useEffect(() => {
     api.get(`/event/${id}`)
@@ -166,7 +168,6 @@ export default function EventPage() {
         })
     }
   }
-  const [buyData, setBuyData] = useState({data: '', signature: '', isLoading: true});
 
   useEffect(() => {
     if (!buyData.isLoading) {
@@ -188,7 +189,7 @@ export default function EventPage() {
         })
         .catch ((error) => {
           console.log(error)
-        } )
+        })
         // setTimeout(()=> {
         //   const form = document.getElementById('liqPayId')
         //   form.submit();
@@ -227,15 +228,10 @@ export default function EventPage() {
             <p>{event.description}</p>
           </div> 
           <div className="price-block">
-            <button
-              onClick={buyClick}
-            >Buy</button>
             <form id="liqPayId" method="POST" action="https://www.liqpay.ua/api/3/checkout" acceptCharset="utf-8">
               <input type="hidden" name="data" value={buyData.data}/>
               <input type="hidden" name="signature" value={buyData.signature}/>
-              <input type="image" src="//static.liqpay.ua/buttons/p1en.radius.png" 
-              onClick={buyClick}
-              />
+              <button onClick={buyClick}>Buy</button>
             </form>
             <div className="price">430$</div>
           </div> 
