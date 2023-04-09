@@ -8,6 +8,7 @@ const eventRouter = require('./routes/eventRouter')
 const searchRouter = require('./routes/searchRouter')
 const commentRouter = require('./routes/commentRouter')
 const organizationRouter = require('./routes/orgRouter')
+const purchaseRouter = require('./routes/purchaseRouter')
 
 const cors = require('cors')
 const authMid = require('./middleware/authMiddleware')
@@ -38,6 +39,7 @@ app.use('/api', eventRouter,errorHandler);
 app.use('/api', searchRouter,errorHandler);
 app.use('/api', organizationRouter,errorHandler);
 app.use('/api', commentRouter,errorHandler);
+app.use('/api', purchaseRouter,errorHandler);
 
 
 app.listen(PORT, () => console.log(`Server up at http://localhost:${PORT}`))
