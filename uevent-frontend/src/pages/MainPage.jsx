@@ -3,6 +3,7 @@ import { useState } from 'react';
 import styled from 'styled-components';
 import api from '../utils/apiSetting';
 import { useNavigate } from 'react-router-dom';
+import  Pagination from 'react-js-pagination'
 
 import { IconContext } from 'react-icons';
 import { FaClock, FaMapMarkerAlt } from "react-icons/fa";
@@ -11,35 +12,7 @@ import { FaClock, FaMapMarkerAlt } from "react-icons/fa";
 export default function MainPage() {
   const navigate = useNavigate()
   const [loading, setIsLoading] = useState(false);
-  const [events, setEvents] = useState([
-    {
-      id: 1,
-      title: 'Event Name',
-      description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore, vitae libero. Dolore, quasi. Facilis cumque doloremque ab ipsam? Labore tenetur quis nulla possimus aut laboriosam suscipit doloribus quisquam saepe fugiat!',
-      location: 'Kharkov',
-
-      date: '15.03.2023 15:30',
-      price: 340
-    },
-    {
-      id: 2,
-      title: 'Event Name',
-      description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore, vitae libero. Dolore, quasi. Facilis cumque doloremque ab ipsam? Labore tenetur quis nulla possimus aut laboriosam suscipit doloribus quisquam saepe fugiat!',
-      location: 'Kharkov',
-
-      date: '15.03.2023 15:30',
-      price: 340
-    },
-    {
-      id: 3,
-      title: 'Event Name',
-      description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore, vitae libero. Dolore, quasi. Facilis cumque doloremque ab ipsam? Labore tenetur quis nulla possimus aut laboriosam suscipit doloribus quisquam saepe fugiat!',
-      location: 'Kharkov',
-
-      date: '15.03.2023 15:30',
-      price: 340
-    }
-  ])
+  const [events, setEvents] = useState({data: [], pagination: {}})
 
   const handleCreateEvent = () => {
     navigate(`/create-event`)
@@ -53,6 +26,19 @@ export default function MainPage() {
     api.get(`/events`)
     .then(function(response) {
       console.log(response.data)
+      setEvents(response.data)
+      setIsLoading(false)  
+    })
+    .catch(function(error) {
+        console.log(error.message)
+    })
+  }, [])
+
+  const handlePageChange = (page) => {
+    console.log('asofofdp');
+    api.get(`/events/2`)
+    .then(function(response) {
+      console.log(response.data)
       setEvents(response.data.data)
       setIsLoading(false)
     
@@ -60,7 +46,7 @@ export default function MainPage() {
     .catch(function(error) {
         console.log(error.message)
     })
-  }, [])
+  }
 
   return (
     <Container>
@@ -112,7 +98,7 @@ export default function MainPage() {
         : 
         <div className="event-list">
         {
-          events.map((item, index) => {
+          events.data.map((item, index) => {
             return (
               <div className="event" key={index}>
               <img src={require("../assets/ev_img.jpg")} alt="" />
@@ -142,6 +128,18 @@ export default function MainPage() {
         }
       </div>
       }
+      {
+        loading ? 
+        <></> 
+        : 
+        <Pagination className='pagination'
+                    activePage={events.pagination.currentPage}
+                    itemsCountPerPage={events.pagination.perPage}
+                    totalItemsCount={events.pagination.total}
+                    pageRangeDisplayed={5}
+                    onChange={handlePageChange} 
+        />
+      }
     </Container>
   )
 }
@@ -149,6 +147,35 @@ export default function MainPage() {
 const Container = styled.div`
   z-index: -1;
   margin-top: -250px;
+  .pagination {
+    width: fit-content;
+    margin: 0 auto;
+    li {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      text-align: center;
+      &.active {
+        background: #FFD100;
+        a {
+          color: white;
+        }
+      }
+      &.disabled {
+        a {
+          color: #D9D9D9;
+        }
+      }
+      a {
+        text-decoration: none;
+        color: #fff;
+        font-weight: 700;
+        display: block;
+        padding-top: 2px;
+        height: 30px;
+      }
+    }
+  }
   div {
     &.background {
       overflow: hidden;
@@ -291,6 +318,7 @@ const Container = styled.div`
       grid-template-columns: repeat(3, 1fr);
       grid-gap: 10px;
       justify-content: space-between;
+      margin-bottom: 60px;
       .event {
         width: 100%;
         height: 490px;
@@ -298,6 +326,11 @@ const Container = styled.div`
         border: 1px solid #000000;
         background: #333533;
         box-shadow: 0px 4px 50px 4px rgba(0, 0, 0, 0.25);
+
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+        align-items: flex-start;
         img {
           display: block;
           width: 100%;
@@ -361,6 +394,7 @@ const Container = styled.div`
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 25px;
             button {
               width: 330px;
               height: 40px;

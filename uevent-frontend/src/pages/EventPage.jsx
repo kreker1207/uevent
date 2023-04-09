@@ -75,7 +75,8 @@ export default function EventPage() {
   useEffect(() => {
     api.get(`/event/${id}`)
       .then(function (response) {
-        console.log(response)
+        // getOrganizationByID !!!!
+        console.log(response.data)
         setEvent(response.data)
         setLoading(false)
       })
@@ -391,7 +392,7 @@ const Container = styled.div`
       .comments-inner {
         width: 100%;
         height: 100%;
-        margin-bottom: 20px;
+        margin-bottom: 40px;
 
         .comment {
           width: 100%;
@@ -481,10 +482,11 @@ const Container = styled.div`
       }
 
     }
+
     .map{
       position: relative;
       width: 100%;
-      height: 100%;
+      height: 75%;
       iframe {
         position: absolute;
         border: none;
