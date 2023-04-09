@@ -205,11 +205,20 @@ export default function EventPage() {
   
 
   const buyClick = (event)=> {
-    api.post('/buy', {event_id: event.id}).
-    then((response) => {
-      console.log(response.data)
-      setBuyData({data: response.data.data, signature:  response.data.signature, isLoading: false})
-    })
+    try {
+      event.preventDefault()
+      api.post('/buy', {event_id: event.id}).then((response)=> {
+        console.log(response.data)
+        setBuyData(response.data)
+        setTimeout(()=> {
+          const form = document.getElementById('liqPayId')
+          form.submit();
+        }, 100);
+      });
+    } catch (error) {
+      console.log(error)
+    }
+    
   }
 
   return (
@@ -243,7 +252,7 @@ export default function EventPage() {
             <button
               onClick={buyClick}
             >Buy</button>
-            <form method="POST" action="https://www.liqpay.ua/api/3/checkout" accept-charset="utf-8">
+            <form id="liqPayId" method="POST" action="https://www.liqpay.ua/api/3/checkout" accept-charset="utf-8">
               <input type="hidden" name="data" value={buyData.data}/>
               <input type="hidden" name="signature" value={buyData.signature}/>
               <input type="image" src="//static.liqpay.ua/buttons/p1en.radius.png" 
