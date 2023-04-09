@@ -13,7 +13,7 @@ class EventController{
         try{
             const event = new Event(EVENT_TABLE);
 
-            const pawns = await event.getAll(req.params.curPage,1);
+            const pawns = await event.getAll(req.params.curPage, 9);
             //org name and id
             res.json(pawns)
         } catch(e){

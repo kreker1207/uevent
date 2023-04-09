@@ -11,8 +11,7 @@ import { FaClock, FaMapMarkerAlt } from "react-icons/fa";
 
 export default function MainPage() {
   const navigate = useNavigate()
-  const [loading, setIsLoading] = useState(false);
-  const [events, setEvents] = useState({data: [], pagination: {}})
+  const [events, setEvents] = useState({loading: true})
 
   const handleCreateEvent = () => {
     navigate(`/create-event`)
@@ -26,8 +25,11 @@ export default function MainPage() {
     api.get(`/events`)
     .then(function(response) {
       console.log(response.data)
-      setEvents(response.data)
-      setIsLoading(false)  
+      setEvents({
+        loading: false,
+        data: response.data.data,
+        pagination: response.data.pagination
+      })
     })
     .catch(function(error) {
         console.log(error.message)
@@ -35,12 +37,14 @@ export default function MainPage() {
   }, [])
 
   const handlePageChange = (page) => {
-    console.log('asofofdp');
-    api.get(`/events/2`)
+    api.get(`/events/${page}`)
     .then(function(response) {
       console.log(response.data)
-      setEvents(response.data.data)
-      setIsLoading(false)
+      setEvents({
+        loading: false,
+        data: response.data.data,
+        pagination: response.data.pagination
+      })
     
     })
     .catch(function(error) {
@@ -93,7 +97,7 @@ export default function MainPage() {
         <button onClick={handleCreateEvent}>+ New Event</button>
       </div>
       {
-        loading ? 
+        events.loading ? 
         <div className='loading'>Loading...</div> 
         : 
         <div className="event-list">
@@ -129,11 +133,11 @@ export default function MainPage() {
       </div>
       }
       {
-        loading ? 
+        events.loading ? 
         <></> 
         : 
         <Pagination className='pagination'
-                    activePage={events.pagination.currentPage}
+                    activePage={Number(events.pagination.currentPage)}
                     itemsCountPerPage={events.pagination.perPage}
                     totalItemsCount={events.pagination.total}
                     pageRangeDisplayed={5}
