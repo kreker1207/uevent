@@ -11,17 +11,19 @@ const mailer = new Mailer();
 
 const generateAccessToken = (user, hours) => {
     const payload = {
-        id:user._id,
-        login:user.login,
-        email:user.email
+        id: user._id,
+        login: user.login,
+        email :user.email,
+        profile_pic: "none.png"
     }
     return jwt.sign(payload, secret_access, {expiresIn: hours})
 }
 const generateRefreshToken = (user, hours) => {
     const payload = {
-        id:user.id,
-        login:user.login,
-        email:user.email
+        id: user.id,
+        login: user.login,
+        email: user.email,
+        profile_pic: "none.png"
     }
     return jwt.sign(payload, secret_refresh, {expiresIn: hours})
 }

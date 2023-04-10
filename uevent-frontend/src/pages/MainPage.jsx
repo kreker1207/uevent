@@ -105,28 +105,28 @@ export default function MainPage() {
           events.data.map((item, index) => {
             return (
               <div className="event" key={index}>
-              <img src={require("../assets/ev_img.jpg")} alt="" />
-              <div className='time-location'>
-                <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
-                  <p className='location'>
-                    <FaMapMarkerAlt/>{item.location}
-                  </p>
-                </IconContext.Provider>
-                <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
-                  <p className='time'>
-                    <FaClock/>{item.event_datetime}
-                  </p>
-                </IconContext.Provider>
+                <img src={`http://localhost:8080/event_pics/${item.eve_pic}`} alt="" />
+                <div className='time-location'>
+                  <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
+                    <p className='location'>
+                      <FaMapMarkerAlt/>{item.location}
+                    </p>
+                  </IconContext.Provider>
+                  <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
+                    <p className='time'>
+                      <FaClock/>{item.event_datetime}
+                    </p>
+                  </IconContext.Provider>
+                </div>
+                <div className='description'>
+                  <h2>{item.title}</h2>
+                  <p>{item.description}</p>
+                </div>
+                <div className='price'>
+                  <button onClick={() => handleEventClick(item.id)}>More</button>
+                  <p>{item.price}$</p>
+                </div>
               </div>
-              <div className='description'>
-                <h2>{item.title}</h2>
-                <p>{item.description}</p>
-              </div>
-              <div className='price'>
-                <button onClick={() => handleEventClick(item.id)}>More</button>
-                <p>{item.price}$</p>
-              </div>
-            </div>
             )
           })
         }
@@ -325,7 +325,7 @@ const Container = styled.div`
       margin-bottom: 60px;
       .event {
         width: 100%;
-        height: 490px;
+        height: fit-content;
         background-color: #ffffff;
         border: 1px solid #000000;
         background: #333533;

@@ -2,54 +2,50 @@ import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/apiSetting'
+import Pagination from 'react-js-pagination';
 
 export default function Companies() {
   const navigate = useNavigate()
   const [loading, setIsLoading] = useState(false);
-  const [companies, setCompanies] = useState([
-    {
-      id: 1,
-      title: 'Company Name',
-      description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta nobis deleniti vitae commodi molestias magni aperiam eos, eligendi dolorem itaque hic odit rem neque amet voluptatem ut unde facilis omnis?',
-      evNumbers: 34,
-      adminEmail: 'example@gmail.com'
-    },
-    {
-      id: 2,
-      title: 'Company Name',
-      description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta nobis deleniti vitae commodi molestias magni aperiam eos, eligendi dolorem itaque hic odit rem neque amet voluptatem ut unde facilis omnis?',
-      evNumbers: 34,
-      adminEmail: 'example@gmail.com'
-    },
-    {
-      id: 3,
-      title: 'Company Name',
-      description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta nobis deleniti vitae commodi molestias magni aperiam eos, eligendi dolorem itaque hic odit rem neque amet voluptatem ut unde facilis omnis?',
-      evNumbers: 34,
-      adminEmail: 'example@gmail.com'
-    },
-    {
-      id: 4,
-      title: 'Company Name',
-      description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta nobis deleniti vitae commodi molestias magni aperiam eos, eligendi dolorem itaque hic odit rem neque amet voluptatem ut unde facilis omnis?',
-      evNumbers: 34,
-      adminEmail: 'example@gmail.com'
-    }
-  ])
+  const [companies, setCompanies] = useState({data: [], pagination: {}, isLoading: true})
 
   useEffect(() => {
-    // api.get(`/companies`)
-    // .then(function(response) {
-    //   setCompanies(response.data)
-    //   setIsLoading(false)
-    // })
-    // .catch(function(error) {
-    //     console.log(error.message)
-    // })
+    api.get(`/org`)
+    .then(function(response) {
+      console.log(response.data)
+      setCompanies({
+        data: response.data.data,
+        pagination: response.data.pagination,
+        isLoading: false
+      })
+      setIsLoading(false)
+    })
+    .catch(function(error) {
+        console.log(error.message)
+    })
   }, [])
 
   const handleCreateCompany = () => {
     navigate('/create-company')
+  }
+  const handleCompanyClick = (id) => {
+    navigate(`/companies/${id}`)
+  }
+
+  const handlePageChange = (page) => {
+    api.get(`/companies/${page}`)
+    .then(function(response) {
+      console.log(response.data)
+      setCompanies({
+        isLoading: false,
+        data: response.data.data,
+        pagination: response.data.pagination
+      })
+    
+    })
+    .catch(function(error) {
+        console.log(error.message)
+    })
   }
 
   return (
@@ -59,16 +55,16 @@ export default function Companies() {
         <button onClick={handleCreateCompany}>+ Create Company</button>
       </div>
       {
-        loading ? 
+        companies.isLoading ? 
         <div className="loading">Loading...</div>
         :
         <div className="companies-list">
         {
-          companies.map((item, index) => {
+          companies.data.map((item, index) => {
             return (
               <div className="company" key={index}>
                 <div className="compnay-img">
-                  <img src={require("../assets/company.jpg")} alt="logo" />
+                  <img src={`http://localhost:8080/organization_pics/${item.org_pic}`} alt="logo" />
                 </div>
                 <div className='company-content'>
                   <h2>{item.title}</h2>
@@ -76,9 +72,9 @@ export default function Companies() {
                   <div className='additionals'>
                     <div>
                       <p>Events number: {item.evNumbers}</p>
-                      <p>{item.adminEmail}</p>
+                      <p>{item.location}</p>
                     </div>
-                    <button>See More</button>
+                    <button onClick={() => handleCompanyClick(item.id)}>See More</button>
                   </div>
                 </div>
               </div>
@@ -87,6 +83,13 @@ export default function Companies() {
         }
         </div>
       }
+      <Pagination className='pagination'
+            activePage={Number(companies.pagination.currentPage)}
+            itemsCountPerPage={companies.pagination.perPage}
+            totalItemsCount={2}
+            pageRangeDisplayed={5}
+            onChange={handlePageChange} 
+      />
     </Container>
   )
 }
@@ -95,6 +98,35 @@ const Container = styled.div`
   max-width: 1480px;
   margin: 0 auto;
   padding: 0px 20px;
+  .pagination {
+    width: fit-content;
+    margin: 0 auto;
+    li {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      text-align: center;
+      &.active {
+        background: #FFD100;
+        a {
+          color: white;
+        }
+      }
+      &.disabled {
+        a {
+          color: #D9D9D9;
+        }
+      }
+      a {
+        text-decoration: none;
+        color: #fff;
+        font-weight: 700;
+        display: block;
+        padding-top: 2px;
+        height: 30px;
+      }
+    }
+  }
   .create-company {
     display: flex;
     justify-content: space-between;
@@ -117,6 +149,7 @@ const Container = styled.div`
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-gap: 10px;
+    margin-bottom: 60px;
     .company {
       display: flex;
       align-items: flex-start;

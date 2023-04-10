@@ -69,19 +69,6 @@ const authSlice = createSlice({
         .addCase(fetchLogout.rejected, (state, action) => {
             state.error = action.payload
         })
-        // [fetchLogin.pending]: (state) => {
-        //   state.loading = true
-        //   state.error = null
-        // },
-        // [fetchLogin.fulfilled]: (state, { payload }) => {
-        //   state.loading = false
-        //   state.userInfo = payload
-        //   state.userToken = payload.userToken
-        // },
-        // [fetchLogin.rejected]: (state, { payload }) => {
-        //   state.loading = false
-        //   state.error = payload
-        // }
     }
 })
 

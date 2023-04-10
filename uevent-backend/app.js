@@ -9,6 +9,7 @@ const searchRouter = require('./routes/searchRouter')
 const commentRouter = require('./routes/commentRouter')
 const organizationRouter = require('./routes/orgRouter')
 const purchaseRouter = require('./routes/purchaseRouter')
+const path = require('path');
 
 const cors = require('cors')
 const authMid = require('./middleware/authMiddleware')
@@ -40,6 +41,24 @@ app.use('/api', searchRouter,errorHandler);
 app.use('/api', organizationRouter,errorHandler);
 app.use('/api', commentRouter,errorHandler);
 app.use('/api', purchaseRouter,errorHandler);
+
+app.get('/organization_pics/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filepath = path.join(__dirname, '/public/organization_pics', filename);
+  res.sendFile(filepath);
+});
+
+app.get('/event_pics/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filepath = path.join(__dirname, '/public/event_pics', filename);
+  res.sendFile(filepath);
+});
+
+app.get('/profile_pics/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filepath = path.join(__dirname, '/public/profile_pics', filename);
+  res.sendFile(filepath);
+});
 
 
 app.listen(PORT, () => console.log(`Server up at http://localhost:${PORT}`))

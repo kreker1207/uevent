@@ -13,6 +13,6 @@ router.post('/registration', [
 router.get('/confirmEmail/:token', controller.confirmEmail)
 
 router.post('/login',controller.login)
-router.get('/logout',controller.logout)
+router.post('/logout',controller.logout)
 
 module.exports = router
