@@ -41,7 +41,7 @@ class SearchController{
             })
           ]);
       
-          res.json({ events, organizations }); // return the results as an object with two properties
+          res.json({ events, organizations });
         } catch (e) {
           e.addMessage = 'Search events and orgs';
           errorReplier(e, res);

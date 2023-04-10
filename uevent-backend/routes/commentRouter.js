@@ -2,7 +2,7 @@ const Router = require('express')
 const router = new Router()
 const controller = require('../controllers/commentController')
 const authMiddleware = require('../middleware/authMiddleware')
-//Not needed
+
 router.get('/comments', controller.getComments);
 router.get('/comments/:id', controller.getCommentById);
 
