@@ -14,7 +14,7 @@ const generateAccessToken = (user, hours) => {
         id: user._id,
         login: user.login,
         email :user.email,
-        profile_pic: "none.png"
+        profile_pic: user.profile_pic
     }
     return jwt.sign(payload, secret_access, {expiresIn: hours})
 }
@@ -23,7 +23,7 @@ const generateRefreshToken = (user, hours) => {
         id: user.id,
         login: user.login,
         email: user.email,
-        profile_pic: "none.png"
+        profile_pic: user.profile_pic
     }
     return jwt.sign(payload, secret_refresh, {expiresIn: hours})
 }

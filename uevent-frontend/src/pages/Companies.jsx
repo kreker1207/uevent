@@ -6,7 +6,6 @@ import Pagination from 'react-js-pagination';
 
 export default function Companies() {
   const navigate = useNavigate()
-  const [loading, setIsLoading] = useState(false);
   const [companies, setCompanies] = useState({data: [], pagination: {}, isLoading: true})
 
   useEffect(() => {
@@ -18,7 +17,6 @@ export default function Companies() {
         pagination: response.data.pagination,
         isLoading: false
       })
-      setIsLoading(false)
     })
     .catch(function(error) {
         console.log(error.message)
@@ -152,22 +150,26 @@ const Container = styled.div`
     margin-bottom: 60px;
     .company {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
       width: 100%;
-      height: 215px;
+      height: fit-content;
       padding: 25px;
       background-color: #333533;
+      gap: 20px;
       .compnay-img {
-        width: 20%;
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        overflow: hidden;
         img {
-          width: 80px;
-          height: 80px;
-          border-radius: 50%;
+          height: 100%;
+          object-fit: cover;
         }
       }
       .company-content {
-        width: 80%;
+        flex-grow: 1;
+        height: fit-content;
         .description {
           margin: 0;
           -ms-text-overflow: ellipsis;

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { IconContext } from 'react-icons';
 import { FaImage } from 'react-icons/fa';
 
-function DragAndDropImage() {
+function DragAndDropImage(props) {
   const [dragging, setDragging] = useState(false);
   const [image, setImage] = useState(null);
 
@@ -21,12 +21,12 @@ function DragAndDropImage() {
     setDragging(false);
 
     const file = event.dataTransfer.files[0];
+    props.onChildStateChange(event.dataTransfer.files[0])
     const reader = new FileReader();
 
     reader.onload = () => {
       setImage(reader.result);
     };
-
     reader.readAsDataURL(file);
   };
 
