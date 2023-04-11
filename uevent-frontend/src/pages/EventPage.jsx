@@ -102,7 +102,7 @@ export default function EventPage() {
   const handleCommentSend = () => {
     if(receiverName!=='' && receiverCommentId !== -1) {
       console.log(receiverCommentId)
-      api.post(`/comments/event/${event.id}/reply/${receiverMaintId}`, {content: description, comment_id: receiverCommentId})
+      api.post(`/comments/event/${event.data.id}/reply/${receiverMaintId}`, {content: description, comment_id: receiverCommentId})
         .then(function(response) {
             console.log(response.data)
           })
@@ -110,7 +110,7 @@ export default function EventPage() {
             console.log(error.message)
           })
     } else {
-      api.post(`/comments/event/${event.id}`, {content: description})
+      api.post(`/comments/event/${event.data.id}`, {content: description})
         .then(function(response) {
           console.log(response.data)
           console.log(event)
@@ -131,7 +131,6 @@ export default function EventPage() {
   const buyClick = (e)=> {
     try {
       e.preventDefault()
-      console.log(event.data.id)
       api.post('/buy', {event_id: event.data.id})
         .then(response => {
           console.log(response.data)
@@ -142,12 +141,8 @@ export default function EventPage() {
           })
         })
         .catch ((error) => {
-          console.log(error)
+          console.warn(error.response.data.message)
         })
-        // setTimeout(()=> {
-        //   const form = document.getElementById('liqPayId')
-        //   form.submit();
-        // }, 100);
     } catch (error) {
       console.log(error)
     }
@@ -233,7 +228,7 @@ export default function EventPage() {
                       {
                         item.replies.map((itemInner, index) => {
                           return (
-                            <div key={index} className="comment">
+                            <div style={{marginBottom: "25px"}} key={index} className="comment">
                               <div className="userinfo">
                                   <div className="photo">
                                     <div><img src = {`http://localhost:8080/profile_pics/${itemInner.profile_pic}`} alt="" /></div>
@@ -267,17 +262,21 @@ export default function EventPage() {
           </div>
         </div>
       }
-
-      <div className="map">
-        <iframe
-          title='map'
-          loading="lazy"
-          allowFullScreen=""
-          referrerPolicy="no-referrer-when-downgrade"
-          src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyDuHV2o8j_nfA8XMUC-15fN9vlDB9htW30
-          &q=${event.location}`}>
-        </iframe>
-      </div>
+      {
+        event.isLoading ? 
+        <div className="loading">Loading...</div>
+        :
+        <div className="map">
+          <iframe
+            title='map'
+            loading="lazy"
+            allowFullScreen=""
+            referrerPolicy="no-referrer-when-downgrade"
+            src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyDuHV2o8j_nfA8XMUC-15fN9vlDB9htW30
+            &q=${event.data.location}`}>
+          </iframe>
+        </div>
+      }
 
     </Container>
   )

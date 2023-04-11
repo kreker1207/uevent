@@ -68,30 +68,32 @@ export default function MainPage() {
       </div>
       <div className="options">
         <div className="options-filters">
-
-          <div className="dropdown">
-            <button className="dropdown-button">Themes</button>
-            <div className="dropdown-content">
-              <a href="/">Опция 1</a>
-              <a href="/">Опция 2</a>
-              <a href="/">Опция 3</a>
-            </div>
+          <div>
+            <select defaultValue="Formats" name="formats" id="formats">
+              <option value="concert">Concert</option>
+              <option value="meet_up">Meet Up</option>
+              <option value="fetival">Festival</option>
+              <option value="show">Show</option>
+              <option value="custom">Custom</option>
+            </select>
           </div>
-          <div className="dropdown">
-            <button className="dropdown-button">Formats</button>
-            <div className="dropdown-content">
-              <a href="/">Опция 1</a>
-              <a href="/">Опция 2</a>
-              <a href="/">Опция 3</a>
-            </div>
+          <div>
+            <select name="formats" id="formats">
+              <option value="concert">Concert</option>
+              <option value="meet_up">Meet Up</option>
+              <option value="fetival">Festival</option>
+              <option value="show">Show</option>
+              <option value="custom">Custom</option>
+            </select>
           </div>
-          <div className="dropdown">
-            <button className="dropdown-button">Dates</button>
-            <div className="dropdown-content">
-              <a href="/">Опция 1</a>
-              <a href="/">Опция 2</a>
-              <a href="/">Опция 3</a>
-            </div>
+          <div>
+            <select name="formats" id="formats">
+              <option value="concert">Concert</option>
+              <option value="meet_up">Meet Up</option>
+              <option value="fetival">Festival</option>
+              <option value="show">Show</option>
+              <option value="custom">Custom</option>
+            </select>
           </div>
         </div>
         <button onClick={handleCreateEvent}>+ New Event</button>
@@ -269,37 +271,21 @@ const Container = styled.div`
         display: flex;
         justify-content: space-between;
         align-items: center;
-        .dropdown {
-          position: relative;
+        div {
+          border: 1px solid #fff;
+          background: transparent;
           display: inline-block;
-          .dropdown-content {
-            position: absolute;
-            display: none;
-            width: 100%;
-            background-color: rgb(32, 32, 32);
-            z-index: 1;
-            a {
-              display: block;
-            }
+          padding: 0px 5px;
+          margin-left: 10px;
+          select {
+            width: 150px;
+            height: 45px;
+            outline: none;
+            background: rgb(32,32,32);
+            border: none;
+            color: #fff;
+            margin: 0;
           }
-          .dropdown-button {
-            background-color: transparent;
-            border: 1px solid #fff;
-            color: white;
-            padding: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            &:hover {
-              background-color: #fff;
-              color: black;
-            }
-          }
-          &:hover {
-            .dropdown-content {
-              display: block;
-            }
-          }
-
         }
       }
 
