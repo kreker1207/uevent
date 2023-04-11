@@ -128,11 +128,13 @@ export default function EventPage() {
     }
   }, [buyData]);
 
-  const buyClick = (event)=> {
+  const buyClick = (e)=> {
     try {
-      event.preventDefault()
-      api.post('/buy', {event_id: event.id})
+      e.preventDefault()
+      console.log(event.data.id)
+      api.post('/buy', {event_id: event.data.id})
         .then(response => {
+          console.log(response.data)
           setBuyData({
             data: response.data.data,
             signature: response.data.signature,

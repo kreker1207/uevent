@@ -25,4 +25,20 @@ module.exports = class Mailer {
             }
         });
     };
+
+    sendTicket (email, data) {
+        this.transporter.sendMail({
+            from: config.from,
+            to: email,
+            subject: 'Uevent: Your tickets!',
+            html: `You successfuly purchased tickets for an event that will take place\
+            at ${data.location} at ${data.event_datetime}!\
+            \nGood luck`,
+        }, (error, info) => {
+            if (error) {
+                console.log(error);
+                return error;
+            }
+        });
+    };
 }
