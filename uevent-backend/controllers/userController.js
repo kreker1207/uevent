@@ -26,7 +26,6 @@ class userController{
         try{
             const user = new User(USERS_TABLE);
             const pawn = await user.getById(req.params.id);
-            //array of user and its company
             res.json(pawn)
         } catch(e){
             e.addMessage = 'Get user by id';
@@ -52,8 +51,6 @@ class userController{
             if (!req.user) {
                 return res.status(401).json({message: `User needs to login first`})
             }
-
-            // should I destructure params to filter the unwanted data? theoretically useless
             const {login, password, email} = req.body;
 
             const user = new User(USERS_TABLE);
@@ -87,7 +84,6 @@ class userController{
                 }, secret_mails, {expiresIn: '1h'}))
             }
 
-            // Regenerate tokens or logout?
             res.status(200).clearCookie('refreshToken', {path: '/'}).json({message: "Success, log in again please"});
         } catch(e){
             e.addMessage = 'Edit user';
@@ -112,7 +108,6 @@ class userController{
             const user = new User(USERS_TABLE);
             const pawn = await user.getById(req.user.id);
             
-            // input name on front should be like this VVV (avatar)
             const avatar = req.files.avatar;
             avatar.mv(avatar_path + avatar_name, function(err) {
                 if (err) return res.status(500).send(err);
