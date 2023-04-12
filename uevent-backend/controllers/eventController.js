@@ -60,7 +60,7 @@ class EventController{
             if(! errors.isEmpty()){
                 throw new CustomError(10);
             }
-            const {title, description, event_datetime, location,seat,price,tags} = req.body;
+            const {title, description, event_datetime, location, seats, price, tags, format } = req.body;
             const event = new Event(EVENT_TABLE);
             const organization = new Organization(ORGANIZATION_TABLE);
             const candidate = await organization.getById(req.params.orgId);
@@ -72,10 +72,10 @@ class EventController{
                 description,
                 event_datetime,
                 location:location,
-                seat:seat,
+                seat:seats,
                 price:price,
-                tags:tags
-
+                tags:tags,
+                format
             }
             const pawn = await event.setEvent(eventData);
             console.log(pawn)

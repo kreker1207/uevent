@@ -60,9 +60,9 @@ class OrganizationController{
                 description: description,
                 location: location,
             }
-            const [pawn] = await organization.set(organizationData);
+            const [ pawn ] = await organization.set(organizationData);
             console.log(pawn);
-            return res.json({organizationData});
+            return res.json(pawn);
 
         }catch(e){
             e.addMessage = 'Create organization';

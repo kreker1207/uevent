@@ -92,7 +92,9 @@ module.exports = class Event extends Entity {
 
     
     async setEvent(eventData) {
-        const knexInstance = knex(knexfile);  
+      console.log(eventData)
+        const knexInstance = knex(knexfile); 
+        const newEvent = await 
         knexInstance.transaction(async trx => {
             // Check if tags exist, and insert any new tags
             const tagIds = []
@@ -114,18 +116,20 @@ module.exports = class Event extends Entity {
               seat: eventData.seat,
               price: eventData.price,
               event_datetime: eventData.event_datetime,
-              column: eventData.column,
+              format: eventData.format,
               location: eventData.location,
               eve_pic: eventData.eve_pic
             }).returning('id')
           
+
             for (const tagId of tagIds) {
                 console.log(tagId,newEvent)
               await trx('event_theme').insert({
                 event_id: newEvent.id,
-                theme_id: tagId
+                theme_id: tagId.id
               })
             }
           })
+          return newEvent
         }
 }

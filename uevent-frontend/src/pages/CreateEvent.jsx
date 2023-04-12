@@ -26,7 +26,7 @@ function CreateEvent() {
     const [price, setPrice] = useState('');
     const [evType, setEvType] = useState('')
     const [placeName, setPlaceName] = useState("");
-    const [format, setFormat] = useState('')
+    const [format, setFormat] = useState('concert')
     const [seats, setSeats] = useState(0)
     const [eve_pic, setFile] = useState(null)
     const [companyId, setCompanyId] = useState(0)
@@ -84,16 +84,18 @@ function CreateEvent() {
         const dataE = {
             title,
             description,
-            "event_datetime": eventDate + ' ' + eventTime,
             seats,
+            price,
+            "event_datetime": eventDate + ' ' + eventTime,
+            format,
+            location: placeName,
             eve_pic,
+            tags,
+
             publishDate,
             evType,
-            location: placeName,
-            format,
-            companyId,
-            tags
         }
+
         console.log(dataE)
 
 

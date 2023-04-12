@@ -6,16 +6,21 @@ import DragAndDropImage from '../components/DragImage'
 import Map from '../components/Map'
 import api from '../utils/apiSetting';
 import { useSelector } from 'react-redux';
+import axios from 'axios';
 
 export default function CreateCompany() {
     const [placeName, setPlaceName] = useState("Location");
     const { userInfo } = useSelector((state) => state.auth)
-    const [phoneNumber, setPhoneNumber] = useState("");
+    const [phone_number, setPhoneNumber] = useState("");
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [userEmail, setUserEmail] = useState('')
+    const [org_pic, setFile] = useState(null)
     const handleMapCoordinates = (placeName) => {
         setPlaceName(placeName);
+    };
+    const handleFileUpload = (org_pic) => {
+        setFile(org_pic);
     };
 
     const handlePublish = () => {
@@ -23,10 +28,29 @@ export default function CreateCompany() {
             title ,
             description,
             location: placeName,
-            phoneNumber,
+            phone_number,
             admin_id: 1
         }
         console.log(data)
+
+        let formData = new FormData()
+        formData.append('avatar', org_pic)
+
+        api.post(`/org`, data)
+            .then(response => {
+                console.log(response.data)
+                axios({
+                    method: "post",
+                    url: `http://localhost:8080/api/org/avatar/${response.data.id}`,
+                    data: formData,
+                    headers: {'Access-Control-Allow-Origin': '*', "Content-Type": "multipart/form-data" },
+                    credentials: 'include',   
+                    withCredentials: true
+                })
+            })
+            .catch(error => {
+                console.log(error.message)
+            })
     }
 
     useEffect(() => {
@@ -48,7 +72,7 @@ export default function CreateCompany() {
             <div className="content">
                 <div className='photo-outer'>
                     <div className="photo-inner">
-                        <DragAndDropImage/>
+                        <DragAndDropImage onChildStateChange={handleFileUpload}/>
                     </div>
                 </div>
                 <div className="description">
@@ -65,7 +89,7 @@ export default function CreateCompany() {
                                 </IconContext.Provider>
                                 <IconContext.Provider value={{ style: { verticalAlign: 'middle', width: '5%' } }}>
                                     <div className="email-inside">
-                                        <FaPhone/> <input value={phoneNumber} type="text" name="phone" id="phone" placeholder='Phone number'  onChange={(e)=>setPhoneNumber(e.target.value)}/>
+                                        <FaPhone/> <input value={phone_number} type="text" name="phone" id="phone" placeholder='Phone number'  onChange={(e)=>setPhoneNumber(e.target.value)}/>
                                     </div>
                                 </IconContext.Provider>
                                 <button onClick={handlePublish}>Publish</button>
@@ -157,6 +181,7 @@ const Component = styled.div`
                     border: none;
                     color: #fff;
                     margin-top: 10px;
+                    cursor: pointer;
                 }
             }
         }
