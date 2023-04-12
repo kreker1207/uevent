@@ -38,7 +38,7 @@ module.exports = async function purCheker(){
                     });
                 }
             });
-        }, 60000)
+        }, 900000)
     } catch (error) {
         e.addMessage = 'purchase checker';
         errorReplier(e, res);

@@ -9,19 +9,18 @@ module.exports = async function eveChecker(){
         const event = new Event(EVENT_TABLE);
         const current = new Date();
         setInterval(async ()=> {
-            console.log('event datetime check check: ' + current);
+            console.log('event datetime check: ' + current);
             const alleves = await event.getAll(0, null)
-            let counter = 0;
-            console.log(alleves);
+
             alleves.data.forEach(eve => {
                 const eve_datetime = new Date(eve.event_datetime)
-                console.log('\n'+ counter++ +'current ' + current + ' < ' + eve_datetime + 'eve.event_datetime????')
-                console.log(eve_datetime < current)
+                /*console.log('\n' +'current ' + current + ' < ' + eve_datetime + 'eve.event_datetime????')
+                console.log(eve_datetime < current)*/
                 if (eve_datetime < current) {
                     event.del({id: eve.id});
                 }
             });
-        }, 10000)
+        }, 86400000)
     } catch (error) {
         e.addMessage = 'event datetime checker';
         errorReplier(e, res);
