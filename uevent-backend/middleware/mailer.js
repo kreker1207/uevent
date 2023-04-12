@@ -25,4 +25,19 @@ module.exports = class Mailer {
             }
         });
     };
+    sendConfirmEmailPassword (email, token) {
+        this.transporter.sendMail({
+            from: config.from,
+            to: email,
+            subject: 'Uevent Password confirmation',
+            html: `You can confirm your password by this URL: \
+            <a href="${this.FrontAddress}/api/confirmPassword/${token}">\
+            Confirm Password!</a>`,
+        }, (error, info) => {
+            if (error) {
+                console.log(error);
+                return error;
+            }
+        });
+    };
 }

@@ -1,5 +1,5 @@
 const Entity = require('./entity');
-
+const bcrypt = require('bcryptjs')
 module.exports = class User extends Entity {
     constructor(tableName) {
         super(tableName);
@@ -14,6 +14,14 @@ module.exports = class User extends Entity {
         }
         return super.get({login: login});
     }
+    async updatePassword(userId, newPassword) {      
+        const hash = await bcrypt.hash(newPassword, 8);
+      
+        return super.table()
+          .where({ id: userId })
+          .update({ password: hash })
+          .returning('*');
+      }
     async getAllOrganizationsByUserId (userId){
         if(userId){
         return await super.table()

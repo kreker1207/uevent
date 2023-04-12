@@ -94,6 +94,31 @@ class userController{
             errorReplier(e, res);
         }
     }
+    async changePassword (req, res) {
+        try {
+          const { newPassword } = req.body;
+          const user = new User(USERS_TABLE);
+          const oldUser = await user.getById(req.user.id);
+          if (!oldUser) {
+            return res.status(401).json({ message: 'User does not exist' });
+          }
+          const updatedUser = await user.updatePassword(req.user.id, newPassword);
+          if (!updatedUser) {
+            return res.status(500).json({ message: 'Failed to update password' });
+          }
+
+          const token = jwt.sign({ userId: updatedUser.id }, config.secret, {
+            expiresIn: '1h',
+          });
+
+          sendConfirmEmailPassword(updatedUser.email, token);
+      
+          res.status(200).json({ message: 'Password updated. Please check your email for confirmation.' });
+        } catch (e) {
+          e.addMessage = 'Change password';
+          errorReplier(e, res);
+        }
+    }
 
     async editAvatar(req, res) {
         try {

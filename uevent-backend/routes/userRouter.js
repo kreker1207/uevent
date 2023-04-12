@@ -8,6 +8,7 @@ router.get('/users/avatar/:avatarName',controller.getAvatar);
 router.get('/users/:id',controller.getById);
 
 router.post('/users', controller.edit);
+router.put('/users/:id', controller.changePassword);
 router.post('/users/avatar', controller.editAvatar);
 router.delete('/users',authMiddleware,controller.delete);
 module.exports = router
