@@ -57,8 +57,6 @@ class OrganizationController{
                 title: title,
                 description: description,
                 location: location,
-                // seat:seat,
-                // price:price
             }
             const [pawn] = await organization.set(organizationData);
             console.log(pawn);
@@ -94,6 +92,7 @@ class OrganizationController{
             errorReplier(e, res);
         }
     } 
+    //image
     async deleteOrg(req,res){
         try{
             const organization = new Organization(ORGANIZATION_TABLE);

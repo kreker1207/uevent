@@ -15,9 +15,21 @@ module.exports = class Event extends Entity {
         .leftJoin('event_theme', 'event.id', 'event_theme.event_id')
         .leftJoin('theme', 'event_theme.theme_id', 'theme.id')
         .groupBy('event.id')
-        .orderBy('event.event_datetime', 'asc');
+        .orderBy('event.event_datetime', 'asc').paginate({ isLengthAware: true, perPage: limit, currentPage: page });
 
     }
+    async getById(id){
+      if(id){
+        const knexInstance = knex(knexfile);
+        return await super.table().select('event.*', knexInstance.raw('json_agg(theme.name) AS tags'))
+        .where({'event.id':id})
+        .leftJoin('event_theme', 'event.id', 'event_theme.event_id')
+        .leftJoin('theme', 'event_theme.theme_id', 'theme.id')
+        .groupBy('event.id')
+        .orderBy('event.event_datetime', 'asc');
+      }
+    }
+
     async getAdminId(eventId){
         if(eventId){
             return await super.table().select('users.id as admin_id')
@@ -38,6 +50,45 @@ module.exports = class Event extends Entity {
         }
         else return result[0];
     }
+    async getEventByOrgId(orgId,page = null, limit = 4){
+      if(orgId){
+          return await super.table().select('event.*')
+          .where('organizer_id', '=', orgId).paginate({ isLengthAware: true, perPage: limit, currentPage: page });
+      }
+      else return result[0];
+  }
+  async getEventWithFilter(filters, page = null, limit = 20) {
+    if (page === null || page === undefined) {
+      page = 0;
+    }
+    const knexInstance = knex(knexfile);
+    console.log(filters)
+  
+    const events = await knexInstance('event')
+      .select('event.*', knexInstance.raw('json_agg(theme.name) AS tags'))
+      .leftJoin('event_theme', 'event.id', 'event_theme.event_id')
+      .leftJoin('theme', 'event_theme.theme_id', 'theme.id')
+      .where(function() {
+        if (filters.format) {
+          this.where('event.column', '=', filters.format);
+        }
+        if (filters.theme) {
+          this.whereIn('theme.name', filters.theme);
+        }
+        if (filters.event_datetime) {
+          const timestamp = isNaN(Date.parse(filters.event_datetime)) ? null : new Date(filters.event_datetime).toISOString();
+          if (timestamp) {
+            this.where('event.event_datetime', '>=', knexInstance.raw('now()::timestamp with time zone'));
+          } else {
+            this.where(knexInstance.raw("to_timestamp(event.event_datetime, 'YYYY-MM-DD HH24:MI:SS') >= ?", timestamp));
+          }
+        } 
+      })
+      .groupBy('event.id')
+      .paginate({ isLengthAware: true, perPage: limit, currentPage: page });
+  
+    return events;
+  }
 
     
     async setEvent(eventData) {
