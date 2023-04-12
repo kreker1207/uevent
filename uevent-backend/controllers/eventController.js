@@ -13,7 +13,7 @@ class EventController{
         try{
             const event = new Event(EVENT_TABLE);
 
-            const pawns = await event.getAll(req.params.page,3);
+            const pawns = await event.getAll(req.params.page,9);
             //org name and id
             res.json(pawns)
         } catch(e){
@@ -32,6 +32,7 @@ class EventController{
             errorReplier(e,res);
         }
     }
+
     async getEventByUserId(req,res){
         try{
             const event = new Event(EVENT_TABLE);
@@ -41,7 +42,18 @@ class EventController{
             e.addMessage= 'Get events by user id';
             errorReplier(e,res);
         }
-    }
+    }   
+    async getEventByOrgId(req,res){
+        try{
+            const event = new Event(EVENT_TABLE);
+            const result = await event.getEventByOrgId(req.params.orgId,req.params.page,4);
+            res.json(result);
+        } catch(e){
+            e.addMessage= 'Get events by user id';
+            errorReplier(e,res);
+        }
+    }   
+   
     async createEvent(req,res){
         try{
             const errors = validationResult(req)
@@ -66,8 +78,6 @@ class EventController{
 
             }
             const pawn = await event.setEvent(eventData);
-            // tags
-            //Add aoutocreation of seats
             console.log(pawn)
             return res.json({eventData})
 
