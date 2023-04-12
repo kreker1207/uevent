@@ -14,6 +14,7 @@ const path = require('path');
 const cors = require('cors')
 const authMid = require('./middleware/authMiddleware')
 const purCheck = require('./middleware/purchase_checker')
+const eveChecker = require('./middleware/event_date_time_checker')
 
 
 const PORT = process.env.PORT || 8080
@@ -65,7 +66,7 @@ app.get('/profile_pics/:filename', (req, res) => {
 app.listen(PORT, () => console.log(`Server up at http://localhost:${PORT}`))
 
 //start purchase checker
-purCheck();
-
+//purCheck();
+eveChecker();
 //price
 //9 elements pagination
