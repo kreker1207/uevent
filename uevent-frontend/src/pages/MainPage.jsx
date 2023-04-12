@@ -68,30 +68,32 @@ export default function MainPage() {
       </div>
       <div className="options">
         <div className="options-filters">
-
-          <div className="dropdown">
-            <button className="dropdown-button">Themes</button>
-            <div className="dropdown-content">
-              <a href="/">Опция 1</a>
-              <a href="/">Опция 2</a>
-              <a href="/">Опция 3</a>
-            </div>
+          <div>
+            <select defaultValue="Formats" name="formats" id="formats">
+              <option value="concert">Concert</option>
+              <option value="meet_up">Meet Up</option>
+              <option value="fetival">Festival</option>
+              <option value="show">Show</option>
+              <option value="custom">Custom</option>
+            </select>
           </div>
-          <div className="dropdown">
-            <button className="dropdown-button">Formats</button>
-            <div className="dropdown-content">
-              <a href="/">Опция 1</a>
-              <a href="/">Опция 2</a>
-              <a href="/">Опция 3</a>
-            </div>
+          <div>
+            <select name="formats" id="formats">
+              <option value="concert">Concert</option>
+              <option value="meet_up">Meet Up</option>
+              <option value="fetival">Festival</option>
+              <option value="show">Show</option>
+              <option value="custom">Custom</option>
+            </select>
           </div>
-          <div className="dropdown">
-            <button className="dropdown-button">Dates</button>
-            <div className="dropdown-content">
-              <a href="/">Опция 1</a>
-              <a href="/">Опция 2</a>
-              <a href="/">Опция 3</a>
-            </div>
+          <div>
+            <select name="formats" id="formats">
+              <option value="concert">Concert</option>
+              <option value="meet_up">Meet Up</option>
+              <option value="fetival">Festival</option>
+              <option value="show">Show</option>
+              <option value="custom">Custom</option>
+            </select>
           </div>
         </div>
         <button onClick={handleCreateEvent}>+ New Event</button>
@@ -105,28 +107,28 @@ export default function MainPage() {
           events.data.map((item, index) => {
             return (
               <div className="event" key={index}>
-              <img src={require("../assets/ev_img.jpg")} alt="" />
-              <div className='time-location'>
-                <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
-                  <p className='location'>
-                    <FaMapMarkerAlt/>{item.location}
-                  </p>
-                </IconContext.Provider>
-                <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
-                  <p className='time'>
-                    <FaClock/>{item.event_datetime}
-                  </p>
-                </IconContext.Provider>
+                <img src={`http://localhost:8080/event_pics/${item.eve_pic}`} alt="" />
+                <div className='time-location'>
+                  <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
+                    <p className='location'>
+                      <FaMapMarkerAlt/>{item.location}
+                    </p>
+                  </IconContext.Provider>
+                  <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
+                    <p className='time'>
+                      <FaClock/>{item.event_datetime}
+                    </p>
+                  </IconContext.Provider>
+                </div>
+                <div className='description'>
+                  <h2>{item.title}</h2>
+                  <p>{item.description}</p>
+                </div>
+                <div className='price'>
+                  <button onClick={() => handleEventClick(item.id)}>More</button>
+                  <p>{item.price}$</p>
+                </div>
               </div>
-              <div className='description'>
-                <h2>{item.title}</h2>
-                <p>{item.description}</p>
-              </div>
-              <div className='price'>
-                <button onClick={() => handleEventClick(item.id)}>More</button>
-                <p>{item.price}$</p>
-              </div>
-            </div>
             )
           })
         }
@@ -269,37 +271,21 @@ const Container = styled.div`
         display: flex;
         justify-content: space-between;
         align-items: center;
-        .dropdown {
-          position: relative;
+        div {
+          border: 1px solid #fff;
+          background: transparent;
           display: inline-block;
-          .dropdown-content {
-            position: absolute;
-            display: none;
-            width: 100%;
-            background-color: rgb(32, 32, 32);
-            z-index: 1;
-            a {
-              display: block;
-            }
+          padding: 0px 5px;
+          margin-left: 10px;
+          select {
+            width: 150px;
+            height: 45px;
+            outline: none;
+            background: rgb(32,32,32);
+            border: none;
+            color: #fff;
+            margin: 0;
           }
-          .dropdown-button {
-            background-color: transparent;
-            border: 1px solid #fff;
-            color: white;
-            padding: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            &:hover {
-              background-color: #fff;
-              color: black;
-            }
-          }
-          &:hover {
-            .dropdown-content {
-              display: block;
-            }
-          }
-
         }
       }
 
@@ -324,8 +310,8 @@ const Container = styled.div`
       justify-content: space-between;
       margin-bottom: 60px;
       .event {
-        width: 100%;
-        height: 490px;
+        grid-column: span 1; /* элементы занимают 1 колонку */
+        grid-row: span 1; /* элементы занимают 1 строку */
         background-color: #ffffff;
         border: 1px solid #000000;
         background: #333533;
@@ -340,6 +326,7 @@ const Container = styled.div`
           width: 100%;
           margin-bottom: 25px;
         }
+
         div {
           width: 100%;
           &.time-location {

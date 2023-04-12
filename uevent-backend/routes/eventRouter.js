@@ -10,6 +10,7 @@ router.get('/event/user/:userId/:page(\\d+)?',controller.getEventByUserId);
 router.get('/event/org/:orgId/:page(\\d+)?',controller.getEventByOrgId);
 //get bought
 
+router.post('/events/avatar/:id', controller.editAvatar);
 router.post('/org/:orgId/events',authMiddleware, controller.createEvent);
 router.delete('/events/:id',authMiddleware,controller.deleteEvent);
 module.exports = router

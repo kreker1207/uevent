@@ -7,10 +7,10 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import EventPage from './pages/EventPage'
 import UserPage from './pages/UserPage'
-import Basket from './pages/Basket'
 import Companies from './pages/Companies'
 import CreateEvent from './pages/CreateEvent'
 import CreateCompany from './pages/CreateCompany'
+import CompanyPage from './pages/CompanyPage'
 
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchProfile } from './utils/authActions'
@@ -41,17 +41,15 @@ export default function App() {
 
             <Route path='/events/:id' element={<EventPage/>}/>
             <Route path='/companies' element={<Companies/>}/>
+            <Route path='/companies/:id' element={<CompanyPage/>}/>
             <Route element = {<ProtectedRoute/>}>
               <Route path='/user-profile' element={<UserPage/>}/>
             </Route>
-            {/* <Route element = {<ProtectedRoute/>}> */}
-              <Route path='/create-event' element={<CreateEvent/>}/>
-            {/* </Route> */}
-            {/* <Route element = {<ProtectedRoute/>}> */}
-            <Route path='/create-company' element={<CreateCompany/>}/>
-            {/* </Route> */}
             <Route element = {<ProtectedRoute/>}>
-              <Route path='/basket' element={<Basket/>}/>
+              <Route path='/create-event' element={<CreateEvent/>}/>
+            </Route>
+            <Route element = {<ProtectedRoute/>}>
+            <Route path='/create-company' element={<CreateCompany/>}/>
             </Route>
           </Routes>
     </BrowserRouter>

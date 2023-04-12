@@ -10,75 +10,27 @@ export default function EventPage() {
   const inputRef = useRef(null);
   const { id } = useParams();
 
-  const [loading, setLoading] = useState(true);
-  const [loadingComments, setLoadingComments] = useState(true);
-
-  const [event, setEvent] = useState({
-    id: 1,
-    title: "Event Name",
-    price: 430,
-    location: "вулиця Пушкінська, 79/1, Харків, Харківська область, Украина, 61000",
-    organization: "Agency",
-    event_datetime: "15.03.2023 15:30",
-    description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Officiis quis, veritatis esse dolores asperiores fugit necessitatibus doloremque. Totam voluptates a sunt architecto nostrum reprehenderit temporibus, similique, hic cupiditate maiores ratione?"
-  })
-
-  // function replacePlusesWithSpaces(str) {
-  //   return str.replace(/\+/g, ' ');
-  // }
-  const [comments, setComments] = useState([])
- /*
-  const [comments, setComments] = useState([
-    {
-      id: 1,
-      username: "Roman Lytvynov",
-      date: "20.03.2023 15:30",
-      content: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sed soluta magnam dolorem blanditiis quam voluptatum fugit aut non nesciunt dolores rem repudiandae delectus eos consequuntur repellat quo, ad provident ab?",
-      commentsInside: []
-    },
-    {
-      id: 2,
-      username: "Roman Lytvynov",
-      date: "20.03.2023",
-      content: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sed soluta magnam dolorem blanditiis quam voluptatum fugit aut non nesciunt dolores rem repudiandae delectus eos consequuntur repellat quo, ad provident ab?",
-      commentsInside: [
-        {
-          senderName: "Polkovnik Piotkovski",
-          receiverName: "Roman Lytvynov",
-          date: "20.03.2023",
-          content: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sed soluta magnam dolorem blanditiis quam voluptatum fugit aut non nesciunt dolores rem repudiandae delectus eos consequuntur repellat quo, ad provident ab?",
-        },
-        {
-          senderName: "Roman Lytvynov",
-          receiverName: "Polkovnik Piotkovski",
-          date: "20.03.2023",
-          content: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sed soluta magnam dolorem blanditiis quam voluptatum fugit aut non nesciunt dolores rem repudiandae delectus eos consequuntur repellat quo, ad provident ab?",
-        }
-      ]
-    },
-    {
-      username: "Roman Lytvynov",
-      date: "20.03.2023",
-      content: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Sed soluta magnam dolorem blanditiis quam voluptatum fugit aut non nesciunt dolores rem repudiandae delectus eos consequuntur repellat quo, ad provident ab?",
-      commentsInside: []
-    }
-  ])*/ 
+  const [event, setEvent] = useState({data: [], isLoading: true})
+  const [comments, setComments] = useState({data: [], isLoading: true})
 
 
-  const [users, setUsers] = useState([])
 
   const [receiverName, setReceiverName] = useState('')
   const [receiverMaintId, setMainCommentId] = useState(-1)
   const [receiverCommentId, setReceiverCommentId] = useState(-1)
   const [description, setDescription] = useState('')
+  const [buyData, setBuyData] = useState({data: '', signature: '', isLoading: true});
+
 
   useEffect(() => {
     api.get(`/event/${id}`)
       .then(function (response) {
         // getOrganizationByID !!!!
         console.log(response.data)
-        setEvent(response.data)
-        setLoading(false)
+        setEvent({
+          data: response.data,
+          isLoading: false
+        })
       })
       .catch(function(error) {
         console.log(error.message)
@@ -105,11 +57,11 @@ export default function EventPage() {
             return {
               ...comment,
               login: authorData.login,
-              picture_img: authorData.picture_img,
+              profile_pic: authorData.profile_pic,
               replies: comment.replies.map((nested, index) => ({
                 ...nested,
                 login: nestedData[index].login,
-                picture_img: nestedData[index].picture_img,
+                profile_pic: nestedData[index].profile_pic,
               })),
             };
           });
@@ -118,8 +70,10 @@ export default function EventPage() {
         // Wait for all the commentPromises to resolve and update the state with the updated comments
         Promise.all(commentPromises)
           .then(updatedComments => {
-            setComments(updatedComments);
-            setLoadingComments(false)
+            setComments({
+              data: updatedComments,
+              isLoading: false
+            });
           })
           .catch(error => {
             console.error(error);
@@ -129,41 +83,6 @@ export default function EventPage() {
         console.error(error);
       });
   }, [id]);
-
-  // useEffect(() => {
-  //   if (comments) {
-  //     const newCommentsPromisses = comments.map((item) => {
-  //       const subItems = item.replies.map(itemInside => {
-  //         return api.get(`/users/${itemInside.author_id}`)
-  //       })
-  //       return subItems
-  //     })
-
-  //     Promise.all(newCommentsPromisses)
-  //       .then(responses => {
-  //         const updatedComments = responses.map((response, index) => {
-
-  //           const data = response.data;
-
-  //           const updatedSubComments = comments[index].replies.map(item => {
-  //             return {
-  //               ...item,
-  //               login: data.login,
-  //               profile_pic: data.profile_pic,
-  //             }
-  //           })
-  //           return {
-  //             ...comments,
-  //             replies: updatedSubComments
-  //           }
-  //         });
-  //         setComments(updatedComments);
-  //       })
-  //       .catch(error => {
-  //         console.error(error);
-  //       });
-  //   }
-  // }, [comments]);
 
 
   const handleCommentFocus = (receiverName, receiverMaintId, receiverCommentId) => {
@@ -183,7 +102,7 @@ export default function EventPage() {
   const handleCommentSend = () => {
     if(receiverName!=='' && receiverCommentId !== -1) {
       console.log(receiverCommentId)
-      api.post(`/comments/event/${event.id}/reply/${receiverMaintId}`, {content: description, comment_id: receiverCommentId})
+      api.post(`/comments/event/${event.data.id}/reply/${receiverMaintId}`, {content: description, comment_id: receiverCommentId})
         .then(function(response) {
             console.log(response.data)
           })
@@ -191,7 +110,7 @@ export default function EventPage() {
             console.log(error.message)
           })
     } else {
-      api.post(`/comments/event/${event.id}`, {content: description})
+      api.post(`/comments/event/${event.data.id}`, {content: description})
         .then(function(response) {
           console.log(response.data)
           console.log(event)
@@ -201,59 +120,96 @@ export default function EventPage() {
         })
     }
   }
-  console.log(comments)
+
+  useEffect(() => {
+    if (!buyData.isLoading) {
+      const form = document.getElementById('liqPayId')
+      form.submit();
+    }
+  }, [buyData]);
+
+  const buyClick = (e)=> {
+    try {
+      e.preventDefault()
+      api.post('/buy', {event_id: event.data.id})
+        .then(response => {
+          console.log(response.data)
+          setBuyData({
+            data: response.data.data,
+            signature: response.data.signature,
+            isLoading: false
+          })
+        })
+        .catch ((error) => {
+          console.warn(error.response.data.message)
+        })
+    } catch (error) {
+      console.log(error)
+    }
+    
+  }
+
   return (
     <Container>
-      <div className="event-image">
-          <img src = {require("../assets/ev_img.jpg")} alt="" />
-      </div>
-      <div className="description-block">
-        <div className="description">
-          <h2>{event.title}</h2>
-          <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
-            <p>
-              <FaMapMarkerAlt/>{event.location}
-            </p>
-          </IconContext.Provider>
-          <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
-            <p>
-              <FaClock/>{event.event_datetime}
-            </p>
-          </IconContext.Provider>
-          <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
-            <p>
-              <FaUser/>{event.organization}
-            </p>
-          </IconContext.Provider>
-          <div className="info">
-            <h3>Description</h3>
-            <p>{event.description}</p>
-          </div> 
-          <div className="price-block">
-            <button>Buy</button>
-            <div className="price">430$</div>
-          </div> 
+      {
+        event.isLoading ? 
+        <div className="loading">Loading...</div>
+        :
+        <div className="event-image">
+          <img src = {`http://localhost:8080/event_pics/${event.data.eve_pic}`} alt="" />
         </div>
-      </div>
-
-
-
-
-
-
-      <div className="comments-block">
+      }
+      {
+        event.isLoading ? 
+        <div className="loading">Loading...</div>
+        :
+        <div className="description-block">
+          <div className="description">
+            <h2>{event.data.title}</h2>
+            <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
+              <p>
+                <FaMapMarkerAlt/>{event.data.location}
+              </p>
+            </IconContext.Provider>
+            <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
+              <p>
+                <FaClock/>{event.data.event_datetime}
+              </p>
+            </IconContext.Provider>
+            <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
+              <p>
+                <FaUser/>{event.data.organization}
+              </p>
+            </IconContext.Provider>
+            <div className="info">
+              <h3>Description</h3>
+              <p>{event.data.description}</p>
+            </div> 
+            <div className="price-block">
+              <form id="liqPayId" method="POST" action="https://www.liqpay.ua/api/3/checkout" acceptCharset="utf-8">
+                <input type="hidden" name="data" value={buyData.data}/>
+                <input type="hidden" name="signature" value={buyData.signature}/>
+                <button onClick={buyClick}>Buy</button>
+              </form>
+              <div className="price">430$</div>
+            </div> 
+          </div>
+        </div>
+      }
+      {
+        event.isLoading && comments.isLoading ? 
+        <div className="loading">Loading...</div>
+        :
+        <div className="comments-block">
           <h2>Comments</h2>
           <div className="comments-inner">
             {
-              loading && loadingComments ? 
-              <div className="loading">Loading...</div>
-              :
-              comments.map((item, index) => {
+              comments.data.map((item, index) => {
                 return (
                   <div key={index} className="comment">
                     <div className="userinfo">
                         <div className="photo">
-                          <div><img src={require("../assets/company.jpg")} alt="userlogo" /></div>
+                          <div><img src={`http://localhost:8080/profile_pics/${item.profile_pic}`} alt="userlogo" /></div>
                           <div className="name">
                             <h4>{item.login}</h4>
                             <p>{item.created_at}</p>
@@ -268,18 +224,14 @@ export default function EventPage() {
                     <div className="comment-text">
                       {item.content}
                     </div>
-                    {
-                    loading ? 
-                    <div className='loading'>Loading...</div> 
-                    :
                     <div className="replies">
                       {
                         item.replies.map((itemInner, index) => {
                           return (
-                            <div key={index} className="comment">
+                            <div style={{marginBottom: "25px"}} key={index} className="comment">
                               <div className="userinfo">
                                   <div className="photo">
-                                    <div><img src={require("../assets/company.jpg")} alt="userlogo" /></div>
+                                    <div><img src = {`http://localhost:8080/profile_pics/${itemInner.profile_pic}`} alt="" /></div>
                                     <div className="name">
                                       <h4>{itemInner.login} <i style={{color: "#868686", fontSize: "12px"}}>replied to {itemInner.receiver_name}</i></h4>
                                       <p>{itemInner.created_at}</p>
@@ -299,7 +251,6 @@ export default function EventPage() {
                         })
                       }
                     </div>
-                    }
                   </div>
                 )
               })
@@ -310,7 +261,11 @@ export default function EventPage() {
             <button onClick={handleCommentSend} type="submit">Send</button>
           </div>
         </div>
-
+      }
+      {
+        event.isLoading ? 
+        <div className="loading">Loading...</div>
+        :
         <div className="map">
           <iframe
             title='map'
@@ -318,9 +273,11 @@ export default function EventPage() {
             allowFullScreen=""
             referrerPolicy="no-referrer-when-downgrade"
             src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyDuHV2o8j_nfA8XMUC-15fN9vlDB9htW30
-            &q=${event.location}`}>
+            &q=${event.data.location}`}>
           </iframe>
-      </div>
+        </div>
+      }
+
     </Container>
   )
 }

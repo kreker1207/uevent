@@ -94,16 +94,15 @@ class userController{
     async editAvatar(req, res) {
         try {
             if (!req.user){
-                return res.status(401).json({message: `User needs to login first`});
+                throw new CustomError(1011);
             }
             if (!req.files || Object.keys(req.files).length === 0) {
-                return res.status(400).json({message: 'No files were uploaded.'});
+                throw new CustomError(1012);
             }
+            console.log(req.files);
             
             const avatar_name = req.user.login + '_' + uuidv4() + '.png';
             const avatar_path = './public/profile_pics/';
-
-            
 
             const user = new User(USERS_TABLE);
             const pawn = await user.getById(req.user.id);

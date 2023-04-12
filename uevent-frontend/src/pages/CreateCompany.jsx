@@ -1,16 +1,19 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { IconContext } from 'react-icons';
 import { FaEnvelope, FaPhone } from 'react-icons/fa';
 import styled from 'styled-components'
 import DragAndDropImage from '../components/DragImage'
 import Map from '../components/Map'
+import api from '../utils/apiSetting';
+import { useSelector } from 'react-redux';
 
 export default function CreateCompany() {
     const [placeName, setPlaceName] = useState("Location");
-    const [userEmail, setuserEmail] = useState("litvinromeo@gmail.com");
+    const { userInfo } = useSelector((state) => state.auth)
     const [phoneNumber, setPhoneNumber] = useState("");
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
+    const [userEmail, setUserEmail] = useState('')
     const handleMapCoordinates = (placeName) => {
         setPlaceName(placeName);
     };
@@ -25,6 +28,19 @@ export default function CreateCompany() {
         }
         console.log(data)
     }
+
+    useEffect(() => {
+        if(userInfo && userInfo.id) {
+            api.get(`/users/${userInfo.id}`)
+                .then(response => {
+                    console.log(response.data)
+                    setUserEmail(response.data.email)
+                })
+                .catch(error => {
+                    console.log(error.message)
+                })
+        }
+    }, [userInfo])
 
     return (
         <Component>

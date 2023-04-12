@@ -6,6 +6,8 @@ const   EVENT_TABLE = 'event',
         {secret_refresh} = require('../config'),
         {validationResult} = require('express-validator'),
         Organization = require('../models/organization'),
+        { v4: uuidv4 } = require('uuid'),
+        Fs = require('fs'),
         Event = require('../models/event');
 
 class EventController{
@@ -77,13 +79,47 @@ class EventController{
             }
             const pawn = await event.setEvent(eventData);
             console.log(pawn)
-            return res.json({eventData})
+            return res.json(pawn)
 
         }catch(e){
             e.addMessage = 'Create event';
             errorReplier(e,res);
         }
     }
+
+    async editAvatar(req, res) {
+        try {
+            if (!req.user){
+                throw new CustomError(1011);
+            }
+            if (!req.files || Object.keys(req.files).length === 0) {
+                throw new CustomError(1012);
+            }
+
+            const event = new Event(EVENT_TABLE);
+            const eve = await event.getById(req.params.id);
+            
+            const avatar_name = eve.title + '_' + uuidv4() + '.png';
+            const avatar_path = './public/event_pics/';
+            
+            // input name on front should be like this VVV (avatar)
+            const avatar = req.files.avatar;
+            avatar.mv(avatar_path + avatar_name, function(err) {
+                if (err) return res.status(500).send(err);
+            });
+            await event.set({id: eve.id, eve_pic: avatar_name});
+
+            if(eve.eve_pic !== 'none.png') {
+                Fs.unlinkSync(avatar_path + eve.eve_pic)
+            }
+            
+            res.send('Success File uploaded!');
+        } catch (e) {
+            e.addMessage = 'edit eve avatar';
+            errorReplier(e, res);
+        }
+    }
+
     async deleteEvent(req,res){
         try{
             const event = new Event(EVENT_TABLE);

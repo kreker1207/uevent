@@ -6,6 +6,8 @@ const   USER_TABLE = 'users',
         {secret_refresh} = require('../config'),      
         {validationResult} = require('express-validator'),
         {CustomError, errorReplier} = require('../models/error'),
+        { v4: uuidv4 } = require('uuid'),
+        Fs = require('fs'),
         Organization = require('../models/organization');
 
 class OrganizationController{
@@ -92,7 +94,39 @@ class OrganizationController{
             errorReplier(e, res);
         }
     } 
-    //image
+
+    async editAvatar(req, res) {
+        try {
+            if (!req.user){
+                throw new CustomError(1011);
+            }
+            if (!req.files || Object.keys(req.files).length === 0) {
+                throw new CustomError(1012);
+            }
+
+            const organization = new Organization(ORGANIZATION_TABLE);
+            const org = await organization.getById(req.params.id);
+            
+            const avatar_name = org.title + '_' + uuidv4() + '.png';
+            const avatar_path = './public/organization_pics/';
+            
+            // input name on front should be like this VVV (avatar)
+            const avatar = req.files.avatar;
+            avatar.mv(avatar_path + avatar_name, function(err) {
+                if (err) return res.status(500).send(err);
+            });
+            await organization.set({id: org.id, org_pic: avatar_name});
+
+            if(org.org_pic !== 'none.png') {
+                Fs.unlinkSync(avatar_path + org.org_pic)
+            }
+            
+            res.send('Success File uploaded!');
+        } catch (e) {
+            e.addMessage = 'edit org avatar';
+            errorReplier(e, res);
+        }
+    }
     async deleteOrg(req,res){
         try{
             const organization = new Organization(ORGANIZATION_TABLE);

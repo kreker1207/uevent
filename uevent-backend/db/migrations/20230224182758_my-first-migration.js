@@ -14,7 +14,6 @@ exports.up = function(knex) {
           table.timestamps(true, true);
         }),
 
-
         knex.schema.createTable('organization', (table) => {
             table.increments('id').primary();
             table.integer('admin_id').unsigned().notNullable();
@@ -35,7 +34,7 @@ exports.up = function(knex) {
             table.integer('seat').notNullable();
             table.string('price', 20).notNullable();
             table.string('event_datetime', 32).notNullable();
-            table.enu('column', ['concert', 'meet_up', 'festival', 'show', 'custom'],
+            table.enu('format', ['concert', 'meet_up', 'festival', 'show', 'custom'],
                 { useNative: true, enumName: 'format' }).defaultTo('custom');
             table.string('location', 256).notNullable();
             table.string('eve_pic', 128).defaultTo('none.png');
@@ -82,6 +81,15 @@ exports.up = function(knex) {
                 ['author_organization_id', 'author_id']);
         }),
 
+        knex.schema.createTable('purchase', (table) => {
+            table.string('id', 64).primary();
+            table.integer('user_id').unsigned().notNullable();
+            table.integer('event_id').unsigned().notNullable();
+            table.boolean('status').notNullable().defaultTo(false);
+
+            table.foreign('user_id').references('id').inTable('users');
+            table.foreign('event_id').references('id').inTable('event');
+        })
     ]);
 };
 

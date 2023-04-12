@@ -14,6 +14,8 @@ const ERROR_MAP = new Map ([
     [1008, { message: 'You are not able to call this endpoint', status: 403 }],
     [1009, { message: 'Event not found by ID', status: 404 }],
     [1010, { message: 'Comment not found by ID', status: 404 }],
+    [1011, { message: 'You need to login first!', status: 403 }],
+    [1012, { message: 'No files were uploaded.', status: 400 }]
 ]);
 
 class CustomError extends Error {

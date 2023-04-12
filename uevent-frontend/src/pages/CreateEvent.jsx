@@ -1,17 +1,51 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import styled from 'styled-components'
 import Map from '../components/Map'
 import DragAndDropImage from '../components/DragImage';
-import { FaTimesCircle, FaDollarSign } from 'react-icons/fa';
+import { FaTimesCircle, FaDollarSign, FaHashtag } from 'react-icons/fa';
 import { IconContext } from 'react-icons';
 import { NavLink } from 'react-router-dom';
 import api from '../utils/apiSetting';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
 
 function CreateEvent() {
+    const { userInfo } = useSelector((state) => state.auth)
+    const [companies, setCompanies] = useState({data: [], isLoading: true})
+
     const [inputType1, setInputType1] = useState('text');
     const [inputType2, setInputType2] = useState('text');
     const [tags, setTags] = useState([]);
     const [tagInput, setTagInput] = useState('');
+
+    const [title, setTitle] = useState('');
+    const [publishDate, setPublishDate] = useState('');
+    const [eventDate, setEventDate] = useState('');
+    const [eventTime, setEventTime] = useState('');
+    const [description, setDescription] = useState('');
+    const [price, setPrice] = useState('');
+    const [evType, setEvType] = useState('')
+    const [placeName, setPlaceName] = useState("");
+    const [format, setFormat] = useState('')
+    const [seats, setSeats] = useState(0)
+    const [eve_pic, setFile] = useState(null)
+    const [companyId, setCompanyId] = useState(0)
+
+    useEffect(() => {
+        if(Object.keys(userInfo) !== 0 && userInfo.id) {
+            api.get(`/org/users/${userInfo.id}`)
+            .then(response => {
+                setCompanies({
+                    data: response.data,
+                    isLoading: false
+                })
+                setCompanyId(response.data[0].id)
+            })
+            .catch(error => {
+                console.warn(error.message)
+            })
+        }
+    }, [userInfo])
 
     const handleTagInputChange = (event) => {
         setTagInput(event.target.value);
@@ -33,23 +67,13 @@ function CreateEvent() {
         setTags(tags.filter((tag) => tag !== tagToRemove));
     };
     
-    const [title, setTitle] = useState('');
-    const [publishDate, setPublishDate] = useState('');
-    const [eventDate, setEventDate] = useState('');
-    const [eventTime, setEventTime] = useState('');
-    const [description, setDescription] = useState('');
-    const [price, setPrice] = useState('');
-    const [evType, setEvType] = useState('')
-    const [placeName, setPlaceName] = useState("");
-    const [companyName, setCompanyName] = useState('')
-    const [format, setFormat] = useState('')
-    const [seats, setSeats] = useState(0)
 
-    //test
-    const [companyId, setCompanyId] = useState(1)
 
     const handleMapCoordinates = (placeName) => {
         setPlaceName(placeName);
+    };
+    const handleFileUpload = (eve_pic) => {
+        setFile(eve_pic);
     };
 
     const handleEvType = (event) => {
@@ -57,26 +81,39 @@ function CreateEvent() {
     };
 
     const handlePublish = () => {
-        const data = {
+        const dataE = {
             title,
             description,
             "event_datetime": eventDate + ' ' + eventTime,
             seats,
-
+            eve_pic,
             publishDate,
             evType,
             location: placeName,
             format,
-            companyName,
+            companyId,
             tags
         }
-        console.log(data)
-        api.post(`/org/${companyId}/events`, data)
+        console.log(dataE)
+
+
+        let formData = new FormData()
+        formData.append('avatar', eve_pic)
+
+        api.post(`/org/${companyId}/events`, dataE)
         .then(function(response) {
-          console.log(response.data)
+            console.log(response.data)
+            axios({
+                method: "post",
+                url: `http://localhost:8080/api/events/avatar/${response.data.id}`,
+                data: formData,
+                headers: {'Access-Control-Allow-Origin': '*', "Content-Type": "multipart/form-data" },
+                credentials: 'include',   
+                withCredentials: true
+            })
         })
         .catch(function(error) {
-          console.log(error.message)
+          console.log(error.response.data.message)
         })
     }
 
@@ -91,7 +128,7 @@ function CreateEvent() {
         <div>
             <Component>
                 <div className="image">
-                    <DragAndDropImage/>
+                    <DragAndDropImage onChildStateChange={handleFileUpload}/>
                 </div>
                 <div className="event">
                     <input 
@@ -175,23 +212,34 @@ function CreateEvent() {
                         <div>
                             <label htmlFor="formats">Company: </label>
                             <div>
-                                <select onChange={(e) => setCompanyName(e.target.value)} name="companies" id="companies">
-                                    <option value="example1">Comapny1</option>
-                                    <option value="example2">Comapny2</option>
-                                    <option value="example3">Comapny3</option>
+                                {
+                                    companies.isLoading? 
+                                    <div className="loading">Loading...</div>
+                                    :
+                                    <select onChange={(e) => setCompanyId(e.target.value)} name="companies" id="companies">
+                                    {
+                                        companies.data.map((item, index) => {
+                                            return <option key={index} value={item.id}>{item.title}</option>
+                                        })
+                                    }
                                 </select>
+                                }
                             </div>
                         </div>        
                     </div>
                     <div style={{textAlign: 'end', fontSize: '10px', color: '#868686'}}>Don't have company? <NavLink style={{color: "#FFD100"}} to='/create-company'>Create now !</NavLink></div>
                     <div style={{display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start'}} className='tags-block'>
-                        <input
-                            type="text"
-                            placeholder="Enter tags here..."
-                            value={tagInput}
-                            onChange={handleTagInputChange}
-                            onKeyDown={handleKeyDown}
-                        />
+                        <div className="input">
+                            <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px"} }}>
+                                <FaHashtag/> <input
+                                                    type="text"
+                                                    placeholder="Enter tags here..."
+                                                    value={tagInput}
+                                                    onChange={handleTagInputChange}
+                                                    onKeyDown={handleKeyDown}
+                                                />
+                            </IconContext.Provider>
+                        </div>
                         <div style={{marginLeft: '10px', display: 'flex', flexWrap: 'wrap', gap: '5px', justifyContent: 'flex-start', alignItems: 'center'}} className='tags-array'>
                             {tags.map((tag) => (
                             <div 
@@ -264,6 +312,7 @@ const MapContainer = styled.div`
             background: #FFD100;
             border: none;
             color: #fff;
+            cursor: pointer;
         }
     }
     

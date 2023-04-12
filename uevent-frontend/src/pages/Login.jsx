@@ -5,6 +5,8 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {ToastContainer, toast} from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css';
 import styled from 'styled-components';
+import { FaLock, FaUser } from 'react-icons/fa';
+import { IconContext } from 'react-icons';
 
 export default function Login() {
   const { loading, userInfo } = useSelector((state) => state.auth)
@@ -61,13 +63,22 @@ export default function Login() {
     <FormContainer>
       <div className='formName'>Login</div>
       <form onSubmit={handleSubmit}>
-        <input type="text" value={login} onChange={(e) => setLogin(e.target.value)} placeholder="Login" />
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password"/>
-        <button type="submit" disabled={loading}>
-          {loading ? 'Logging in...' : 'Log in'}
-        </button>
+          <IconContext.Provider value={{ style: { verticalAlign: 'middle'} }}>
+              <div className="input-container">
+                <FaUser style={{marginRight: '10px'}}/> <input type="text" value={login} onChange={(e) => setLogin(e.target.value)} placeholder="Login" />
+              </div>
+          </IconContext.Provider>
+          <IconContext.Provider value={{ style: { verticalAlign: 'middle'} }}>
+            <div className="input-container">
+              <FaLock style={{marginRight: '10px'}}/> <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password"/>
+            </div>
+          </IconContext.Provider>
+          <div className='reset-password'>Forgot your password?</div>
+          <button type="submit" disabled={loading}>
+            {loading ? 'Logging in...' : 'Log in'}
+          </button>
       </form>
-      <div>Don't have an accout? <NavLink to='/register'>Sign Up</NavLink> !</div>
+      <div className='register'>Don't have an accout? <NavLink to='/register'>Sign Up</NavLink> !</div>
       <ToastContainer/>
     </FormContainer>
   )
@@ -78,17 +89,11 @@ const FormContainer = styled.div`
   flex-direction: column;
   margin: 0 auto;
   width: fit-content;
-  background-color: #cbc6c0;
-  padding: 30px;
-  border-radius: 10px;
 
-  div {
-      align-self: center;
-      font-size: 15px;
-      &.formName {
-        margin-bottom: 10px;
-        font-size: 32px;
-      }
+  .formName {
+    text-align: center;
+    margin-bottom: 70px;
+    font-size: 32px;
   }
 
   form {  
@@ -96,17 +101,44 @@ const FormContainer = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    input {
-      width: 100%;
+    gap: 20px;
+
+    .input-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       padding: 10px;
-      margin-bottom: 10px;
-      border: none;
-      border-radius: 5px;
+      border: 1px solid #fff;
+      input {
+        outline: none;
+        background: rgb(32, 32, 32);;
+        border: none;
+        color: #fff;
+      }
     }
+
+    .reset-password {
+      width: 100%;
+      text-align: end;
+      font-size: 12px;
+      color: #848484;
+      margin-top: -15px;
+    }
+
     button {
       width: 100%;
       padding: 5px;
       margin-bottom: 10px;
+      background: #FFD100;
+      color: #fff;
+      border: none;
+      cursor: pointer;
     }
+  }
+  .register {
+    width: 100%;
+    text-align: end;
+    font-size: 12px;
+    color: #848484;
   }
 `;

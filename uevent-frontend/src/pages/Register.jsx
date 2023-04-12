@@ -5,6 +5,8 @@ import {ToastContainer, toast} from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css';
 import styled from 'styled-components';
 import { useNavigate, NavLink } from 'react-router-dom';
+import { FaEnvelope, FaLock, FaUser } from 'react-icons/fa';
+import { IconContext } from 'react-icons';
 
 export default function Register() {
   const [login, setLogin] = useState("");
@@ -82,15 +84,31 @@ export default function Register() {
       <FormContainer>
         <div className='formName'>Register</div>
         <form onSubmit={handleSubmit}>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
-          <input type="text" value={login} onChange={(e) => setLogin(e.target.value)} placeholder="Username" />
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password"/>
-          <input type="password" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} placeholder="Repeat password"/>
+          <IconContext.Provider value={{ style: { verticalAlign: 'middle'} }}>
+            <div className="input-container">
+              <FaEnvelope style={{marginRight: '10px'}}/> <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
+            </div>
+          </IconContext.Provider>
+          <IconContext.Provider value={{ style: { verticalAlign: 'middle'} }}>
+            <div className="input-container">
+              <FaUser style={{marginRight: '10px'}}/> <input type="text" value={login} onChange={(e) => setLogin(e.target.value)} placeholder="Username" />
+            </div>
+          </IconContext.Provider>
+          <IconContext.Provider value={{ style: { verticalAlign: 'middle'} }}>
+            <div className="input-container">
+              <FaLock style={{marginRight: '10px'}}/> <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password"/>
+            </div>
+          </IconContext.Provider>
+          <IconContext.Provider value={{ style: { verticalAlign: 'middle'} }}>
+            <div className="input-container">
+              <FaLock style={{marginRight: '10px'}}/> <input type="password" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} placeholder="Repeat password"/>
+            </div>
+          </IconContext.Provider>
           <button type="submit" disabled={loading}>
             {loading ? 'Signing up...' : 'Sign up'}
           </button>
         </form>
-        <div>Already have an account? <NavLink to='/login'>Sign In</NavLink> !</div>
+        <div className='login'>Already have an account? <NavLink to='/login'>Sign In</NavLink> !</div>
         <ToastContainer />
       </FormContainer>
   )
@@ -101,17 +119,11 @@ const FormContainer = styled.div`
   flex-direction: column;
   margin: 0 auto;
   width: fit-content;
-  background-color: #cbc6c0;
-  padding: 30px;
-  border-radius: 10px;
 
-  div {
-      align-self: center;
-      font-size: 15px;
-      &.formName {
-        margin-bottom: 10px;
-        font-size: 32px;
-      }
+  .formName {
+    text-align: center;
+    margin-bottom: 70px;
+    font-size: 32px;
   }
 
   form {  
@@ -119,17 +131,44 @@ const FormContainer = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    input {
-      width: 100%;
+    gap: 20px;
+
+    .input-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       padding: 10px;
-      margin-bottom: 10px;
-      border: none;
-      border-radius: 5px;
+      border: 1px solid #fff;
+      input {
+        outline: none;
+        background: rgb(32, 32, 32);;
+        border: none;
+        color: #fff;
+      }
     }
+
+    .reset-password {
+      width: 100%;
+      text-align: end;
+      font-size: 12px;
+      color: #848484;
+      margin-top: -15px;
+    }
+
     button {
       width: 100%;
       padding: 5px;
       margin-bottom: 10px;
+      background: #FFD100;
+      color: #fff;
+      border: none;
+      cursor: pointer;
     }
+  }
+  .login {
+    width: 100%;
+    text-align: end;
+    font-size: 12px;
+    color: #848484;
   }
 `;

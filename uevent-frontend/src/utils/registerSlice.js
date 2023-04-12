@@ -27,20 +27,6 @@ const registerSlice = createSlice({
             state.error = action.payload
         })
     }
-    //     // register user 
-    //     [fetchRegister.pending]: (state) => {
-    //       state.loading = true
-    //       state.error = null
-    //     },
-    //     [fetchRegister.fulfilled]: (state, { payload }) => {
-    //       state.loading = false
-    //       state.success = true // registration successful
-    //     },
-    //     [fetchRegister.rejected]: (state, { payload }) => {
-    //       state.loading = false
-    //       state.error = payload
-    //     }
-    // }
 })
 
 
