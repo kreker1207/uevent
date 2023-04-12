@@ -23,7 +23,7 @@ exports.up = function(knex) {
             table.string('phone_number', 20).defaultTo(null);
             table.string('org_pic', 128).defaultTo('none.png');
             
-            table.foreign('admin_id').references('id').inTable('users')
+            table.foreign('admin_id').references('id').inTable('users').onDelete('cascade')
         }),
     
         knex.schema.createTable('event', (table) => {
@@ -39,7 +39,7 @@ exports.up = function(knex) {
             table.string('location', 256).notNullable();
             table.string('eve_pic', 128).defaultTo('none.png');
 
-            table.foreign('organizer_id').references('id').inTable('organization')
+            table.foreign('organizer_id').references('id').inTable('organization').onDelete('cascade')
         }),
 
         knex.schema.createTable('theme', (table) => {
@@ -52,8 +52,8 @@ exports.up = function(knex) {
             table.integer('event_id').unsigned().notNullable();
             table.integer('theme_id').unsigned().notNullable();
 
-            table.foreign('event_id').references('id').inTable('event');
-            table.foreign('theme_id').references('id').inTable('theme');
+            table.foreign('event_id').references('id').inTable('event').onDelete('cascade');
+            table.foreign('theme_id').references('id').inTable('theme').onDelete('cascade');
         }),
 
 
@@ -73,9 +73,9 @@ exports.up = function(knex) {
             table.foreign('author_id').references('id').inTable('users');
             table.foreign('author_organization_id').references('id').inTable('organization');
             
-            table.foreign('event_id').references('id').inTable('event');
-            table.foreign('comment_id').references('id').inTable('comment');
-            table.foreign('main_comment_id').references('id').inTable('comment');
+            table.foreign('event_id').references('id').inTable('event').onDelete('cascade');
+            table.foreign('comment_id').references('id').inTable('comment').onDelete('cascade');
+            table.foreign('main_comment_id').references('id').inTable('comment').onDelete('cascade');
 
             table.check('((?? is not null):: integer + (?? is not null):: integer) = 1', 
                 ['author_organization_id', 'author_id']);
@@ -87,8 +87,8 @@ exports.up = function(knex) {
             table.integer('event_id').unsigned().notNullable();
             table.boolean('status').notNullable().defaultTo(false);
 
-            table.foreign('user_id').references('id').inTable('users');
-            table.foreign('event_id').references('id').inTable('event');
+            table.foreign('user_id').references('id').inTable('users').onDelete('cascade');
+            table.foreign('event_id').references('id').inTable('event').onDelete('cascade');
         })
     ]);
 };
