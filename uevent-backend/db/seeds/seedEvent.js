@@ -38,6 +38,5 @@
       {id: 32, organizer_id: 1,title:'BururiEvent',description:"Some description",location:"Ukraine",format:"festival",price:"150", seat:"20",event_datetime:"2023-04-26T13:00:00.00"},
       {id: 33, organizer_id: 1,title:'BururiEvent',description:"Some description",location:"Ukraine",format:"festival",price:"150", seat:"20",event_datetime:"2023-04-26T13:00:00.00"},
       {id: 34, organizer_id: 1,title:'BururiEvent',description:"Some description",location:"Ukraine",format:"festival",price:"150", seat:"20",event_datetime:"2023-04-26T13:00:00.00"},
-
     ]);
   };

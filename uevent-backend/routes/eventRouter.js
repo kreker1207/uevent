@@ -4,9 +4,10 @@ const controller = require('../controllers/eventController')
 const authMiddleware = require('../middleware/authMiddleware')
 
 
-router.get('/events/:curPage(\\d+)?', controller.getEvents);
+router.get('/events/:page(\\d+)?', controller.getEvents);
 router.get('/event/:id',controller.getEventById);
-//get events by user org id (which he created)
+router.get('/event/user/:userId/:page(\\d+)?',controller.getEventByUserId);
+router.get('/event/org/:orgId/:page(\\d+)?',controller.getEventByOrgId);
 //get bought
 
 router.post('/events/avatar/:id', controller.editAvatar);

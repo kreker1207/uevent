@@ -3,7 +3,7 @@ const router = new Router()
 const controller = require('../controllers/orgController')
 const authMiddleware = require('../middleware/authMiddleware')
 
-router.get('/org', controller.getOrgs);
+router.get('/org/:page(\\d+)?', controller.getOrgs);
 router.get('/org/:id',controller.getOrgById);
 router.get('/org/users/:userId',controller.getOrgsByUserId);
 

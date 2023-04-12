@@ -14,9 +14,7 @@ class EventController{
     async getEvents(req,res){
         try{
             const event = new Event(EVENT_TABLE);
-
-            const pawns = await event.getAll(req.params.curPage, 9);
-            //org name and id
+            const pawns = await event.getAll(req.params.page,9);
             res.json(pawns)
         } catch(e){
             e.addMessage = 'Get events';
@@ -26,7 +24,7 @@ class EventController{
     async getEventById(req,res){
         try{
             const event = new Event(EVENT_TABLE);
-            const result = await event.getById(req.params.id)
+            const result = await event.getById(req.params.id);
             res.json(result);
 
         } catch(e){
@@ -34,14 +32,35 @@ class EventController{
             errorReplier(e,res);
         }
     }
+
+    async getEventByUserId(req,res){
+        try{
+            const event = new Event(EVENT_TABLE);
+            const result = await event.getEventByUserId(req.params.userId,req.params.page,4);
+            res.json(result);
+        } catch(e){
+            e.addMessage= 'Get events by user id';
+            errorReplier(e,res);
+        }
+    }   
+    async getEventByOrgId(req,res){
+        try{
+            const event = new Event(EVENT_TABLE);
+            const result = await event.getEventByOrgId(req.params.orgId,req.params.page,4);
+            res.json(result);
+        } catch(e){
+            e.addMessage= 'Get events by user id';
+            errorReplier(e,res);
+        }
+    }   
+   
     async createEvent(req,res){
         try{
             const errors = validationResult(req)
             if(! errors.isEmpty()){
                 throw new CustomError(10);
             }
-            const {title, description, event_datetime, location} = req.body;
-            console.log(title + '\n' + description + '\n' + event_datetime + '\n' + location)
+            const {title, description, event_datetime, location,seat,price,tags} = req.body;
             const event = new Event(EVENT_TABLE);
             const organization = new Organization(ORGANIZATION_TABLE);
             const candidate = await organization.getById(req.params.orgId);
@@ -53,10 +72,12 @@ class EventController{
                 description,
                 event_datetime,
                 location:location,
+                seat:seat,
+                price:price,
+                tags:tags
+
             }
-            const [pawn] = await event.set(eventData);
-            // tags
-            //Add aoutocreation of seats
+            const pawn = await event.setEvent(eventData);
             console.log(pawn)
             return res.json(pawn)
 

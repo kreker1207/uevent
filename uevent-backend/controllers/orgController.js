@@ -15,11 +15,8 @@ class OrganizationController{
     async getOrgs(req,res){
         try{
             const organization = new Organization(ORGANIZATION_TABLE);
-            const pawns = await organization.getAll();
+            const pawns = await organization.getAll(req.params.page,8);
             res.json(pawns)
-            // number of events
-            // mail of admin
-            //pagination 8
         } catch(e){
             e.addMessage = 'Get organizations';
             errorReplier(e, res);
@@ -30,9 +27,6 @@ class OrganizationController{
             const user = new User(USER_TABLE);
             const pawns = await user.getAllOrganizationsByUserId(req.params.userId);
             res.json(pawns)
-            // number of events
-            // mail of admin
-            //pagination 8
         } catch(e){
             e.addMessage = 'Get organizations';
             errorReplier(e, res);
@@ -55,7 +49,7 @@ class OrganizationController{
             if(! errors.isEmpty()){
                 throw new CustomError(10);
             }
-            const { title, description, location} = req.body;
+            const { title, description, location,seat,price} = req.body;
             const organization = new Organization(ORGANIZATION_TABLE);
             const {refreshToken} = req.cookies;
             const userId = getJwtUserId(refreshToken);
@@ -64,10 +58,9 @@ class OrganizationController{
                 admin_id: userId,
                 title: title,
                 description: description,
-                location: location
+                location: location,
             }
             const [pawn] = await organization.set(organizationData);
-            //Add aoutocreation of seats
             console.log(pawn);
             return res.json({organizationData});
 
@@ -134,7 +127,6 @@ class OrganizationController{
             errorReplier(e, res);
         }
     }
-
     async deleteOrg(req,res){
         try{
             const organization = new Organization(ORGANIZATION_TABLE);

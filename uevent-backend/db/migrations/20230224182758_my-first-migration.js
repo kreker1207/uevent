@@ -32,7 +32,7 @@ exports.up = function(knex) {
             table.string('title', 40).notNullable();
             table.text('description').notNullable();
             table.integer('seat').notNullable();
-            table.string('price', 20).defaultTo(null);
+            table.string('price', 20).notNullable();
             table.string('event_datetime', 32).notNullable();
             table.enu('format', ['concert', 'meet_up', 'festival', 'show', 'custom'],
                 { useNative: true, enumName: 'format' }).defaultTo('custom');
@@ -44,7 +44,7 @@ exports.up = function(knex) {
 
         knex.schema.createTable('theme', (table) => {
             table.increments('id').primary();
-            table.string('name', 30).notNullable();
+            table.string('name', 30).notNullable().unique();
         }),
 
         knex.schema.createTable('event_theme', (table) => {
