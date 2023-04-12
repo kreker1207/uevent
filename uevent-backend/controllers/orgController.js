@@ -6,6 +6,8 @@ const   USER_TABLE = 'users',
         {secret_refresh} = require('../config'),      
         {validationResult} = require('express-validator'),
         {CustomError, errorReplier} = require('../models/error'),
+        { v4: uuidv4 } = require('uuid'),
+        Fs = require('fs'),
         Organization = require('../models/organization');
 
 class OrganizationController{

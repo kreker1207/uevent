@@ -6,6 +6,8 @@ const   EVENT_TABLE = 'event',
         {secret_refresh} = require('../config'),
         {validationResult} = require('express-validator'),
         Organization = require('../models/organization'),
+        { v4: uuidv4 } = require('uuid'),
+        Fs = require('fs'),
         Event = require('../models/event');
 
 class EventController{
@@ -56,7 +58,7 @@ class EventController{
             // tags
             //Add aoutocreation of seats
             console.log(pawn)
-            return res.json({eventData})
+            return res.json(pawn)
 
         }catch(e){
             e.addMessage = 'Create event';

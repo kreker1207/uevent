@@ -65,7 +65,7 @@ app.get('/profile_pics/:filename', (req, res) => {
 app.listen(PORT, () => console.log(`Server up at http://localhost:${PORT}`))
 
 //start purchase checker
-purCheck();
+// purCheck();
 
 //price
 //9 elements pagination

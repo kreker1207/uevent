@@ -69,7 +69,7 @@ export default function UserPage() {
             <div className="user-settings">
               <div className="buttons">
                 <button className='active'>User</button>
-                <button onClick={()=>setUserSettings('companies')}>Companies</button>
+                <button className='unactive' onClick={()=>setUserSettings('companies')}>Companies</button>
               </div>
               <h2>My tickets</h2>
               <h2>Notification subscriptions</h2>
@@ -77,7 +77,7 @@ export default function UserPage() {
             :
             <div className="companies-settings">
               <div className="buttons">
-                <button onClick={()=>setUserSettings('user')}>User</button>
+                <button className='unactive' onClick={()=>setUserSettings('user')}>User</button>
                 <button className='active'>Companies</button>
               </div>
               <h2>My companies</h2>
@@ -139,11 +139,13 @@ const Container = styled.div`
           background: rgb(32, 32, 32);
           border: 1px solid #fff;
           color: #fff;
-          border-left: none;
           cursor: pointer;
           &.active {
             background: #FFD100;
             border-right: none;
+          }
+          &.unactive {
+            border-left: none;
           }
         }
       }
@@ -158,11 +160,13 @@ const Container = styled.div`
           background: rgb(32, 32, 32);
           border: 1px solid #fff;
           color: #fff;
-          border-right: none;
           cursor: pointer;
           &.active {
             background: #FFD100;
             border-left: none;
+          }
+          &.unactive {
+            border-right: none;
           }
         }
       }

@@ -310,8 +310,8 @@ const Container = styled.div`
       justify-content: space-between;
       margin-bottom: 60px;
       .event {
-        width: 100%;
-        height: fit-content;
+        grid-column: span 1; /* элементы занимают 1 колонку */
+        grid-row: span 1; /* элементы занимают 1 строку */
         background-color: #ffffff;
         border: 1px solid #000000;
         background: #333533;
@@ -326,6 +326,7 @@ const Container = styled.div`
           width: 100%;
           margin-bottom: 25px;
         }
+
         div {
           width: 100%;
           &.time-location {

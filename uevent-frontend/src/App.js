@@ -45,12 +45,12 @@ export default function App() {
             <Route element = {<ProtectedRoute/>}>
               <Route path='/user-profile' element={<UserPage/>}/>
             </Route>
-            {/* <Route element = {<ProtectedRoute/>}> */}
+            <Route element = {<ProtectedRoute/>}>
               <Route path='/create-event' element={<CreateEvent/>}/>
-            {/* </Route> */}
-            {/* <Route element = {<ProtectedRoute/>}> */}
+            </Route>
+            <Route element = {<ProtectedRoute/>}>
             <Route path='/create-company' element={<CreateCompany/>}/>
-            {/* </Route> */}
+            </Route>
           </Routes>
     </BrowserRouter>
   )

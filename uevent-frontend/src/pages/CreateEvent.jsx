@@ -7,6 +7,7 @@ import { IconContext } from 'react-icons';
 import { NavLink } from 'react-router-dom';
 import api from '../utils/apiSetting';
 import { useSelector } from 'react-redux';
+import axios from 'axios';
 
 function CreateEvent() {
     const { userInfo } = useSelector((state) => state.auth)
@@ -28,7 +29,7 @@ function CreateEvent() {
     const [format, setFormat] = useState('')
     const [seats, setSeats] = useState(0)
     const [eve_pic, setFile] = useState(null)
-    const [companyId, setCompanyId] = useState(null)
+    const [companyId, setCompanyId] = useState(0)
 
     useEffect(() => {
         if(Object.keys(userInfo) !== 0 && userInfo.id) {
@@ -38,6 +39,7 @@ function CreateEvent() {
                     data: response.data,
                     isLoading: false
                 })
+                setCompanyId(response.data[0].id)
             })
             .catch(error => {
                 console.warn(error.message)
@@ -79,7 +81,7 @@ function CreateEvent() {
     };
 
     const handlePublish = () => {
-        const data = {
+        const dataE = {
             title,
             description,
             "event_datetime": eventDate + ' ' + eventTime,
@@ -92,14 +94,27 @@ function CreateEvent() {
             companyId,
             tags
         }
-        console.log(data)
-        // api.post(`/org/${companyId}/events`, data)
-        // .then(function(response) {
-        //   console.log(response.data)
-        // })
-        // .catch(function(error) {
-        //   console.log(error.message)
-        // })
+        console.log(dataE)
+
+
+        let formData = new FormData()
+        formData.append('avatar', eve_pic)
+
+        api.post(`/org/${companyId}/events`, dataE)
+        .then(function(response) {
+            console.log(response.data)
+            axios({
+                method: "post",
+                url: `http://localhost:8080/api/events/avatar/${response.data.id}`,
+                data: formData,
+                headers: {'Access-Control-Allow-Origin': '*', "Content-Type": "multipart/form-data" },
+                credentials: 'include',   
+                withCredentials: true
+            })
+        })
+        .catch(function(error) {
+          console.log(error.response.data.message)
+        })
     }
 
     function handleKeyPress(event) {
@@ -297,6 +312,7 @@ const MapContainer = styled.div`
             background: #FFD100;
             border: none;
             color: #fff;
+            cursor: pointer;
         }
     }
     
