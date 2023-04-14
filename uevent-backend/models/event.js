@@ -18,15 +18,18 @@ module.exports = class Event extends Entity {
         .orderBy('event.event_datetime', 'asc').paginate({ isLengthAware: true, perPage: limit, currentPage: page });
 
     }
-    async getById(id){
-      if(id){
+    async getById(id) {
+      if (id) {
         const knexInstance = knex(knexfile);
-        return await super.table().select('event.*', knexInstance.raw('json_agg(theme.name) AS tags'))
-        .where({'event.id':id})
-        .leftJoin('event_theme', 'event.id', 'event_theme.event_id')
-        .leftJoin('theme', 'event_theme.theme_id', 'theme.id')
-        .groupBy('event.id')
-        .orderBy('event.event_datetime', 'asc');
+        return await super
+          .table()
+          .select('event.*', 'organization.title AS org_name ', knexInstance.raw('json_agg(theme.name) AS tags'))
+          .where({'event.id':id})
+          .leftJoin('event_theme', 'event.id', 'event_theme.event_id')
+          .leftJoin('theme', 'event_theme.theme_id', 'theme.id')
+          .leftJoin('organization', 'event.organizer_id', '=', 'organization.id')
+          .groupBy('event.id', 'organization.title')
+          .orderBy('event.event_datetime', 'asc').first();
       }
     }
 
@@ -56,7 +59,8 @@ module.exports = class Event extends Entity {
           .where('organizer_id', '=', orgId).paginate({ isLengthAware: true, perPage: limit, currentPage: page });
       }
       else return result[0];
-  }
+    }
+
   async getEventWithFilter(filters, page = null, limit = 20) {
     if (page === null || page === undefined) {
       page = 0;
@@ -101,7 +105,7 @@ module.exports = class Event extends Entity {
             for (const tagName of eventData.tags) {
               const [tag] = await trx('theme').where('name', tagName)
               if (tag) {
-                tagIds.push(tag.id)
+                tagIds.push({id: tag.id})
               } else {
                 const [newTag] = await trx('theme').insert({ name: tagName }).returning('id')
                 tagIds.push(newTag)
@@ -123,12 +127,13 @@ module.exports = class Event extends Entity {
           
 
             for (const tagId of tagIds) {
-                console.log(tagId,newEvent)
+                console.log(tagId, newEvent)
               await trx('event_theme').insert({
                 event_id: newEvent.id,
                 theme_id: tagId.id
               })
             }
+            return newEvent
           })
           return newEvent
         }

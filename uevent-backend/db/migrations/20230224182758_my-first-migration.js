@@ -19,7 +19,7 @@ exports.up = function(knex) {
             table.integer('admin_id').unsigned().notNullable();
             table.string('title', 60).notNullable();
             table.text('description').notNullable();
-            table.string('location', 60).defaultTo(null);
+            table.string('location', 256).defaultTo(null);
             table.string('phone_number', 20).defaultTo(null);
             table.string('org_pic', 128).defaultTo('none.png');
             

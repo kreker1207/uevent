@@ -46,7 +46,7 @@ class EventController{
     async getEventByOrgId(req,res){
         try{
             const event = new Event(EVENT_TABLE);
-            const result = await event.getEventByOrgId(req.params.orgId,req.params.page,4);
+            const result = await event.getEventByOrgId(req.params.orgId,req.params.page, 9);
             res.json(result);
         } catch(e){
             e.addMessage= 'Get events by user id';
@@ -72,13 +72,13 @@ class EventController{
                 description,
                 event_datetime,
                 location:location,
-                seat:seats,
+                seat: seats,
                 price:price,
                 tags:tags,
                 format
             }
+            // console.log(eventData)
             const pawn = await event.setEvent(eventData);
-            console.log(pawn)
             return res.json(pawn)
 
         }catch(e){
@@ -97,7 +97,7 @@ class EventController{
             }
 
             const event = new Event(EVENT_TABLE);
-            const eve = await event.getById(req.params.id);
+            const eve = await event.table().select('*').where({id: req.params.id}).first();
             
             const avatar_name = eve.title + '_' + uuidv4() + '.png';
             const avatar_path = './public/event_pics/';

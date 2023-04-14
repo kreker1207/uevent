@@ -88,7 +88,7 @@ class CommentController{
             if(! errors.isEmpty()){
                 throw new CustomError(10);
             }
-            const { content,comment_id } = req.body;
+            const { content, comment_id, receiver_name } = req.body;
             if(!comment_id)throw new CustomError(1010);
             const comment = new Comment(COMMENT_TABLE);
             const eventTable = new Event(EVENT_TABLE);
@@ -103,7 +103,8 @@ class CommentController{
                     author_organization_id:event.organizer_id,
                     event_id: req.params.eventId,
                     comment_id: comment_id,
-                    main_comment_id:req.params.mainComId
+                    main_comment_id:req.params.mainComId,
+                    receiver_name
                 }
                 const [pawn] = await comment.set(commenttData);
                 console.log(pawn)
@@ -115,7 +116,8 @@ class CommentController{
                     content: content,
                     event_id: req.params.eventId,
                     comment_id: comment_id,
-                    main_comment_id:req.params.mainComId
+                    main_comment_id:req.params.mainComId,
+                    receiver_name
                 }
                 const [pawn] = await comment.set(commentData);
                 console.log(pawn)

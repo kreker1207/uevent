@@ -87,13 +87,7 @@ export default function MainPage() {
             </select>
           </div>
           <div>
-            <select name="formats" id="formats">
-              <option value="concert">Concert</option>
-              <option value="meet_up">Meet Up</option>
-              <option value="fetival">Festival</option>
-              <option value="show">Show</option>
-              <option value="custom">Custom</option>
-            </select>
+            <input type="date" name="" id="" />
           </div>
         </div>
         <button onClick={handleCreateEvent}>+ New Event</button>
@@ -275,8 +269,16 @@ const Container = styled.div`
           border: 1px solid #fff;
           background: transparent;
           display: inline-block;
-          padding: 0px 5px;
+          padding: 0px 10px;
           margin-left: 10px;
+          input {
+            width: 150px;
+            height: 45px;
+            background: rgb(32, 32, 32);
+            border: none;
+            color: #fff;
+            outline: none;
+          }
           select {
             width: 150px;
             height: 45px;
@@ -308,10 +310,9 @@ const Container = styled.div`
       grid-template-columns: repeat(3, 1fr);
       grid-gap: 10px;
       justify-content: space-between;
+      align-items: center;
       margin-bottom: 60px;
       .event {
-        grid-column: span 1; /* элементы занимают 1 колонку */
-        grid-row: span 1; /* элементы занимают 1 строку */
         background-color: #ffffff;
         border: 1px solid #000000;
         background: #333533;
@@ -321,6 +322,7 @@ const Container = styled.div`
         justify-content: space-between;
         flex-direction: column;
         align-items: flex-start;
+        height: fit-content;
         img {
           display: block;
           width: 100%;

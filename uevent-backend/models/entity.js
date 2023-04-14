@@ -33,6 +33,9 @@ module.exports = class Entity {
       }
 
     async set(setObj) {
+        console.log('-----------------------------')
+        console.log(setObj)
+        console.log('-----------------------------')
         if (setObj.id) {
             return await this.table().returning('*').where({id: setObj.id}).update(setObj)
             .catch((error)=>{console.error(`Error inserting into ${this.tableName}:`, error); throw error});

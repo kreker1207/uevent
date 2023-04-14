@@ -12,6 +12,7 @@ export default function EventPage() {
 
   const [event, setEvent] = useState({data: [], isLoading: true})
   const [comments, setComments] = useState({data: [], isLoading: true})
+  const [commentsChanged, setCommentsChanged] = useState(0)
 
 
 
@@ -20,6 +21,8 @@ export default function EventPage() {
   const [receiverCommentId, setReceiverCommentId] = useState(-1)
   const [description, setDescription] = useState('')
   const [buyData, setBuyData] = useState({data: '', signature: '', isLoading: true});
+
+  
 
 
   useEffect(() => {
@@ -84,6 +87,53 @@ export default function EventPage() {
       });
   }, [id]);
 
+  useEffect(() => {
+    // Make API request to get the comments
+    api.get(`/comments/event/${id}`)
+      .then(response => {
+        const commentsData = response.data;
+
+        // Create an array of promises to get the additional fields for each comment object and its nestedArray
+        const commentPromises = commentsData.map(comment => {
+          const authorPromise = api.get(`/users/${comment.author_id}`);
+          const nestedArrayPromises = comment.replies.map(nested => api.get(`/users/${nested.author_id}`));
+
+          return Promise.all([authorPromise, ...nestedArrayPromises]).then(responses => {
+            const [authorResponse, ...nestedResponses] = responses;
+            const authorData = authorResponse.data;
+            const nestedData = nestedResponses.map(response => response.data);
+
+            // Return the updated comment object with the additional fields
+            return {
+              ...comment,
+              login: authorData.login,
+              profile_pic: authorData.profile_pic,
+              replies: comment.replies.map((nested, index) => ({
+                ...nested,
+                login: nestedData[index].login,
+                profile_pic: nestedData[index].profile_pic,
+              })),
+            };
+          });
+        });
+
+        // Wait for all the commentPromises to resolve and update the state with the updated comments
+        Promise.all(commentPromises)
+          .then(updatedComments => {
+            setComments({
+              data: updatedComments,
+              isLoading: false
+            });
+          })
+          .catch(error => {
+            console.error(error);
+          });
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }, [commentsChanged]);
+
 
   const handleCommentFocus = (receiverName, receiverMaintId, receiverCommentId) => {
     if (inputRef.current) {
@@ -102,23 +152,26 @@ export default function EventPage() {
   const handleCommentSend = () => {
     if(receiverName!=='' && receiverCommentId !== -1) {
       console.log(receiverCommentId)
-      api.post(`/comments/event/${event.data.id}/reply/${receiverMaintId}`, {content: description, comment_id: receiverCommentId})
+      api.post(`/comments/event/${event.data.id}/reply/${receiverMaintId}`, {content: description, comment_id: receiverCommentId, receiver_name: receiverName})
         .then(function(response) {
             console.log(response.data)
+            setCommentsChanged(commentsChanged + 1)
           })
           .catch(function(error) {
             console.log(error.message)
           })
     } else {
-      api.post(`/comments/event/${event.data.id}`, {content: description})
+      api.post(`/comments/event/${event.data.id}`, {content: description, receiver_name: receiverName})
         .then(function(response) {
           console.log(response.data)
           console.log(event)
+          setCommentsChanged(commentsChanged + 1)
         })
         .catch(function(error) {
           console.log(error.message)
         })
     }
+
   }
 
   useEffect(() => {
@@ -178,7 +231,7 @@ export default function EventPage() {
             </IconContext.Provider>
             <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
               <p>
-                <FaUser/>{event.data.organization}
+                <FaUser/>{event.data.org_name}
               </p>
             </IconContext.Provider>
             <div className="info">

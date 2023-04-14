@@ -102,7 +102,7 @@ class authController{
             const refreshToken = generateRefreshToken(pawn,"1d")
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
-                maxAge: 5184000,
+                maxAge: 86400000,
                 credentials: "include"
             });
             res.status(200).json({...pawn, accessToken, password: ''});

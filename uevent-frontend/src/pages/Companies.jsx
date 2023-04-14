@@ -3,13 +3,15 @@ import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/apiSetting'
 import Pagination from 'react-js-pagination';
+import { FaCalendar, FaEnvelope } from 'react-icons/fa';
+import { IconContext } from 'react-icons';
 
 export default function Companies() {
   const navigate = useNavigate()
   const [companies, setCompanies] = useState({data: [], pagination: {}, isLoading: true})
 
   useEffect(() => {
-    api.get(`/org`)
+    api.get(`/orgs`)
     .then(function(response) {
       console.log(response.data)
       setCompanies({
@@ -31,7 +33,7 @@ export default function Companies() {
   }
 
   const handlePageChange = (page) => {
-    api.get(`/companies/${page}`)
+    api.get(`/orgs/${page}`)
     .then(function(response) {
       console.log(response.data)
       setCompanies({
@@ -61,16 +63,26 @@ export default function Companies() {
           companies.data.map((item, index) => {
             return (
               <div className="company" key={index}>
-                <div className="compnay-img">
-                  <img src={`http://localhost:8080/organization_pics/${item.org_pic}`} alt="logo" />
+                <div className="img-block">
+                  <div className="compnay-img">
+                    <img src={`http://localhost:8080/organization_pics/${item.org_pic}`} alt="logo" />
+                  </div>
                 </div>
                 <div className='company-content'>
                   <h2>{item.title}</h2>
-                  <p className='description'>{item.description}</p>
+                  <div className='description'>{item.description}</div>
                   <div className='additionals'>
                     <div>
-                      <p>Events number: {item.evNumbers}</p>
-                      <p>{item.location}</p>
+                      <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
+                        <div>
+                          <FaCalendar/> Events number: {item.num_events}
+                        </div>
+                      </IconContext.Provider>
+                      <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
+                        <div className='location'>
+                          <FaEnvelope /> {item.email}
+                        </div>
+                      </IconContext.Provider>
                     </div>
                     <button onClick={() => handleCompanyClick(item.id)}>See More</button>
                   </div>
@@ -96,9 +108,11 @@ const Container = styled.div`
   max-width: 1480px;
   margin: 0 auto;
   padding: 0px 20px;
+
   .pagination {
-    width: fit-content;
+    max-width: fit-content;
     margin: 0 auto;
+    padding: 0px 20px;
     li {
       display: inline-block;
       width: 30px;
@@ -125,6 +139,7 @@ const Container = styled.div`
       }
     }
   }
+
   .create-company {
     display: flex;
     justify-content: space-between;
@@ -143,35 +158,49 @@ const Container = styled.div`
       cursor: pointer;
     }
   }
+
   .companies-list {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: auto;
     grid-gap: 10px;
     margin-bottom: 60px;
+
     .company {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      width: 100%;
-      height: fit-content;
-      padding: 25px;
-      background-color: #333533;
+      align-items: stretch;
+      background: #333533;
       gap: 20px;
-      .compnay-img {
-        width: 130px;
-        height: 130px;
-        border-radius: 50%;
-        overflow: hidden;
-        img {
-          height: 100%;
-          object-fit: cover;
+      padding: 25px;
+
+      .img-block {
+        width: 20%;
+        .compnay-img {
+          width: 100%;
+          height: 0;
+          padding-bottom: 100%;
+          border-radius: 65%;
+          overflow: hidden;
+          position: relative;
+
+          img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: left top;
+          }
         }
       }
       .company-content {
-        flex-grow: 1;
-        height: fit-content;
+        width: 80%;
+        display: flex;
+        flex-direction: column;
         .description {
-          margin: 0;
+          margin: 20px 0;
           -ms-text-overflow: ellipsis;
           -o-text-overflow: ellipsis;
           text-overflow: ellipsis;
@@ -184,26 +213,81 @@ const Container = styled.div`
           word-wrap: break-word;
           -webkit-box-orient: vertical;
           box-orient: vertical;
-
-          color: #A6A6A6;
-          margin-bottom: 10px;
         }
         .additionals {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          margin-top: auto;
+          flex-wrap: wrap;
+          gap: 10px;
+
           button {
-            width: 152.21px;
+            width: 150px;
             height: 40px;
-            background-color: #FFD100;
-
-            color: #fff;
-            font-weight: 700;
-            font-size: 16px;
-
+            background: #FFD100;
             border: none;
-            cursor: pointer;
+            color: #fff;
           }
+        }
+      }
+    }
+  }
+      /* Телефоны в портретной ориентации */
+  @media only screen and (max-width: 320px) {
+    .companies-list {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      .company {
+        .img-block { 
+          width: 40%;
+        }
+        .company-content {
+          width: 60%;
+        }
+      }
+    }
+  }
+
+  /* Телефоны в альбомной ориентации */
+  @media only screen and (min-width: 321px) and (max-width: 568px) {
+    .companies-list {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      .company {
+        .img-block { 
+          width: 40%;
+        }
+        .company-content {
+          width: 60%;
+        }
+      }
+    }
+  }
+
+  /* Планшеты в портретной ориентации */
+  @media only screen and (min-width: 569px) and (max-width: 768px) {
+    .companies-list {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      .company {
+        .img-block { 
+          width: 25%;
+        }
+        .company-content {
+          width: 75%;
+        }
+      }
+    }
+  }
+
+  /* Планшеты в альбомной ориентации */
+  @media only screen and (min-width: 769px) and (max-width: 1024px) {
+    .companies-list {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      .company {
+        .img-block { 
+          width: 15%;
+        }
+        .company-content {
+          width: 85%;
         }
       }
     }

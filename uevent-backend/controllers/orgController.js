@@ -33,9 +33,13 @@ class OrganizationController{
             }
     }
     async getOrgById(req,res){
+        console.log('--------------------------')
         try{
             const organization = new Organization(ORGANIZATION_TABLE);
             const result = await organization.getById(req.params.id);
+            console.log('--------------------------')
+            console.log(result)
+            console.log('--------------------------')
             res.json(result);
 
         } catch(e){
@@ -49,7 +53,7 @@ class OrganizationController{
             if(! errors.isEmpty()){
                 throw new CustomError(10);
             }
-            const { title, description, location,seat,price} = req.body;
+            const { title, description, location, phone_number} = req.body;
             const organization = new Organization(ORGANIZATION_TABLE);
             const {refreshToken} = req.cookies;
             const userId = getJwtUserId(refreshToken);
@@ -59,6 +63,7 @@ class OrganizationController{
                 title: title,
                 description: description,
                 location: location,
+                phone_number
             }
             const [ pawn ] = await organization.set(organizationData);
             console.log(pawn);
