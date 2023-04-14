@@ -2,12 +2,14 @@ const { errorReplier, CustomError } = require('../models/error');
 
 const   EVENT_TABLE = 'event',
         ORGANIZATION_TABLE = 'organization',
+        THEME_TABLE = 'theme',
         jwt = require('jsonwebtoken'),
         {secret_refresh} = require('../config'),
         {validationResult} = require('express-validator'),
         Organization = require('../models/organization'),
         { v4: uuidv4 } = require('uuid'),
         Fs = require('fs'),
+        Tag = require('../models/tag'),
         Event = require('../models/event');
 
 class EventController{
@@ -29,6 +31,18 @@ class EventController{
 
         } catch(e){
             e.addMessage= 'Get event by id';
+            errorReplier(e,res);
+        }
+    }
+    async getTags(req,res){
+        try{
+            const tags = new Tag(THEME_TABLE);
+            const result = await tags.getAllSorted();
+            res.json(result);
+
+        }
+        catch(e){
+            e.addMessage= 'Get sorted tags';
             errorReplier(e,res);
         }
     }
