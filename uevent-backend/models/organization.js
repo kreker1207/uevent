@@ -16,4 +16,23 @@ module.exports = class Organization extends Entity {
         .groupBy('organization.id','users.email').paginate({ isLengthAware: true, perPage: limit, currentPage: page });
 
     }
+    async getSearchAll(page, limit, { filter } = {}) {
+        if (page === null || page === undefined) {
+          page = 0;
+        }
+        const knexInstance = knex(knexfile);
+        let query = super.table()
+          .leftJoin('event', 'organization.id', 'event.organizer_id')
+          .join('users', 'organization.admin_id', 'users.id')
+          .select('organization.*', 'users.email', knexInstance.raw('COUNT(event.id) as num_events'))
+          .groupBy('organization.id', 'users.email')
+          .orderBy('organization.title', 'asc');
+        if (filter) {
+          query = query.andWhere((builder) => {
+            builder.where('organization.title', 'ilike', `${filter}%`);
+          });
+        }
+        const orgs = await query.paginate({ isLengthAware: true, perPage: limit, currentPage: page });
+        return orgs;
+      }
 }

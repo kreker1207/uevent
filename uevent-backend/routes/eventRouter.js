@@ -8,6 +8,7 @@ router.get('/events/:page(\\d+)?', controller.getEvents);
 router.get('/event/:id',controller.getEventById);
 router.get('/event/user/:userId/:page(\\d+)?',controller.getEventByUserId);
 router.get('/event/org/:orgId/:page(\\d+)?',controller.getEventByOrgId);
+router.get('/tags',controller.getTags);
 //get bought
 
 router.post('/events/avatar/:id', controller.editAvatar);
