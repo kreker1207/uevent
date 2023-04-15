@@ -235,6 +235,19 @@ const Container = styled.div`
   }
       /* Телефоны в портретной ориентации */
   @media only screen and (max-width: 320px) {
+    h1 {
+      font-size: 18px;
+    }
+    * {
+      font-size: 11px;
+    }
+    .create-company {
+      button {
+        font-size: 11px;
+        width: fit-content;
+        padding: 0px 10px;
+      }
+    }
     .companies-list {
       grid-template-columns: repeat(1, minmax(0, 1fr));
       .company {
@@ -250,6 +263,12 @@ const Container = styled.div`
 
   /* Телефоны в альбомной ориентации */
   @media only screen and (min-width: 321px) and (max-width: 568px) {
+    h1 {
+      font-size: 18px;
+    }
+    * {
+      font-size: 11px;
+    }
     .companies-list {
       grid-template-columns: repeat(1, minmax(0, 1fr));
       .company {

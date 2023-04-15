@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components'
 
 import { IconContext } from 'react-icons';
-import { FaClock, FaMapMarkerAlt, FaReply, FaUser } from "react-icons/fa";
+import { FaClock, FaHashtag, FaMapMarkerAlt, FaReply, FaUser } from "react-icons/fa";
 import api from '../utils/apiSetting';
 
 export default function EventPage() {
@@ -20,6 +20,7 @@ export default function EventPage() {
   const [receiverMaintId, setMainCommentId] = useState(-1)
   const [receiverCommentId, setReceiverCommentId] = useState(-1)
   const [description, setDescription] = useState('')
+  const [promo, setPromo] = useState('')
   const [buyData, setBuyData] = useState({data: '', signature: '', isLoading: true});
 
   
@@ -132,7 +133,7 @@ export default function EventPage() {
       .catch(error => {
         console.error(error);
       });
-  }, [commentsChanged]);
+  }, [id, commentsChanged]);
 
 
   const handleCommentFocus = (receiverName, receiverMaintId, receiverCommentId) => {
@@ -184,7 +185,7 @@ export default function EventPage() {
   const buyClick = (e)=> {
     try {
       e.preventDefault()
-      api.post('/buy', {event_id: event.data.id})
+      api.post('/buy', {event_id: event.data.id, promo})
         .then(response => {
           console.log(response.data)
           setBuyData({
@@ -245,6 +246,11 @@ export default function EventPage() {
                 <button onClick={buyClick}>Buy</button>
               </form>
               <div className="price">430$</div>
+              <IconContext.Provider value={{ style: { verticalAlign: 'middle'} }}>
+                <div className="promo">
+                  <FaHashtag/> <input type="text" value={promo} placeholder='Enter promocode here' onChange={(e) => setPromo(e.target.value)}/>
+                </div>
+              </IconContext.Provider>
             </div> 
           </div>
         </div>
@@ -255,63 +261,68 @@ export default function EventPage() {
         :
         <div className="comments-block">
           <h2>Comments</h2>
-          <div className="comments-inner">
-            {
-              comments.data.map((item, index) => {
-                return (
-                  <div key={index} className="comment">
-                    <div className="userinfo">
-                        <div className="photo">
-                          <div><img src={`http://localhost:8080/profile_pics/${item.profile_pic}`} alt="userlogo" /></div>
-                          <div className="name">
-                            <h4>{item.login}</h4>
-                            <p>{item.created_at}</p>
-                          </div>
-                        </div>
-                        <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px", cursor: "pointer" } }}>
-                          <div className="arrow">
-                            <FaReply onClick={() => handleCommentFocus(item.login, item.id, item.id)}/>
-                          </div>
-                        </IconContext.Provider>
-                    </div>
-                    <div className="comment-text">
-                      {item.content}
-                    </div>
-                    <div className="replies">
-                      {
-                        item.replies.map((itemInner, index) => {
-                          return (
-                            <div style={{marginBottom: "25px"}} key={index} className="comment">
-                              <div className="userinfo">
-                                  <div className="photo">
-                                    <div><img src = {`http://localhost:8080/profile_pics/${itemInner.profile_pic}`} alt="" /></div>
-                                    <div className="name">
-                                      <h4>{itemInner.login} <i style={{color: "#868686", fontSize: "12px"}}>replied to {itemInner.receiver_name}</i></h4>
-                                      <p>{itemInner.created_at}</p>
-                                    </div>
-                                  </div>
-                                  <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px", cursor: "pointer" } }}>
-                                    <div className="arrow">
-                                      <FaReply onClick={() => handleCommentFocus(itemInner.login, item.id, itemInner.id)}/>
-                                    </div>
-                                  </IconContext.Provider>
-                              </div>
-                              <div className="comment-text">
-                                {itemInner.content}
-                              </div>
+          {
+            comments.data.length === 0 ? 
+            <div className="loading">No comments yet</div>
+            :
+            <div className="comments-inner">
+              {
+                comments.data.map((item, index) => {
+                  return (
+                    <div key={index} className="comment">
+                      <div className="userinfo">
+                          <div className="photo">
+                            <div><img src={`http://localhost:8080/profile_pics/${item.profile_pic}`} alt="userlogo" /></div>
+                            <div className="name">
+                              <h4>{item.login}</h4>
+                              <p>{item.created_at}</p>
                             </div>
-                          )
-                        })
-                      }
+                          </div>
+                          <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px", cursor: "pointer" } }}>
+                            <div className="arrow">
+                              <FaReply onClick={() => handleCommentFocus(item.login, item.id, item.id)}/>
+                            </div>
+                          </IconContext.Provider>
+                      </div>
+                      <div className="comment-text">
+                        {item.content}
+                      </div>
+                      <div className="replies">
+                        {
+                          item.replies.map((itemInner, index) => {
+                            return (
+                              <div style={{marginBottom: "25px"}} key={index} className="comment">
+                                <div className="userinfo">
+                                    <div className="photo">
+                                      <div><img src = {`http://localhost:8080/profile_pics/${itemInner.profile_pic}`} alt="" /></div>
+                                      <div className="name">
+                                        <h4>{itemInner.login} <i style={{color: "#868686", fontSize: "12px"}}>replied to {itemInner.receiver_name}</i></h4>
+                                        <p>{itemInner.created_at}</p>
+                                      </div>
+                                    </div>
+                                    <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px", cursor: "pointer" } }}>
+                                      <div className="arrow">
+                                        <FaReply onClick={() => handleCommentFocus(itemInner.login, item.id, itemInner.id)}/>
+                                      </div>
+                                    </IconContext.Provider>
+                                </div>
+                                <div className="comment-text">
+                                  {itemInner.content}
+                                </div>
+                              </div>
+                            )
+                          })
+                        }
+                      </div>
                     </div>
-                  </div>
-                )
-              })
-            }
-          </div>
+                  )
+                })
+              }
+            </div>
+          }
           <div className="textarea">
              <textarea value={description} id="textarea" ref={inputRef} placeholder="Type comment here..." onChange={(e)=>setDescription(e.target.value)}></textarea>
-            <button onClick={handleCommentSend} type="submit">Send</button>
+             <button onClick={handleCommentSend} type="submit">Send</button>
           </div>
         </div>
       }
@@ -379,6 +390,17 @@ const Container = styled.div`
             background: #FFD100;
             border: none;
             color: #fff;
+          }
+          .promo {
+            border: 1px solid #fff;
+            padding: 5px;
+            margin-left: auto;
+            input {
+              outline: none;
+              border: none;
+              color: #fff;
+              background: rgb(32,32,32);
+            }
           }
         }
       }
@@ -465,11 +487,12 @@ const Container = styled.div`
 
       .textarea {
         position: relative;
+        margin-top: auto;
         width: 100%;
-        height: 100%;
+        height: fit-content;
         textarea {
           width: 100%;
-          height: 100%;
+          height: 120px;
           padding: 10px;
           border: none;
           resize: none; /* отключаем возможность изменения размеров */
@@ -479,7 +502,7 @@ const Container = styled.div`
           position: absolute;
           right: 0;
           top: 0;
-          height: 100%;
+          height: 120px;
           width: 100px;
 
           background: #FFD100;
@@ -496,7 +519,7 @@ const Container = styled.div`
     .map{
       position: relative;
       width: 100%;
-      height: 75%;
+      height: 400px;
       iframe {
         position: absolute;
         border: none;
@@ -507,44 +530,3 @@ const Container = styled.div`
       }
     }
 `
-
-
-
-    // comments.map((item) => {
-    //     api.get(`/users/${item.author_id}`)
-    //     .then(function (response) {
-
-    //       console.log(response.data)
-    //       const newItem = {
-    //         type: 'outside',
-    //         login: response.data.login,
-    //         profile_pic: response.data.prifole_pic
-    //       }
-    //       item.username = response.data.login
-    //       item.
-
-    //       item.commentsInside.map((itemInside) => {
-    //         api.get(`/comments/${itemInside.comment_id}`)
-    //           .then(function (response) {
-    //             api.get(`/users/${response.data.author_id}`)
-    //               .then(function (response) {
-    //                 console.log(response.data)
-    //                 const newItem = {
-    //                   type: 'inside',
-    //                   login: response.data.login,
-    //                   profile_pic: response.data.prifole_pic
-    //                 }
-    //               })
-    //               .catch(function(error) {
-    //                 console.log(error.message)
-    //               })
-    //           })
-    //           .catch(function(error) {
-    //             console.log(error.message)
-    //           })
-    //       })
-    //     })
-    //     .catch(function(error) {
-    //       console.log(error.message)
-    //     })
-    // })

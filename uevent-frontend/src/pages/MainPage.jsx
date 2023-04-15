@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useReducer } from 'react'
 import { useState } from 'react';
 import styled from 'styled-components';
 import api from '../utils/apiSetting';
@@ -6,12 +6,47 @@ import { useNavigate } from 'react-router-dom';
 import  Pagination from 'react-js-pagination'
 
 import { IconContext } from 'react-icons';
-import { FaClock, FaMapMarkerAlt } from "react-icons/fa";
+import { FaClock, FaHashtag, FaMapMarkerAlt } from "react-icons/fa";
 
 
 export default function MainPage() {
   const navigate = useNavigate()
   const [events, setEvents] = useState({loading: true})
+  const [tags, setTags] = useState([]);
+  const [format, setFormat] = useState('');
+  const [date, setDate] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+
+  /*-----------------------------THEMES-----------------------------*/
+  const handleOptionChange = (event) => {
+    const optionValue = event.target.getAttribute('value');
+    const isSelected = tags.includes(optionValue);
+    if (isSelected) {
+      setTags(tags.filter((value) => value !== optionValue));
+    } else {
+      setTags([...tags, optionValue]);
+    }
+  };
+  const toggleOpen = () => {
+    setIsOpen(!isOpen);
+  };
+  /*-----------------------------------------------------------------*/
+
+
+  useEffect(() => {
+    if(tags.length !== 0) {
+      console.log(tags)
+    }
+    if(format !== '') {
+      console.log(format)
+    }
+    if(date !== '') {
+      console.log(date)
+    }
+  }, [tags, format, date])
+
+
+
 
   const handleCreateEvent = () => {
     navigate(`/create-event`)
@@ -24,7 +59,6 @@ export default function MainPage() {
   useEffect(() => {
     api.get(`/events`)
     .then(function(response) {
-      console.log(response.data)
       setEvents({
         loading: false,
         data: response.data.data,
@@ -39,7 +73,6 @@ export default function MainPage() {
   const handlePageChange = (page) => {
     api.get(`/events/${page}`)
     .then(function(response) {
-      console.log(response.data)
       setEvents({
         loading: false,
         data: response.data.data,
@@ -51,6 +84,8 @@ export default function MainPage() {
         console.log(error.message)
     })
   }
+
+
 
   return (
     <Container>
@@ -69,25 +104,32 @@ export default function MainPage() {
       <div className="options">
         <div className="options-filters">
           <div>
-            <select defaultValue="Formats" name="formats" id="formats">
+            <select defaultValue="Formats" name="formats" id="formats" onChange={(e) => setFormat(e.target.value)}>
               <option value="concert">Concert</option>
               <option value="meet_up">Meet Up</option>
-              <option value="fetival">Festival</option>
+              <option value="festival">Festival</option>
               <option value="show">Show</option>
               <option value="custom">Custom</option>
             </select>
           </div>
-          <div>
-            <select name="formats" id="formats">
-              <option value="concert">Concert</option>
-              <option value="meet_up">Meet Up</option>
-              <option value="fetival">Festival</option>
-              <option value="show">Show</option>
-              <option value="custom">Custom</option>
-            </select>
+          <div className="selected-tags">
+            <div className="template-block">
+              <span>--Select themes-- {tags[0]}</span>
+              <i onClick={toggleOpen} className={`arrow ${isOpen ? 'up' : 'down'}`} />
+            </div>
+            {isOpen && (
+              <div className="options-tags">
+                <div value="option1" className={`option ${tags.includes('option1')}`} onClick={handleOptionChange}>#jojfd</div>
+                <div value="option2" className={`option ${tags.includes('option2')}`} onClick={handleOptionChange}>#joj</div>
+                <div value="option3" className={`option ${tags.includes('option3')}`} onClick={handleOptionChange}>#jojfd</div>
+                <div value="option4" className={`option ${tags.includes('option4')}`} onClick={handleOptionChange}>#jojfd sdkmckds</div>
+                <div value="option5" className={`option ${tags.includes('option5')}`} onClick={handleOptionChange}>#dsckmsdc</div>
+                <div value="option6" className={`option ${tags.includes('option6')}`} onClick={handleOptionChange}>#ksdncs </div>
+              </div>
+            )}
           </div>
           <div>
-            <input type="date" name="" id="" />
+            <input value={date}  type="date" name="" id="" placeholder='Select date' onChange = {(e) => setDate(e.target.value)}/>
           </div>
         </div>
         <button onClick={handleCreateEvent}>+ New Event</button>
@@ -150,6 +192,7 @@ const Container = styled.div`
   .pagination {
     width: fit-content;
     margin: 0 auto;
+    padding: 0 !important;
     li {
       display: inline-block;
       width: 30px;
@@ -176,8 +219,8 @@ const Container = styled.div`
       }
     }
   }
-  div {
-    &.background {
+
+    .background {
       overflow: hidden;
       img {
         width: 100%;
@@ -187,7 +230,8 @@ const Container = styled.div`
         filter: brightness(50%);
       }
     }
-    &.slogan {
+
+    .slogan {
       white-space: nowrap;
       p {
         white-space: normal;
@@ -235,6 +279,7 @@ const Container = styled.div`
           background-color: #FFD100;
           border: none;
           color: #fff;
+          cursor: pointer;
         }
         @media (max-width: 850px) {
           input{
@@ -251,33 +296,33 @@ const Container = styled.div`
         }
       }
     }
-    &.options {
+
+    .options {
       max-width: 1480px;
       margin: 0 auto;
-      padding-left: 22px;
       padding-top: 55px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 60px;
+
       .options-filters {
-        width: 520px;
+        width: fit-content;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 10px;
         div {
           border: 1px solid #fff;
           background: transparent;
           display: inline-block;
           padding: 0px 10px;
-          margin-left: 10px;
           input {
-            width: 150px;
             height: 45px;
-            background: rgb(32, 32, 32);
+            outline: none;
             border: none;
             color: #fff;
-            outline: none;
+            background: rgb(32,32,32);
           }
           select {
             width: 150px;
@@ -287,6 +332,67 @@ const Container = styled.div`
             border: none;
             color: #fff;
             margin: 0;
+          }
+          &.selected-tags {
+            position: relative;
+            padding: 10.5px 10px;
+            .template-block {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              gap: 15px;
+              height: 100%;
+              border: none;
+              .arrow {
+                width: 0;
+                height: 0;
+                border-style: solid;
+                border-width: 8px 6px 0 6px;
+                border-color: #fff transparent transparent transparent;
+                cursor: pointer;
+                &.up {
+                  transform: rotate(180deg);
+                }
+              }
+            }
+            .options-tags {
+              position: absolute;
+              top: 50px;
+              left: 0;
+              width: 100%;
+              height: 150px;
+              overflow-y: scroll;
+              scrollbar-width: none;
+              background-color: #333533;
+              z-index: 1;
+              border: none;
+              border-radius: 5px;
+
+              display: flex;
+              justify-content: flex-start;
+              align-items: center;
+              flex-wrap: wrap;
+              gap: 10px;
+              padding: 10px;
+
+              &::-webkit-scrollbar {
+                display: none;
+              }
+
+              .option {
+                border: none;
+                width: fit-content;
+                color: #000000;
+                background-color: #ffffff;
+                border-radius: 5px;
+                padding: 5px;
+                cursor: pointer;
+                &.true {
+                  background-color: #FFD100;
+                  color: #000000;
+                }
+              }
+            }
           }
         }
       }
@@ -302,10 +408,10 @@ const Container = styled.div`
         cursor: pointer;
       }
     }
-    &.event-list {
+
+    .event-list {
       max-width: 1480px;
       margin: 0 auto;
-      padding-left: 22px;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-gap: 10px;
@@ -407,6 +513,135 @@ const Container = styled.div`
           }
         }
       }
+    }
+
+  /* Телефоны в портретной ориентации */
+  @media only screen and (max-width: 320px) {
+    font-size: 12px;
+    h1 {
+      font-size: 18px;
+    }
+    .options {
+      max-width: 310px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      row-gap: 10px;
+      .options-filters {
+        height: fit-content;
+        width: fit-content;
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        div {
+          margin: 0;
+        }
+      }
+      button {
+        width: fit-content;
+        padding: 5px 20px;
+        margin-top: 50px;
+      }
+    }
+    .event-list {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      max-width: 310px;
+      font-size: 12px;
+      .event {
+        div.price {
+          button {
+            width: 120px;
+            height: 35px;
+          }
+        }
+      }
+    }
+  }
+
+  /* Телефоны в альбомной ориентации */
+  @media only screen and (min-width: 321px) and (max-width: 568px) {
+    .options {
+      max-width: 311px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      row-gap: 10px;
+      .options-filters {
+        height: fit-content;
+        width: fit-content;
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        div {
+          margin: 0;
+        }
+      }
+      button {
+        width: fit-content;
+        padding: 5px 20px;
+        margin-top: 50px;
+      }
+    }
+
+    .event-list {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      max-width: 311px;
+      font-size: 12px;
+      .event {
+        div.price {
+          button {
+            width: 120px;
+            height: 35px;
+          }
+        }
+      }
+    }
+  }
+
+  /* Планшеты в портретной ориентации */
+  @media only screen and (min-width: 569px) and (max-width: 768px) {
+    .options {
+      max-width: 559px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 10px;
+
+      .options-filters {
+        height: fit-content;
+        width: fit-content;
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+    }
+    .event-list {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      max-width: 559px;
+    }
+  }
+
+  /* Планшеты в альбомной ориентации */
+  @media only screen and (min-width: 769px) and (max-width: 1024px) {
+    .options {
+      max-width: 759px;
+    }
+    .event-list {
+      max-width: 759px;
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+  }
+
+  @media only screen and (min-width: 1025px) and (max-width: 1440px) {
+    .options {
+      max-width: 1015px;
+    }
+    .event-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-width: 1015px;
     }
   }
 `
