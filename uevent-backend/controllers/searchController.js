@@ -41,7 +41,8 @@ class SearchController{
       async getEventsFilter(req,res){
         try{
             const event = new Event(EVENT_TABLE);
-            const result = await event.getEventWithFilter(req.body,req.params.page,9);
+            console.log('----------' + req.body.jopa)
+            const result = await event.getEventWithFilter(req.body, req.params.page, 9);
             res.json(result);
         } catch(e){
             e.addMessage= 'Get events by filters';
