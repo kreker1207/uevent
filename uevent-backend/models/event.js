@@ -66,7 +66,7 @@ module.exports = class Event extends Entity {
       page = 0;
     }
     const knexInstance = knex(knexfile);
-    // console.log(filters)
+    console.log(filters)
   
     const events = await knexInstance('event')
       .select('event.*', knexInstance.raw('json_agg(theme.name) AS tags'))
@@ -83,18 +83,21 @@ module.exports = class Event extends Entity {
             this.where('theme.name', '=', filters.theme);
           }
         }
+
         if (filters.event_datetime) {
+          // console.log(filters.event_datetime)
           const timestamp = isNaN(Date.parse(filters.event_datetime)) ? null : new Date(filters.event_datetime).toISOString();
           if (timestamp) {
-            this.where(knexInstance.raw("event.event_datetime::timestamp with time zone >= now()"));
+            this.where(knexInstance.raw('event.event_datetime::timestamp with time zone >= now()'));
           } else {
             this.where(knexInstance.raw("to_timestamp(event.event_datetime, 'YYYY-MM-DD HH24:MI:SS') >= ?", timestamp));
           }
         } 
       })
+      
       .groupBy('event.id')
       .paginate({ isLengthAware: true, perPage: limit, currentPage: page });
-  
+    
     return events;
   }
   async getSearchAll(page, limit, { filter } = {}) {

@@ -17,8 +17,22 @@ export default function MainPage() {
   const [date, setDate] = useState('');
   const [themes, setThemes] = useState({data: [], isLoading: true})
   const [isOpen, setIsOpen] = useState(false);
+  useEffect(() => {
+    api.get(`/events`)
+    .then(function(response) {
+      console.log(response.data.pagination)
+      setEvents({
+        loading: false,
+        data: response.data.data,
+        pagination: response.data.pagination
+      })
+    })
+    .catch(function(error) {
+        console.log(error.message)
+    })
+  }, [])
 
-  /*-----------------------------THEMES-----------------------------*/
+  /*-----------------------------THEMES--------------------------------------*/
   useEffect(() => {
     api.get('/tags')
       .then(response => {
@@ -43,8 +57,9 @@ export default function MainPage() {
   const toggleOpen = () => {
     setIsOpen(!isOpen);
   };
-  /*-----------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
+  /*-----------------------------SEARCH FUNCTIONS-----------------------------*/
   const handleSearchEvents = () => {
     // api.get(`/events/search/:page(\\d+)?`)
     //   .then(response => {
@@ -55,54 +70,42 @@ export default function MainPage() {
     //   })
   }
 
+  const handleSearchAll = () => {
+
+  }
+  /*--------------------------------------------------------------------------*/
+
+  /*-----------------------------FILTERS QUERY--------------------------------*/
   useEffect(() => {
-    if(tags.length !== 0) {
-      console.log(tags)
-    }
-    if(format !== '') {
-      console.log(format)
-    }
-    if(date !== '') {
-      console.log(date)
-    }
     if(tags.length !== 0 || format !== '' || date !== '') {
-      api.post(`/filter/1`, {theme: tags, format, event_datetime: date})
+      console.log('hui')
+      api.post(`/filter/${events.pagination.currentPage}`, {theme: tags.length === 0 ? null : tags, format: format === '' ? null : format, event_datetime: date})
         .then(response => {
-          console.log(response.data)
+          // console.log(response.data)
+          setEvents({
+            loading: false,
+            data: response.data.data,
+            pagination: response.data.pagination
+          })
         })
         .catch(error => {
           console.log(error.message)
         })
     }
   }, [tags, format, date])
+  /*--------------------------------------------------------------------------*/
 
-  const handleCreateEvent = () => {
-    navigate(`/create-event`)
-  }
-  
-  const handleEventClick = (id) => {
-    navigate(`/events/${id}`)
-  }
-
-  useEffect(() => {
-    api.get(`/events`)
-    .then(function(response) {
-      setEvents({
-        loading: false,
-        data: response.data.data,
-        pagination: response.data.pagination
-      })
-    })
-    .catch(function(error) {
-        console.log(error.message)
-    })
-  }, [])
-
+  /*-----------------------------HANDLE PAGE CHANGE--------------------------------*/
   const handlePageChange = (page) => {
     if(tags.length !== 0 || format !== '' || date !== '') {
       api.post(`/filter/${page}`, {theme: tags, format, event_datetime: date})
       .then(response => {
         console.log(response.data)
+        setEvents({
+          loading: false,
+          data: response.data.data,
+          pagination: response.data.pagination
+        })
       })
       .catch(error => {
         console.log(error.message)
@@ -122,8 +125,15 @@ export default function MainPage() {
       })
     }
   }
+  /*--------------------------------------------------------------------------------*/
 
-
+  const handleCreateEvent = () => {
+    navigate(`/create-event`)
+  }
+  
+  const handleEventClick = (id) => {
+    navigate(`/events/${id}`)
+  }
 
   return (
     <Container>
@@ -152,7 +162,7 @@ export default function MainPage() {
           </div>
           <div className="selected-tags">
             <div className="template-block">
-              <span>--Select themes-- {tags[0]}</span>
+              <span>--Select themes--</span>
               <i onClick={toggleOpen} className={`arrow ${isOpen ? 'up' : 'down'}`} />
             </div>
             {isOpen && (
