@@ -11,6 +11,7 @@ export default function Header() {
   const [activeIndex, setActiveIndex] = useState(null);
   const [searchValue, setSearchValue] = useState('')
   const [isSearchOpen, setIsSearchOpen] = useState('close')
+  const [searchResults, setSearchResults] = useState({data: [], isLoading: true})
   const dispatch = useDispatch()
 
   const navigate = useNavigate()
@@ -48,7 +49,20 @@ export default function Header() {
       api.post(`/search/`, {query: searchValue})
         .then(response => {
           console.log(response.data)
-          setIsSearchOpen('open')
+          const mergedArray = response.data.events.concat(response.data.organizations);
+          mergedArray.sort((a, b) => {
+            if (a.title < b.title) return -1;
+            if (a.title > b.title) return 1;
+            return 0;
+          });
+          setSearchResults({
+            data: mergedArray,
+            isLoading: false
+          })
+          if(response.data.events.length !== 0 || response.data.organizations.length !== 0) {
+            console.log('hello')
+            setIsSearchOpen('open')
+          }
         })
         .catch(error => {
           console.log(error.message)
@@ -59,6 +73,11 @@ export default function Header() {
     }
   }, [searchValue])
 
+  const handleCheck = (id, type) => {
+    setIsSearchOpen('close')
+    navigate(`/${type}/${id}`)
+  }
+
   return (
     <Head>
       <img src={require('../assets/logo.png')} alt="logo" />
@@ -67,7 +86,28 @@ export default function Header() {
           <input value={searchValue} type="search" onChange={(e) => setSearchValue(e.target.value)}/>
           <img src={require('../assets/search-icon.png')} alt="search" />
           <div className={`found-info ${isSearchOpen}`}>
-
+            {
+              searchResults.isLoading ?
+              <div className='loading'>Loading...</div> 
+              :
+              <>
+                {
+                  searchResults.data.map((item, index) => {
+                    return (
+                      <div className='found-item' key={index}> 
+                      {item.title}
+                      {item.admin_id ? 
+                        <span style={{color: "red", fontSize: "12px", border: '1px solid red', padding: '0px 5px'}}>compnay</span> 
+                        :
+                        <span style={{color: "#FFD100", fontSize: "12px", border: '1px solid #FFD100', padding: '0px 5px'}}>event</span> 
+                      }
+                      <button onClick={() => handleCheck(item.id, item.admin_id ? 'companies' : 'events')}>More</button>
+                      </div>
+                    )
+                  })
+                }
+              </>
+            }
           </div>
         </div>
         {
@@ -236,19 +276,41 @@ const Head = styled.nav`
           position: absolute;
           top: 50px;
           left: 0;
-          width: 100%;
+          width: 200%;
           margin: 0;
           display: none;
-          overflow-y: scroll;
-          &::-webkit-scrollbar {
-            display: none;
-          }
+
           &.open {
-            display: block;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: scroll;
+            opacity: 1;
+
             background-color: #353535;
             border-radius: 5px;
-            padding: 20px;
+            padding: 10px;
             height: 130px;
+            .found-item {
+              display: flex;
+              justify-content: flex-start;
+              align-items: center;
+              gap: 10px;
+              margin: 0;
+              button {
+                all: unset;
+                margin-left: auto;
+                background-color: #FFD100;
+                color: #ffffff;
+                padding: 0 10px;
+                cursor: pointer;
+              }
+            }
+
+          }
+
+          &::-webkit-scrollbar {
+            display: none;
           }
         }
       }

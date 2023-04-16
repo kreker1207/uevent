@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import  Pagination from 'react-js-pagination'
 
 import { IconContext } from 'react-icons';
-import { FaClock, FaHashtag, FaMapMarkerAlt } from "react-icons/fa";
+import { FaClock, FaMapMarkerAlt } from "react-icons/fa";
 
 
 export default function MainPage() {
@@ -18,6 +18,7 @@ export default function MainPage() {
   const [themes, setThemes] = useState({data: [], isLoading: true})
   const [isOpen, setIsOpen] = useState(false);
   const [eventsToSearch, setEventsToSearch] = useState('')
+
   useEffect(() => {
     api.get(`/events`)
     .then(function(response) {
@@ -94,6 +95,7 @@ export default function MainPage() {
           console.log(error.message)
         })
     }
+    // eslint-disable-next-line
   }, [tags, format, date])
   /*--------------------------------------------------------------------------*/
 

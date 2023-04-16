@@ -4,7 +4,7 @@ import Map from '../components/Map'
 import DragAndDropImage from '../components/DragImage';
 import { FaTimesCircle, FaDollarSign, FaHashtag } from 'react-icons/fa';
 import { IconContext } from 'react-icons';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import api from '../utils/apiSetting';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
@@ -13,22 +13,26 @@ function CreateEvent() {
     const { userInfo } = useSelector((state) => state.auth)
     const [companies, setCompanies] = useState({data: [], isLoading: true})
     const navigate = useNavigate()
+    const location = useLocation();
+
 
     const [inputType1, setInputType1] = useState('text');
     const [inputType2, setInputType2] = useState('text');
-    const [tags, setTags] = useState([]);
+
     const [tagInput, setTagInput] = useState('');
 
-    const [title, setTitle] = useState('');
-    const [publishDate, setPublishDate] = useState('');
-    const [eventDate, setEventDate] = useState('');
-    const [eventTime, setEventTime] = useState('');
-    const [description, setDescription] = useState('');
-    const [price, setPrice] = useState('');
+    const [title, setTitle] = useState(location.state?.title || '' );
+    const [description, setDescription] = useState(location.state?.description || '' );
+    const [seats, setSeats] = useState(location.state?.seats || 0)
+    const [tags, setTags] = useState(location.state?.tags || []);
+    const [eventDate, setEventDate] = useState(location.state?.event_datetime?.split(' ')[0] || '');
+    const [eventTime, setEventTime] = useState(location.state?.event_datetime?.split(' ')[1] || '');
+    const [price, setPrice] = useState(location.state?.price || '');
+    const [format, setFormat] = useState(location.state?.format || 'meet_up')
+    const [publishDate, setPublishDate] = useState('' );
+
     const [evType, setEvType] = useState('')
     const [placeName, setPlaceName] = useState("");
-    const [format, setFormat] = useState('concert')
-    const [seats, setSeats] = useState(0)
     const [eve_pic, setFile] = useState(null)
     const [companyId, setCompanyId] = useState(0)
 
@@ -202,7 +206,7 @@ function CreateEvent() {
                         <div style={{position: "relative"}}>
                             <label htmlFor="formats">Format: </label>
                             <div>
-                                <select onChange={(e) => setFormat(e.target.value)} name="formats" id="formats">
+                                <select defaultValue={format} onChange={(e) => setFormat(e.target.value)} name="formats" id="formats">
                                     <option value="concert">Concert</option>
                                     <option value="meet_up">Meet Up</option>
                                     <option value="fetival">Festival</option>

@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import api from '../utils/apiSetting'
 import { IconContext } from 'react-icons'
-import { FaCalendar, FaClock, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa'
+import { FaCalendar, FaClock, FaMapMarkerAlt } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import Pagination from 'react-js-pagination'
 
@@ -49,7 +49,7 @@ export default function UserPage() {
 
   useEffect(() => {
     if(Object.keys(user.data) !== 0 && user.data.id) {
-      api.get(`/event/user/${user.data.id}/`)
+      api.get(`/event/user/${user.data.id}`)
       .then(response => {
         console.log(response.data)
         setUserEvents({
@@ -106,8 +106,22 @@ export default function UserPage() {
     navigate(`/companies/${id}`)
   }
 
-  const handleEditClick = (id) => {
-    //edit
+  const handleEditClick = (item) => {
+      console.log(item.event_datetime.split(' ')[0])
+      navigate('/create-event', { state: { 
+        title: item.title,
+        description: item.description,
+        seats: item.seat,
+        price: item.price,
+        event_datetime: item.event_datetime,
+        format: item.format,
+        location: item.location,
+        eve_pic: item.eve_pic,
+        tags: item.tags,
+  
+        publishDate: item.publishDate,
+        evType: item.evType,
+      } });
   }
   const handleEventClick = (id) => {
     navigate(`/events/${id}`)
@@ -220,7 +234,7 @@ export default function UserPage() {
                         <div className='price'>
                           <div className="buttons">
                             <button className='more' onClick={() => handleEventClick(item.id)}>More</button>
-                            <button className='edit' onClick={() => handleEditClick(item.id)}>Edit</button>
+                            <button className='edit' onClick={() => handleEditClick(item)}>Edit</button>
                             <button className='delete' onClick={() => handleDeleteClick(item.id)}>Delete</button>
                           </div>
                           <p>{item.price}$</p>
