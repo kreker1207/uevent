@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react'
+import React, { useEffect } from 'react'
 import { useState } from 'react';
 import styled from 'styled-components';
 import api from '../utils/apiSetting';
@@ -15,9 +15,36 @@ export default function MainPage() {
   const [tags, setTags] = useState([]);
   const [format, setFormat] = useState('');
   const [date, setDate] = useState('');
+  const [themes, setThemes] = useState({data: [], isLoading: true})
   const [isOpen, setIsOpen] = useState(false);
+  useEffect(() => {
+    api.get(`/events`)
+    .then(function(response) {
+      console.log(response.data.pagination)
+      setEvents({
+        loading: false,
+        data: response.data.data,
+        pagination: response.data.pagination
+      })
+    })
+    .catch(function(error) {
+        console.log(error.message)
+    })
+  }, [])
 
-  /*-----------------------------THEMES-----------------------------*/
+  /*-----------------------------THEMES--------------------------------------*/
+  useEffect(() => {
+    api.get('/tags')
+      .then(response => {
+        setThemes({
+          data: response.data,
+          isLoading: false
+        })
+      })
+      .catch(error => {
+        console.log(error.message)
+      })
+  }, [])
   const handleOptionChange = (event) => {
     const optionValue = event.target.getAttribute('value');
     const isSelected = tags.includes(optionValue);
@@ -30,23 +57,75 @@ export default function MainPage() {
   const toggleOpen = () => {
     setIsOpen(!isOpen);
   };
-  /*-----------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
+  /*-----------------------------SEARCH FUNCTIONS-----------------------------*/
+  const handleSearchEvents = () => {
+    // api.get(`/events/search/:page(\\d+)?`)
+    //   .then(response => {
 
+    //   })
+    //   .catch(error => {
+    //     console.log(error.message)
+    //   })
+  }
+
+  const handleSearchAll = () => {
+
+  }
+  /*--------------------------------------------------------------------------*/
+
+  /*-----------------------------FILTERS QUERY--------------------------------*/
   useEffect(() => {
-    if(tags.length !== 0) {
-      console.log(tags)
-    }
-    if(format !== '') {
-      console.log(format)
-    }
-    if(date !== '') {
-      console.log(date)
+    if(tags.length !== 0 || format !== '' || date !== '') {
+      console.log('hui')
+      api.post(`/filter/${events.pagination.currentPage}`, {theme: tags.length === 0 ? null : tags, format: format === '' ? null : format, event_datetime: date})
+        .then(response => {
+          // console.log(response.data)
+          setEvents({
+            loading: false,
+            data: response.data.data,
+            pagination: response.data.pagination
+          })
+        })
+        .catch(error => {
+          console.log(error.message)
+        })
     }
   }, [tags, format, date])
+  /*--------------------------------------------------------------------------*/
 
-
-
+  /*-----------------------------HANDLE PAGE CHANGE--------------------------------*/
+  const handlePageChange = (page) => {
+    if(tags.length !== 0 || format !== '' || date !== '') {
+      api.post(`/filter/${page}`, {theme: tags, format, event_datetime: date})
+      .then(response => {
+        console.log(response.data)
+        setEvents({
+          loading: false,
+          data: response.data.data,
+          pagination: response.data.pagination
+        })
+      })
+      .catch(error => {
+        console.log(error.message)
+      })
+    } else {
+      api.get(`/events/${page}`)
+      .then(function(response) {
+        setEvents({
+          loading: false,
+          data: response.data.data,
+          pagination: response.data.pagination
+        })
+      
+      })
+      .catch(function(error) {
+          console.log(error.message)
+      })
+    }
+  }
+  /*--------------------------------------------------------------------------------*/
 
   const handleCreateEvent = () => {
     navigate(`/create-event`)
@@ -55,37 +134,6 @@ export default function MainPage() {
   const handleEventClick = (id) => {
     navigate(`/events/${id}`)
   }
-
-  useEffect(() => {
-    api.get(`/events`)
-    .then(function(response) {
-      setEvents({
-        loading: false,
-        data: response.data.data,
-        pagination: response.data.pagination
-      })
-    })
-    .catch(function(error) {
-        console.log(error.message)
-    })
-  }, [])
-
-  const handlePageChange = (page) => {
-    api.get(`/events/${page}`)
-    .then(function(response) {
-      setEvents({
-        loading: false,
-        data: response.data.data,
-        pagination: response.data.pagination
-      })
-    
-    })
-    .catch(function(error) {
-        console.log(error.message)
-    })
-  }
-
-
 
   return (
     <Container>
@@ -98,7 +146,7 @@ export default function MainPage() {
         <p>Shop millions of live events and discover can't-miss concerts, games, theater and more.</p>
         <div className="search-event">
           <input type="search" placeholder='Search for an event'/>
-          <button>Search</button>
+          <button onClick={handleSearchEvents}>Search</button>
         </div>
       </div>
       <div className="options">
@@ -114,17 +162,25 @@ export default function MainPage() {
           </div>
           <div className="selected-tags">
             <div className="template-block">
-              <span>--Select themes-- {tags[0]}</span>
+              <span>--Select themes--</span>
               <i onClick={toggleOpen} className={`arrow ${isOpen ? 'up' : 'down'}`} />
             </div>
             {isOpen && (
               <div className="options-tags">
-                <div value="option1" className={`option ${tags.includes('option1')}`} onClick={handleOptionChange}>#jojfd</div>
-                <div value="option2" className={`option ${tags.includes('option2')}`} onClick={handleOptionChange}>#joj</div>
-                <div value="option3" className={`option ${tags.includes('option3')}`} onClick={handleOptionChange}>#jojfd</div>
-                <div value="option4" className={`option ${tags.includes('option4')}`} onClick={handleOptionChange}>#jojfd sdkmckds</div>
-                <div value="option5" className={`option ${tags.includes('option5')}`} onClick={handleOptionChange}>#dsckmsdc</div>
-                <div value="option6" className={`option ${tags.includes('option6')}`} onClick={handleOptionChange}>#ksdncs </div>
+                {
+                  themes.isLoading ?
+                  <div className='loading'>Loading...</div> 
+                  :
+                  <>
+                    {
+                      themes.data.map((item, index) => {
+                        return (
+                          <div key={index} value={item.name} className={`option ${tags.includes(item.name)}`} onClick={handleOptionChange}>#{item.name}</div>
+                        )
+                      })
+                    }
+                  </>
+                }
               </div>
             )}
           </div>
