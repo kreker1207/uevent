@@ -228,6 +228,7 @@ const Container = styled.div`
             background: #FFD100;
             border: none;
             color: #fff;
+            cursor: pointer;
           }
         }
       }

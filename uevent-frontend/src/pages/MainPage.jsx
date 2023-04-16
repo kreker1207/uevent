@@ -17,10 +17,10 @@ export default function MainPage() {
   const [date, setDate] = useState('');
   const [themes, setThemes] = useState({data: [], isLoading: true})
   const [isOpen, setIsOpen] = useState(false);
+  const [eventsToSearch, setEventsToSearch] = useState('')
   useEffect(() => {
     api.get(`/events`)
     .then(function(response) {
-      console.log(response.data.pagination)
       setEvents({
         loading: false,
         data: response.data.data,
@@ -61,18 +61,20 @@ export default function MainPage() {
 
   /*-----------------------------SEARCH FUNCTIONS-----------------------------*/
   const handleSearchEvents = () => {
-    // api.get(`/events/search/:page(\\d+)?`)
-    //   .then(response => {
-
-    //   })
-    //   .catch(error => {
-    //     console.log(error.message)
-    //   })
+    api.post(`/events/search/`, {query: eventsToSearch})
+      .then(response => {
+        console.log(response.data)
+        setEvents({
+          loading: false,
+          data: response.data.data,
+          pagination: response.data.pagination
+        })
+      })
+      .catch(error => {
+        console.log(error.message)
+      })
   }
 
-  const handleSearchAll = () => {
-
-  }
   /*--------------------------------------------------------------------------*/
 
   /*-----------------------------FILTERS QUERY--------------------------------*/
@@ -145,7 +147,7 @@ export default function MainPage() {
         <br />
         <p>Shop millions of live events and discover can't-miss concerts, games, theater and more.</p>
         <div className="search-event">
-          <input type="search" placeholder='Search for an event'/>
+          <input value={eventsToSearch} onChange={(e) => setEventsToSearch(e.target.value)} type="search" placeholder='Search for an event'/>
           <button onClick={handleSearchEvents}>Search</button>
         </div>
       </div>

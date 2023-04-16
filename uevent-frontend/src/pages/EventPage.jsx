@@ -14,8 +14,6 @@ export default function EventPage() {
   const [comments, setComments] = useState({data: [], isLoading: true})
   const [commentsChanged, setCommentsChanged] = useState(0)
 
-
-
   const [receiverName, setReceiverName] = useState('')
   const [receiverMaintId, setMainCommentId] = useState(-1)
   const [receiverCommentId, setReceiverCommentId] = useState(-1)
@@ -24,8 +22,6 @@ export default function EventPage() {
   const [buyData, setBuyData] = useState({data: '', signature: '', isLoading: true});
 
   
-
-
   useEffect(() => {
     api.get(`/event/${id}`)
       .then(function (response) {
@@ -41,6 +37,7 @@ export default function EventPage() {
       })
   }, [id])
 
+
   useEffect(() => {
     // Make API request to get the comments
     api.get(`/comments/event/${id}`)
@@ -49,23 +46,40 @@ export default function EventPage() {
 
         // Create an array of promises to get the additional fields for each comment object and its nestedArray
         const commentPromises = commentsData.map(comment => {
-          const authorPromise = api.get(`/users/${comment.author_id}`);
-          const nestedArrayPromises = comment.replies.map(nested => api.get(`/users/${nested.author_id}`));
+          let authorPromise;
+          if(comment.author_id) {
+            authorPromise = api.get(`/users/${comment.author_id}`);
+          } else {
+            authorPromise = api.get(`/org/${comment.author_organization_id}`);
+          }
+
+          const nestedArrayPromises = comment.replies.map(nested => {
+            if(nested.author_id) {
+              console.log(nested)
+              return api.get(`/users/${nested.author_id}`)
+            } else {
+              console.log('Hui2')
+              return api.get(`/org/${nested.author_organization_id}`)
+            }
+          });
 
           return Promise.all([authorPromise, ...nestedArrayPromises]).then(responses => {
             const [authorResponse, ...nestedResponses] = responses;
             const authorData = authorResponse.data;
             const nestedData = nestedResponses.map(response => response.data);
 
+
             // Return the updated comment object with the additional fields
             return {
               ...comment,
-              login: authorData.login,
-              profile_pic: authorData.profile_pic,
+              login: authorData.login ? authorData.login : authorData.title,
+              company: authorData.login ? null : 'creator',
+              profile_pic: authorData.profile_pic ? 'profile_pics/'+ authorData.profile_pic : 'organization_pics/' + authorData.org_pic,
               replies: comment.replies.map((nested, index) => ({
                 ...nested,
-                login: nestedData[index].login,
-                profile_pic: nestedData[index].profile_pic,
+                login: nestedData[index].login ? nestedData[index].login : nestedData[index].title,
+                company: nestedData[index].login ? null : 'creator',
+                profile_pic: nestedData[index].profile_pic ? 'profile_pics/' + nestedData[index].profile_pic : 'organization_pics/'+ nestedData[index].org_pic,
               })),
             };
           });
@@ -74,6 +88,7 @@ export default function EventPage() {
         // Wait for all the commentPromises to resolve and update the state with the updated comments
         Promise.all(commentPromises)
           .then(updatedComments => {
+            console.log(updatedComments)
             setComments({
               data: updatedComments,
               isLoading: false
@@ -88,52 +103,52 @@ export default function EventPage() {
       });
   }, [id]);
 
-  useEffect(() => {
-    // Make API request to get the comments
-    api.get(`/comments/event/${id}`)
-      .then(response => {
-        const commentsData = response.data;
+  // useEffect(() => {
+  //   // Make API request to get the comments
+  //   api.get(`/comments/event/${id}`)
+  //     .then(response => {
+  //       const commentsData = response.data;
 
-        // Create an array of promises to get the additional fields for each comment object and its nestedArray
-        const commentPromises = commentsData.map(comment => {
-          const authorPromise = api.get(`/users/${comment.author_id}`);
-          const nestedArrayPromises = comment.replies.map(nested => api.get(`/users/${nested.author_id}`));
+  //       // Create an array of promises to get the additional fields for each comment object and its nestedArray
+  //       const commentPromises = commentsData.map(comment => {
+  //         const authorPromise = api.get(`/users/${comment.author_id}`);
+  //         const nestedArrayPromises = comment.replies.map(nested => api.get(`/users/${nested.author_id}`));
 
-          return Promise.all([authorPromise, ...nestedArrayPromises]).then(responses => {
-            const [authorResponse, ...nestedResponses] = responses;
-            const authorData = authorResponse.data;
-            const nestedData = nestedResponses.map(response => response.data);
+  //         return Promise.all([authorPromise, ...nestedArrayPromises]).then(responses => {
+  //           const [authorResponse, ...nestedResponses] = responses;
+  //           const authorData = authorResponse.data;
+  //           const nestedData = nestedResponses.map(response => response.data);
 
-            // Return the updated comment object with the additional fields
-            return {
-              ...comment,
-              login: authorData.login,
-              profile_pic: authorData.profile_pic,
-              replies: comment.replies.map((nested, index) => ({
-                ...nested,
-                login: nestedData[index].login,
-                profile_pic: nestedData[index].profile_pic,
-              })),
-            };
-          });
-        });
+  //           // Return the updated comment object with the additional fields
+  //           return {
+  //             ...comment,
+  //             login: authorData.login,
+  //             profile_pic: authorData.profile_pic,
+  //             replies: comment.replies.map((nested, index) => ({
+  //               ...nested,
+  //               login: nestedData[index].login,
+  //               profile_pic: nestedData[index].profile_pic,
+  //             })),
+  //           };
+  //         });
+  //       });
 
-        // Wait for all the commentPromises to resolve and update the state with the updated comments
-        Promise.all(commentPromises)
-          .then(updatedComments => {
-            setComments({
-              data: updatedComments,
-              isLoading: false
-            });
-          })
-          .catch(error => {
-            console.error(error);
-          });
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  }, [id, commentsChanged]);
+  //       // Wait for all the commentPromises to resolve and update the state with the updated comments
+  //       Promise.all(commentPromises)
+  //         .then(updatedComments => {
+  //           setComments({
+  //             data: updatedComments,
+  //             isLoading: false
+  //           });
+  //         })
+  //         .catch(error => {
+  //           console.error(error);
+  //         });
+  //     })
+  //     .catch(error => {
+  //       console.error(error);
+  //     });
+  // }, [id, commentsChanged]);
 
 
   const handleCommentFocus = (receiverName, receiverMaintId, receiverCommentId) => {
@@ -147,7 +162,6 @@ export default function EventPage() {
       setReceiverCommentId(receiverCommentId)
     }
   };
-
 
 
   const handleCommentSend = () => {
@@ -272,9 +286,9 @@ export default function EventPage() {
                     <div key={index} className="comment">
                       <div className="userinfo">
                           <div className="photo">
-                            <div><img src={`http://localhost:8080/profile_pics/${item.profile_pic}`} alt="userlogo" /></div>
+                            <div><img src={`http://localhost:8080/${item.profile_pic}`} alt="userlogo" /></div>
                             <div className="name">
-                              <h4>{item.login}</h4>
+                              <h4>{item.login} {item.company ? <span style={{color: "red", fontSize: "12px", border: '1px solid red', padding: '0px 5px'}}>{item.company}</span> : <></>} </h4>
                               <p>{item.created_at}</p>
                             </div>
                           </div>
@@ -294,9 +308,9 @@ export default function EventPage() {
                               <div style={{marginBottom: "25px"}} key={index} className="comment">
                                 <div className="userinfo">
                                     <div className="photo">
-                                      <div><img src = {`http://localhost:8080/profile_pics/${itemInner.profile_pic}`} alt="" /></div>
+                                      <div><img src = {`http://localhost:8080/${itemInner.profile_pic}`} alt="" /></div>
                                       <div className="name">
-                                        <h4>{itemInner.login} <i style={{color: "#868686", fontSize: "12px"}}>replied to {itemInner.receiver_name}</i></h4>
+                                        <h4>{itemInner.login} {itemInner.company ? <span style={{color: "red", fontSize: "12px", border: '1px solid red', padding: '0px 5px'}}>{itemInner.company}</span> : <></>} <i style={{color: "#868686", fontSize: "12px"}}>replied to {itemInner.receiver_name}</i></h4>
                                         <p>{itemInner.created_at}</p>
                                       </div>
                                     </div>

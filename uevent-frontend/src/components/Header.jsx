@@ -1,13 +1,16 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import styled from 'styled-components';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchLogout } from '../utils/authActions';
+import api from '../utils/apiSetting';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const { userInfo } = useSelector((state) => state.auth)
   const [activeIndex, setActiveIndex] = useState(null);
+  const [searchValue, setSearchValue] = useState('')
+  const [isSearchOpen, setIsSearchOpen] = useState('close')
   const dispatch = useDispatch()
 
   const navigate = useNavigate()
@@ -40,13 +43,32 @@ export default function Header() {
     }
   }
 
+  useEffect(() => {
+    if(searchValue !== '') {
+      api.post(`/search/`, {query: searchValue})
+        .then(response => {
+          console.log(response.data)
+          setIsSearchOpen('open')
+        })
+        .catch(error => {
+          console.log(error.message)
+        })
+      // console.log(searchValue)
+    } else {
+      setIsSearchOpen('close')
+    }
+  }, [searchValue])
+
   return (
     <Head>
       <img src={require('../assets/logo.png')} alt="logo" />
       <ul className={`${isOpen && "open"}`}>
         <div className="search-box">
-          <input type="search"/>
+          <input value={searchValue} type="search" onChange={(e) => setSearchValue(e.target.value)}/>
           <img src={require('../assets/search-icon.png')} alt="search" />
+          <div className={`found-info ${isSearchOpen}`}>
+
+          </div>
         </div>
         {
           li.map(({ id, label, path }, index) => (
@@ -210,7 +232,25 @@ const Head = styled.nav`
           background-image: url("../assets/search-icon.png");
           background-size: cover;
         }
-
+        .found-info {
+          position: absolute;
+          top: 50px;
+          left: 0;
+          width: 100%;
+          margin: 0;
+          display: none;
+          overflow-y: scroll;
+          &::-webkit-scrollbar {
+            display: none;
+          }
+          &.open {
+            display: block;
+            background-color: #353535;
+            border-radius: 5px;
+            padding: 20px;
+            height: 130px;
+          }
+        }
       }
     }
 
