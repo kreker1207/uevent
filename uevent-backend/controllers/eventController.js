@@ -10,6 +10,7 @@ const   EVENT_TABLE = 'event',
         { v4: uuidv4 } = require('uuid'),
         Fs = require('fs'),
         Tag = require('../models/tag'),
+        Sub = require('../models/sub'),
         Event = require('../models/event');
 
 class EventController{
@@ -130,6 +131,23 @@ class EventController{
             res.send('Success File uploaded!');
         } catch (e) {
             e.addMessage = 'edit eve avatar';
+            errorReplier(e, res);
+        }
+    }
+
+    async setSub(req, res) {
+        try {
+            if (!req.user) throw new CustomError(1011);
+            if (!req.params.eventId) throw new CustomError(10);
+
+            const subTable = new Sub('sub');
+            const subObj = {event_id: req.params.eventId, user_id: req.user.id};
+            const sub = await subTable.get(subObj);
+            if (sub) subTable.del(subObj)
+            else subTable.set(subObj)
+            res.json(sub)
+        } catch (e) {
+            e.addMessage = 'set Subscription';
             errorReplier(e, res);
         }
     }

@@ -65,9 +65,8 @@ exports.up = function(knex) {
             table.integer('author_organization_id').unsigned().defaultTo(null);
             
             table.integer('event_id').unsigned().defaultTo(null);
-            table.integer('main_comment_id').unsigned().defaultTo(null);
             table.integer('comment_id').unsigned().defaultTo(null);
-            //
+            // do we need timestamps?
             table.timestamps(true, true);
             table.string('receiver_name', 40).defaultTo(null);
             table.foreign('author_id').references('id').inTable('users');
@@ -75,10 +74,11 @@ exports.up = function(knex) {
             
             table.foreign('event_id').references('id').inTable('event').onDelete('cascade');
             table.foreign('comment_id').references('id').inTable('comment').onDelete('cascade');
-            table.foreign('main_comment_id').references('id').inTable('comment').onDelete('cascade');
 
             table.check('((?? is not null):: integer + (?? is not null):: integer) = 1', 
                 ['author_organization_id', 'author_id']);
+            table.check('((?? is not null):: integer + (?? is not null):: integer) = 1', 
+                ['event_id', 'comment_id']);
         }),
 
         knex.schema.createTable('purchase', (table) => {
@@ -86,6 +86,24 @@ exports.up = function(knex) {
             table.integer('user_id').unsigned().notNullable();
             table.integer('event_id').unsigned().notNullable();
             table.boolean('status').notNullable().defaultTo(false);
+
+            table.foreign('user_id').references('id').inTable('users').onDelete('cascade');
+            table.foreign('event_id').references('id').inTable('event').onDelete('cascade');
+        }),
+
+        knex.schema.createTable('promo', (table) => {
+            table.increments('id').primary();
+
+            table.string('name', 20).notNullable().unique();
+            //discount percentage from 1 to 100
+            table.integer('discount').checkBetween([1, 100]).notNullable();
+            table.datetime('expires').defaultTo(knex.raw('CURRENT_TIMESTAMP + INTERVAL \'30 days\''));
+        }),
+
+        knex.schema.createTable('sub', (table) => {
+            table.increments('id').primary();
+            table.integer('user_id').unsigned().notNullable();
+            table.integer('event_id').unsigned().notNullable();
 
             table.foreign('user_id').references('id').inTable('users').onDelete('cascade');
             table.foreign('event_id').references('id').inTable('event').onDelete('cascade');

@@ -6,6 +6,7 @@ const authMiddleware = require('../middleware/authMiddleware')
 router.get('/users', controller.get);
 router.get('/users/avatar/:avatarName',controller.getAvatar);
 router.get('/users/:id',controller.getById);
+router.get('/users/sub', controller.getSub);
 
 router.post('/users', controller.edit);
 router.post('/users/avatar', controller.editAvatar);

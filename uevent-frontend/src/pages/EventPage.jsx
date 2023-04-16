@@ -150,28 +150,23 @@ export default function EventPage() {
 
 
   const handleCommentSend = () => {
-    if(receiverName!=='' && receiverCommentId !== -1) {
-      console.log(receiverCommentId)
-      api.post(`/comments/event/${event.data.id}/reply/${receiverMaintId}`, {content: description, comment_id: receiverCommentId, receiver_name: receiverName})
-        .then(function(response) {
-            console.log(response.data)
-            setCommentsChanged(commentsChanged + 1)
-          })
-          .catch(function(error) {
-            console.log(error.message)
-          })
-    } else {
-      api.post(`/comments/event/${event.data.id}`, {content: description, receiver_name: receiverName})
-        .then(function(response) {
-          console.log(response.data)
-          console.log(event)
-          setCommentsChanged(commentsChanged + 1)
-        })
-        .catch(function(error) {
-          console.log(error.message)
-        })
+    const commentToSend = {
+      content: description, 
+      receiver_name: receiverName
+    }
+    if(receiverName!=='' && receiverMaintId !== -1){
+      commentToSend.comment_id = receiverMaintId;
     }
 
+    api.post(`/comments/event/${event.data.id}`, commentToSend)
+    .then(function(response) {
+      console.log(response.data)
+      console.log(event)
+      setCommentsChanged(commentsChanged + 1)
+    })
+    .catch(function(error) {
+      console.log(error.message)
+    })
   }
 
   useEffect(() => {
