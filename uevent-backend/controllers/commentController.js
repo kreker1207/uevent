@@ -40,93 +40,52 @@ class CommentController{
             errorReplier(e,res);
         }
     }
-    async createEventComment(req,res){
-        try{
-            const errors = validationResult(req)
-            if(! errors.isEmpty()){
-                throw new CustomError(10);
-            }
-            const { content} = req.body;
-            const comment = new Comment(COMMENT_TABLE);
-            const eventTable = new Event(EVENT_TABLE);
-            const event = await eventTable.getById(req.params.eventId);
-            const {refreshToken} = req.cookies;
-            const userId = getJwtUserId(refreshToken);
-            const adminId = await eventTable.getAdminId(req.params.eventId);
-            if(!event) throw new CustomError(1009);
-            if(userId === adminId){
-                const commenttData= {
-                    author_id: userId,
-                    content: content,
-                    author_organization_id:event.organizer_id,
-                    event_id: req.params.eventId
-                }
-                const [pawn] = await comment.set(commenttData);
-                console.log(pawn)
-                return res.json({commenttData})
-            }
-            else{
-                const commentData= {
-                    author_id: userId,
-                    content: content,
-                    event_id: req.params.eventId
-                }
-                const [pawn] = await comment.set(commentData);
-                console.log(pawn)
-                return res.json({commentData})
-            }
-            
 
-        }catch(e){
-            e.addMessage = 'Create comments';
-            errorReplier(e,res);
-        }
-    }
-    async createReplyComment(req,res){
+    async createComment(req, res) {
         try{
+            // front sends both event id and main comment id (when commenting a comment)
+            console.log(req.params)
+            console.log(req.body)
             const errors = validationResult(req)
-            if(! errors.isEmpty()){
-                throw new CustomError(10);
-            }
-            const { content, comment_id, receiver_name } = req.body;
-            if(!comment_id)throw new CustomError(1010);
-            const comment = new Comment(COMMENT_TABLE);
+            if(! errors.isEmpty()) throw new CustomError(10);
+            if(!req.params.eventId && !req.body.comment_id) throw new CustomError(10);
+            if (!req.user) throw new CustomError(1011);
+            const {content, receiver_name} = req.body;
+            const commentTable = new Comment(COMMENT_TABLE);
             const eventTable = new Event(EVENT_TABLE);
-            const event = await eventTable.getById(req.params.eventId);
-            const {refreshToken} = req.cookies;
-            const userId = getJwtUserId(refreshToken);
-            const adminId = await eventTable.getAdminId(req.params.eventId);
-            if(!event) throw new CustomError(1009);
-            if(userId === adminId){
-                const commenttData= {
-                    content: content,
-                    author_organization_id:event.organizer_id,
-                    event_id: req.params.eventId,
-                    comment_id: comment_id,
-                    main_comment_id:req.params.mainComId,
-                    receiver_name
-                }
-                const [pawn] = await comment.set(commenttData);
-                console.log(pawn)
-                return res.json({commenttData})
-            }
-            else{
-                const commentData= {
-                    author_id: userId,
-                    content: content,
-                    event_id: req.params.eventId,
-                    comment_id: comment_id,
-                    main_comment_id:req.params.mainComId,
-                    receiver_name
-                }
-                const [pawn] = await comment.set(commentData);
-                console.log(pawn)
-                return res.json({commentData})
-            }
             
+            const commentData= {
+                content: content,
+            }
+            let adminId = null;
+            
+            if(req.body.comment_id) {
+                const commentTable = new Comment(COMMENT_TABLE);
+                const mainComment = await commentTable.getById(req.body.comment_id);
+                if(!mainComment) throw new CustomError(1010);
+                /*const eventId = await commentTable.getEventId(req.params.eventId);
+                console.log(eventId)
+                if(!eventId) throw new CustomError(1009);*/
+                adminId = await eventTable.getAdminId(req.params.eventId);
+                commentData.comment_id = req.body.comment_id;
+                commentData.receiver_name = receiver_name;
+            } else {
+                const event = await eventTable.getById(req.params.eventId);
+                if(!event) throw new CustomError(1009);
+                adminId = await eventTable.getAdminId(req.params.eventId);
+                commentData.event_id = req.params.eventId
+            }
 
-        }catch(e){
-            e.addMessage = 'Create comments';
+            if (req.user.id === adminId) 
+                commentData.author_organization_id = adminId;
+            else
+                commentData.author_id = req.user.id;
+            console.log(commentData)
+            const [comment] = await commentTable.set(commentData);
+            console.log(comment);
+            return res.json({commentData});
+        } catch(e) {
+            e.addMessage = 'Create comment';
             errorReplier(e,res);
         }
     }

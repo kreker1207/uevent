@@ -18,7 +18,7 @@ module.exports = async function purCheker(){
     try {
         console.log('purchase checker started');
         const liqpay = new LiqPay(PUBLIC_KEY, PRIVATE_KEY);
-        const purchase = await new Purchase(PURCHASE_TABLE);
+        const purchase = new Purchase(PURCHASE_TABLE);
         setInterval(async ()=> {
             console.log('restarting check');
             const orders = await purchase.get({status: false});

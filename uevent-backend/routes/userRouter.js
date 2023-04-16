@@ -7,6 +7,7 @@ const {check} = require('express-validator')
 router.get('/users', controller.get);
 router.get('/users/avatar/:avatarName',controller.getAvatar);
 router.get('/users/:id',controller.getById);
+router.get('/users/sub', controller.getSub);
 
 router.post('/users/password',[check('email',"Not valid email").isEmail()], controller.resetPassword);
 router.post('/users', controller.edit);
