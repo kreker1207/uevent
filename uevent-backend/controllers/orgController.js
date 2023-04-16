@@ -80,7 +80,7 @@ class OrganizationController{
             if(! errors.isEmpty()){
                 throw new CustomError(10);
             }
-            const { title, description, location} = req.body;
+            const { title, description, location,phone_number} = req.body;
             const {refreshToken} = req.cookies;
             const userId = getJwtUserId(refreshToken);
             const organization = new Organization(ORGANIZATION_TABLE);
@@ -91,7 +91,8 @@ class OrganizationController{
                 id: req.params.id, 
                 title: title, 
                 description: description, 
-                location: location
+                location: location,
+                phone_number
             })
             res.json(newOrganization);
         } catch(e){
