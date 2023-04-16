@@ -41,4 +41,19 @@ module.exports = class Mailer {
             }
         });
     };
+    sendResetUserPassword (email, password) {
+        this.transporter.sendMail({
+            from: config.from,
+            to: email,
+            subject: 'Uevent Password reset',
+            html: `Here is your new password \
+            <strong> ${this.password}</strong>
+           Change it as soon as posible`,
+        }, (error, info) => {
+            if (error) {
+                console.log(error);
+                return error;
+            }
+        });
+    };
 }

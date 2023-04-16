@@ -23,4 +23,14 @@ module.exports = class User extends Entity {
     
         }else return [];
       };
+
+    async findByIdAndUpdate(userId,password){
+        return await super.table().where({id:userId}).update({password: password});
+    }
+    
+    async getUserByEmail(email){
+        if(email){
+            return await super.table().select('users.*').where('email',email).first();
+        }
+    }
 }
