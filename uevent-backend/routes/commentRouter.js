@@ -8,6 +8,5 @@ router.get('/comments/:id', controller.getCommentById);
 
 router.get('/comments/event/:eventId',controller.getCommentsByEventId);
 
-router.post('/comments/event/:eventId',authMiddleware, controller.createEventComment);
-router.post('/comments/event/:eventId/reply/:mainComId',authMiddleware, controller.createReplyComment);
+router.post('/comments/event/:eventId',authMiddleware, controller.createComment);
 module.exports = router

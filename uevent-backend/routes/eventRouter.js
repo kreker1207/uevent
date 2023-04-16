@@ -10,6 +10,7 @@ router.get('/event/user/:userId/:page(\\d+)?',controller.getEventByUserId);
 router.get('/event/org/:orgId/:page(\\d+)?',controller.getEventByOrgId);
 router.get('/tags',controller.getTags);
 //get bought
+router.post('/events/:id/sub', controller.setSub);
 
 router.post('/events/avatar/:id', controller.editAvatar);
 router.post('/event/edit/:id',authMiddleware,controller.editEvent);

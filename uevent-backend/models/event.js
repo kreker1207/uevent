@@ -46,6 +46,7 @@ module.exports = class Event extends Entity {
         }
         else return result[0];
     }
+
     async getEventByUserId(userId,page = null, limit = 4){
       if(userId){
           const knexInstance = knex(knexfile);

@@ -5,6 +5,7 @@ const   USERS_TABLE = 'users',
         { v4: uuidv4 } = require('uuid'),
         Fs = require('fs'),
         User = require('../models/user'),
+        Sub = require('../models/sub'),
         Mailer = require('../middleware/mailer'),
         {CustomError, errorReplier} = require('../models/error');
 //
@@ -140,6 +141,19 @@ class userController{
             res.send('Success File uploaded!');
         } catch (e) {
             e.addMessage = 'edit avatar';
+            errorReplier(e, res);
+        }
+    }
+
+    async getSub(req, res) {
+        try {
+            if (!req.user) throw new CustomError(1011);
+
+            const subTable = new Sub('sub');
+            const subs = await subTable.get({user_id: req.user.id}, true)
+            res.json(subs)
+        } catch (e) {
+            e.addMessage = 'get Subscription';
             errorReplier(e, res);
         }
     }
