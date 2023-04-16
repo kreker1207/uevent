@@ -45,6 +45,26 @@ class userController{
             errorReplier(e, res);
         }
     }
+    async resetPassword(req,res){
+        try{
+            const {email} = req.body;
+            const userTable = new User(USERS_TABLE);
+            const user = await userTable.getUserByEmail(email);
+            if(!user){
+                throw new CustomError(1014);
+            }
+            const newPassword = uuidv4().slice(0,7);
+            console.log(newPassword);
+            const hashedNewPassword = bcrypt.hashSync(newPassword,8);
+            await userTable.findByIdAndUpdate(user.id,hashedNewPassword);
+            mailer.sendResetUserPassword(email,newPassword, secret_mails, {expiresIn: '2h'});
+            return res.json(user);
+        }
+        catch(e){
+            e.addMessage = 'Reset password';
+            errorReplier(e,res);
+        }
+    }
 
     async edit(req, res) {
         try{
