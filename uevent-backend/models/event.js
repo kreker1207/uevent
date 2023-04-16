@@ -93,10 +93,7 @@ module.exports = class Event extends Entity {
   
     return events;
   }
-  async getSearchAll(page, limit, { filter } = {}) {
-    if (page === null || page === undefined) {
-      page = 0;
-    }
+  async getSearchAll({ filter } = {}) {
     const knexInstance = knex(knexfile);
     let query = super.table().select('event.*', knexInstance.raw('json_agg(theme.name) AS tags'))
       .leftJoin('event_theme', 'event.id', 'event_theme.event_id')
@@ -108,7 +105,7 @@ module.exports = class Event extends Entity {
         builder.where('event.title', 'ilike', `${filter}%`);
       });
     }
-    const events = await query.paginate({ isLengthAware: true, perPage: limit, currentPage: page });
+    const events = await query;
     return events;
   }
 

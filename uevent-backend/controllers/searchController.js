@@ -24,10 +24,10 @@ class SearchController{
       const org = new Organization(ORGANIZATION_TABLE);
       const { query } = req.body || ''; 
       const [events, organizations] = await Promise.all([
-        event.getSearchAll(req.params.page, 20, {
+        event.getSearchAll({
           filter: query.toLowerCase()
         }),
-        org.getSearchAll(req.params.page, 20, {
+        org.getSearchAll({
           filter: query.toLowerCase()
         })
       ]);
