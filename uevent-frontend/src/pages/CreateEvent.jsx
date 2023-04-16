@@ -29,11 +29,13 @@ function CreateEvent() {
     const [eventTime, setEventTime] = useState(location.state?.event_datetime?.split(' ')[1] || '');
     const [price, setPrice] = useState(location.state?.price || '');
     const [format, setFormat] = useState(location.state?.format || 'meet_up')
+    const [placeName, setPlaceName] = useState(location.state?.location || "");
     const [publishDate, setPublishDate] = useState('' );
 
     const [evType, setEvType] = useState('')
-    const [placeName, setPlaceName] = useState("");
     const [eve_pic, setFile] = useState(null)
+
+
     const [companyId, setCompanyId] = useState(0)
 
     useEffect(() => {
@@ -104,27 +106,40 @@ function CreateEvent() {
         let formData = new FormData()
         formData.append('avatar', eve_pic)
 
-        api.post(`/org/${companyId}/events`, dataE)
-        .then(function(response) {
-            console.log(response.data)
-            const eventID = response.data.id
-            axios({
-                method: "post",
-                url: `http://localhost:8080/api/events/avatar/${eventID}`,
-                data: formData,
-                headers: {'Access-Control-Allow-Origin': '*', "Content-Type": "multipart/form-data" },
-                credentials: 'include',   
-                withCredentials: true
-            }).then(response => {
+        if(location.state?.id) {
+
+            api.post(`/event/edit/${location.state?.id}`)
+                .then(response => {
+                    console.log(response.data)
+                    navigate(`/events/${response.data.id}`)
+                })
+                .catch(error => {
+                    console.log(error.message)
+                })
+
+        } else {
+            api.post(`/org/${companyId}/events`, dataE)
+            .then(function(response) {
                 console.log(response.data)
-                navigate(`/events/${eventID}`)
-            }).catch(error => {
-                console.log(error.message)
+                const eventID = response.data.id
+                axios({
+                    method: "post",
+                    url: `http://localhost:8080/api/events/avatar/${eventID}`,
+                    data: formData,
+                    headers: {'Access-Control-Allow-Origin': '*', "Content-Type": "multipart/form-data" },
+                    credentials: 'include',   
+                    withCredentials: true
+                }).then(response => {
+                    console.log(response.data)
+                    navigate(`/events/${eventID}`)
+                }).catch(error => {
+                    console.log(error.message)
+                })
             })
-        })
-        .catch(function(error) {
-          console.log(error.response.data.message)
-        })
+            .catch(function(error) {
+              console.log(error.response.data.message)
+            })
+        }
     }
 
     function handleKeyPress(event) {

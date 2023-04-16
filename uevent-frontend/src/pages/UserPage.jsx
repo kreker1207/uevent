@@ -107,8 +107,9 @@ export default function UserPage() {
   }
 
   const handleEditClick = (item) => {
-      console.log(item.event_datetime.split(' ')[0])
-      navigate('/create-event', { state: { 
+      console.log(item.location)
+      navigate('/create-event', { state: {
+        id: item.id,
         title: item.title,
         description: item.description,
         seats: item.seat,
