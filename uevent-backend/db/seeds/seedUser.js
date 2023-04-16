@@ -6,8 +6,8 @@ const bcrypt = require('bcryptjs');
  const hashedPassword = bcrypt.hashSync('admin',8)
  exports.seed = async function(knex) {
     await knex('users').insert([
-      {id: 1, login: 'admin',email:'admin@gmail.com',password:hashedPassword},
-      {id: 2, login: 'user',email:'user@gmail.com',password:hashedPassword},
+      {id: 100, login: 'admin',email:'admin@gmail.com',password:hashedPassword},
+      {id: 200, login: 'user',email:'user@gmail.com',password:hashedPassword},
     ]);
   };
   

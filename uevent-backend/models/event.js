@@ -6,17 +6,20 @@ module.exports = class Event extends Entity {
     constructor(tableName) {
         super(tableName);
     }
-    async getAll(page = null, limit = 20){
-        if (page === null || page === undefined) {
-            page = 0;
-          }
-          const knexInstance = knex(knexfile);
-        return await super.table().select('event.*', knexInstance.raw('json_agg(theme.name) AS tags'))
+    async getAll(page = null, limit = 20) {
+      if (page === null || page === undefined) {
+        page = 0;
+      }
+      const knexInstance = knex(knexfile);
+      const currentDatetime = knexInstance.fn.now();
+      return await super.table()
+        .select('event.*', knexInstance.raw('json_agg(theme.name) AS tags'))
         .leftJoin('event_theme', 'event.id', 'event_theme.event_id')
         .leftJoin('theme', 'event_theme.theme_id', 'theme.id')
+        .where('event.publish_date', '>=', currentDatetime)
         .groupBy('event.id')
-        .orderBy('event.event_datetime', 'asc').paginate({ isLengthAware: true, perPage: limit, currentPage: page });
-
+        .orderBy('event.event_datetime', 'asc')
+        .paginate({ isLengthAware: true, perPage: limit, currentPage: page });
     }
     async getById(id) {
       if (id) {
@@ -45,14 +48,20 @@ module.exports = class Event extends Entity {
     }
 
     async getEventByUserId(userId,page = null, limit = 4){
-        if(userId){
-            return await super.table().select('event.*')
-            .from('event')
-            .join('organization', 'event.organizer_id', '=', 'organization.id')
-            .join('users', 'organization.admin_id', '=', 'users.id')
-            .where('users.id', '=', userId).paginate({ isLengthAware: true, perPage: limit, currentPage: page });
-        }
-        else return result[0];
+      if(userId){
+          const knexInstance = knex(knexfile);
+          return await super.table().select('event.*', knexInstance.raw('json_agg(theme.name) AS tags'))
+          .from('event')
+          .leftJoin('event_theme', 'event.id', 'event_theme.event_id')
+          .leftJoin('theme', 'event_theme.theme_id', 'theme.id')
+          .join('organization', 'event.organizer_id', '=', 'organization.id')
+          .join('users', 'organization.admin_id', '=', 'users.id')
+          .where('users.id', '=', userId)
+          .groupBy('event.id', 'organization.title')
+          .orderBy('event.event_datetime', 'asc')
+          .paginate({ isLengthAware: true, perPage: limit, currentPage: page });
+      }
+      else return result[0];
     }
     async getEventByOrgId(orgId,page = null, limit = 4){
       if(orgId){
@@ -75,29 +84,33 @@ module.exports = class Event extends Entity {
       .leftJoin('theme', 'event_theme.theme_id', 'theme.id')
       .where(function() {
         if (filters.format) {
-          this.where('event.column', '=', filters.format);
+          this.where('event.format', '=', filters.format);
         }
         if (filters.theme) {
-          this.whereIn('theme.name', filters.theme);
+          if (Array.isArray(filters.theme)) {
+            this.whereIn('theme.name', filters.theme);
+          } else {
+            this.where('theme.name', '=', filters.theme);
+          }
         }
+
         if (filters.event_datetime) {
+          // console.log(filters.event_datetime)
           const timestamp = isNaN(Date.parse(filters.event_datetime)) ? null : new Date(filters.event_datetime).toISOString();
           if (timestamp) {
-            this.where('event.event_datetime', '>=', knexInstance.raw('now()::timestamp with time zone'));
+            this.where(knexInstance.raw('event.event_datetime::timestamp with time zone >= now()'));
           } else {
             this.where(knexInstance.raw("to_timestamp(event.event_datetime, 'YYYY-MM-DD HH24:MI:SS') >= ?", timestamp));
           }
         } 
       })
+      
       .groupBy('event.id')
       .paginate({ isLengthAware: true, perPage: limit, currentPage: page });
-  
+    
     return events;
   }
-  async getSearchAll(page, limit, { filter } = {}) {
-    if (page === null || page === undefined) {
-      page = 0;
-    }
+  async getSearchAll({ filter } = {}) {
     const knexInstance = knex(knexfile);
     let query = super.table().select('event.*', knexInstance.raw('json_agg(theme.name) AS tags'))
       .leftJoin('event_theme', 'event.id', 'event_theme.event_id')
@@ -109,7 +122,7 @@ module.exports = class Event extends Entity {
         builder.where('event.title', 'ilike', `${filter}%`);
       });
     }
-    const events = await query.paginate({ isLengthAware: true, perPage: limit, currentPage: page });
+    const events = await query;
     return events;
   }
 

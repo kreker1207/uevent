@@ -7,8 +7,11 @@ import Map from '../components/Map'
 import api from '../utils/apiSetting';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
+//import { useLocation } from 'react-router-dom';
 
 export default function CreateCompany() {
+    //const location = useLocation();
+
     const [placeName, setPlaceName] = useState("Location");
     const { userInfo } = useSelector((state) => state.auth)
     const [phone_number, setPhoneNumber] = useState("");
@@ -16,6 +19,8 @@ export default function CreateCompany() {
     const [description, setDescription] = useState("");
     const [userEmail, setUserEmail] = useState('')
     const [org_pic, setFile] = useState(null)
+
+
     const handleMapCoordinates = (placeName) => {
         setPlaceName(placeName);
     };

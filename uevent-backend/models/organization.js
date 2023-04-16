@@ -16,10 +16,7 @@ module.exports = class Organization extends Entity {
         .groupBy('organization.id','users.email').paginate({ isLengthAware: true, perPage: limit, currentPage: page });
 
     }
-    async getSearchAll(page, limit, { filter } = {}) {
-        if (page === null || page === undefined) {
-          page = 0;
-        }
+    async getSearchAll({ filter } = {}) {
         const knexInstance = knex(knexfile);
         let query = super.table()
           .leftJoin('event', 'organization.id', 'event.organizer_id')
@@ -32,7 +29,7 @@ module.exports = class Organization extends Entity {
             builder.where('organization.title', 'ilike', `${filter}%`);
           });
         }
-        const orgs = await query.paginate({ isLengthAware: true, perPage: limit, currentPage: page });
+        const orgs = await query;
         return orgs;
       }
 }

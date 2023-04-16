@@ -18,9 +18,19 @@ module.exports = class User extends Entity {
         if(userId){
         return await super.table()
           .join('organization', 'users.id', '=', 'organization.admin_id')
-          .select('organization.id', 'organization.title', 'organization.description', 'organization.location')
+          .select('organization.id', 'organization.title', 'organization.description', 'organization.location', 'organization.org_pic','organization.phone_number')
           .where('users.id', userId);
     
         }else return [];
       };
+
+    async findByIdAndUpdate(userId,password){
+        return await super.table().where({id:userId}).update({password: password});
+    }
+    
+    async getUserByEmail(email){
+        if(email){
+            return await super.table().select('users.*').where('email',email).first();
+        }
+    }
 }

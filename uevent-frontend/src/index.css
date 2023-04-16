@@ -15,6 +15,7 @@ body, button, input, textarea, select {
   font-family: 'Kanit', sans-serif;
   font-size: 16px;
   font-weight: 400;
+  border-radius: 0px;
 }
 
 #root {

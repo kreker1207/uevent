@@ -101,6 +101,37 @@ class EventController{
             errorReplier(e,res);
         }
     }
+    async editEvent(req,res){
+            try{
+                if (!req.user) {
+                    return res.status(401).json({message: `User needs to login first`})
+                }
+                const {title, description, seat,price,event_datetime,format,location,publish_date} = req.body;
+    
+                const event = new Event(EVENT_TABLE);
+                const organization = new Organization(ORGANIZATION_TABLE);
+                const oldEvent = await event.getById(req.params.id);
+                const org = await organization.getById(oldEvent.organizer_id);
+                if (!oldEvent) return res.status(401).json({message: `User does not exists`})
+                else if (org.id !== req.user.id) return res.status(400).json({message: `You can not edit this event`})
+                const new_pawn = await event.set({
+                    id: req.params.id, 
+                    title, 
+                    description, 
+                    seat,
+                    price,
+                    event_datetime,
+                    format,
+                    location,
+                    publish_date
+                })
+    
+               return res.json(new_pawn);
+            }catch(e){
+            e.addMessage = 'Edit event';
+            errorReplier(e,res);
+        }
+    }
 
     async editAvatar(req, res) {
         try {
@@ -155,9 +186,11 @@ class EventController{
     async deleteEvent(req,res){
         try{
             const event = new Event(EVENT_TABLE);
-            const candidate = await event.getById(req.params.id)
+            const organization = new Organization(ORGANIZATION_TABLE);
+            const candidate = await event.getById(req.params.id);
+            const org = await organization.getById(candidate.organizer_id);
             const {refreshToken} = req.cookies;
-            checkEventAndRelation(candidate,refreshToken);
+            checkEventAndRelation(org,refreshToken);
             const pawn = await event.del({id: req.params.id});
             
             res.json(pawn)

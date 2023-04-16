@@ -37,6 +37,7 @@ exports.up = function(knex) {
             table.enu('format', ['concert', 'meet_up', 'festival', 'show', 'custom'],
                 { useNative: true, enumName: 'format' }).defaultTo('custom');
             table.string('location', 256).notNullable();
+            table.string('publish_date',32).defaultTo(knex.fn.now().toDate());
             table.string('eve_pic', 128).defaultTo('none.png');
 
             table.foreign('organizer_id').references('id').inTable('organization').onDelete('cascade')
