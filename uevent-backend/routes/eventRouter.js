@@ -12,6 +12,7 @@ router.get('/tags',controller.getTags);
 //get bought
 
 router.post('/events/avatar/:id', controller.editAvatar);
+router.post('/event/edit/:id',authMiddleware,controller.editEvent);
 router.post('/org/:orgId/events',authMiddleware, controller.createEvent);
 router.delete('/events/:id',authMiddleware,controller.deleteEvent);
 module.exports = router

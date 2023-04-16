@@ -18,7 +18,7 @@ module.exports = class User extends Entity {
         if(userId){
         return await super.table()
           .join('organization', 'users.id', '=', 'organization.admin_id')
-          .select('organization.id', 'organization.title', 'organization.description', 'organization.location', 'organization.org_pic')
+          .select('organization.id', 'organization.title', 'organization.description', 'organization.location', 'organization.org_pic','organization.phone_number')
           .where('users.id', userId);
     
         }else return [];

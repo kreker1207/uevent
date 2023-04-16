@@ -6,17 +6,20 @@ module.exports = class Event extends Entity {
     constructor(tableName) {
         super(tableName);
     }
-    async getAll(page = null, limit = 20){
-        if (page === null || page === undefined) {
-            page = 0;
-          }
-          const knexInstance = knex(knexfile);
-        return await super.table().select('event.*', knexInstance.raw('json_agg(theme.name) AS tags'))
+    async getAll(page = null, limit = 20) {
+      if (page === null || page === undefined) {
+        page = 0;
+      }
+      const knexInstance = knex(knexfile);
+      const currentDatetime = knexInstance.fn.now();
+      return await super.table()
+        .select('event.*', knexInstance.raw('json_agg(theme.name) AS tags'))
         .leftJoin('event_theme', 'event.id', 'event_theme.event_id')
         .leftJoin('theme', 'event_theme.theme_id', 'theme.id')
+        .where('event.publish_date', '>=', currentDatetime)
         .groupBy('event.id')
-        .orderBy('event.event_datetime', 'asc').paginate({ isLengthAware: true, perPage: limit, currentPage: page });
-
+        .orderBy('event.event_datetime', 'asc')
+        .paginate({ isLengthAware: true, perPage: limit, currentPage: page });
     }
     async getById(id) {
       if (id) {
