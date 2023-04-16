@@ -25,6 +25,9 @@ module.exports = class Comment extends Entity {
             .orderBy('id', 'asc')
             .select('*');
             comment.replies = replies;
+            const createdAt = new Date(comment.created_at);
+            const createdAtFormatted = `${createdAt.getFullYear()}:${createdAt.getMonth()+1}:${createdAt.getDate()} ${createdAt.getHours()}:${createdAt.getMinutes()}`;
+            comment.created_at = createdAtFormatted;
         }
         return comments;
     }
