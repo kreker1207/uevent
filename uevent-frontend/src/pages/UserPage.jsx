@@ -102,6 +102,7 @@ export default function UserPage() {
         console.log(file)
         formData.append('avatar', file)
 
+        // eslint-disable-next-line
         const { data } = await axios({
             method: "post",
             url: `http://localhost:8080/api/users/avatar`,
@@ -136,7 +137,7 @@ export default function UserPage() {
         tags: item.tags,
   
         publish_date: item.publish_date,
-        evType: item.evType,
+        ev_type: item.is_everybody,
       } });
   }
 
@@ -221,7 +222,7 @@ export default function UserPage() {
                     subscriptions.data.map((item, index) => {
                       return (
                         <div key={index} className="subscription">
-                          <div>{item.title}</div>
+                          <h2 style={{margin: '0'}}>{item.title}</h2>
                           <button onClick={() => handleUnsubscribe(item.event_id)}>Unsubscribe</button>
                         </div>
                       )
@@ -312,8 +313,11 @@ export default function UserPage() {
                         <div className='price'>
                           <div className="buttons">
                             <button className='more' onClick={() => handleEventClick(item.id)}>More</button>
-                            <button className='edit' onClick={() => handleEventEditClick(item)}>Edit</button>
-                            <button className='delete' onClick={() => handleEventDeleteClick(item.id)}>Delete</button>
+                            <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "20px" } }}>
+                                <div>
+                                  <FaPencilAlt style={{cursor: 'pointer', marginLeft: '20px'}} onClick={() => handleEventEditClick(item)}/> <FaTrashAlt style={{color: 'red', cursor: 'pointer'}} onClick={() => handleEventDeleteClick(item.id)}/>
+                                </div>
+                            </IconContext.Provider>
                           </div>
                           <p>{item.price}$</p>
                         </div>
@@ -324,7 +328,7 @@ export default function UserPage() {
                 </div>
               }
               {     
-                userEvents.isLoading ? 
+                userEvents.isLoading? 
                 <></> 
                 : 
                 <Pagination className='pagination'
@@ -387,7 +391,7 @@ const Container = styled.div`
           margin: 20px 0px;
         }
         button {
-          width: 50%;
+          width: 220px;
           height: 50px;
           background: rgb(32, 32, 32);
           border: 1px solid #fff;
@@ -401,6 +405,29 @@ const Container = styled.div`
             border-left: none;
           }
         }
+        .subscriptions {
+          display: flex;
+          justify-content: flex-start;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+          .subscription {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            background: #333533;
+            width: 100%;
+            padding: 15px;
+            button {
+              all: unset;
+              background: #FFD100;
+              color: #ffffff;
+              padding: 8px 50px;
+              cursor: pointer;
+            }
+          }
+        }
       }
       .companies-settings {
         flex-grow: 1;
@@ -408,7 +435,7 @@ const Container = styled.div`
           margin: 20px 0px;
         }
         button {
-          width: 50%;
+          width: 220px;
           height: 50px;
           background: rgb(32, 32, 32);
           border: 1px solid #fff;
@@ -455,7 +482,7 @@ const Container = styled.div`
                   width: 100%;
                   height: 100%;
                   object-fit: cover;
-                  object-position: left top;
+                  object-position: center top;
                 }
               }
             }
@@ -610,14 +637,6 @@ const Container = styled.div`
                   &.more {
                     color: #fff;
                     background-color: #FFD100;
-                  }
-                  &.edit {
-                    color: #48a21c;
-                    background-color: #333533;
-                  }
-                  &.delete {
-                    color: #a61e1e;
-                    background-color: #333533;
                   }
                 }
               }

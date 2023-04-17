@@ -51,9 +51,9 @@ export default function CreateCompany() {
                 })
         } else {
             api.post(`/org`, dataE)
-            .then(response => {
+            .then(async response => {
                 console.log(response.data)
-                axios({
+                await axios({
                     method: "post",
                     url: `http://localhost:8080/api/org/avatar/${response.data.id}`,
                     data: formData,
@@ -61,6 +61,8 @@ export default function CreateCompany() {
                     credentials: 'include',   
                     withCredentials: true
                 })
+                navigate(`/companies/${response.data.id}`)
+
             })
             .catch(error => {
                 console.log(error.message)

@@ -128,6 +128,25 @@ module.exports = class Event extends Entity {
     const events = await query;
     return events;
   }
+  
+  async getSearchEvent(page = null, limit = 20,{ filter } = {}) {
+    if (page === null || page === undefined) {
+      page = 0;
+    }
+    const knexInstance = knex(knexfile);
+    let query = super.table().select('event.*', knexInstance.raw('json_agg(theme.name) AS tags'))
+      .leftJoin('event_theme', 'event.id', 'event_theme.event_id')
+      .leftJoin('theme', 'event_theme.theme_id', 'theme.id')
+      .groupBy('event.id')
+      .orderBy('event.title', 'asc');
+    if (filter) {
+      query = query.where((builder) => {
+        builder.where('event.title', 'ilike', `${filter}%`);
+      });
+    }
+    const events = await query.paginate({ isLengthAware: true, perPage: limit, currentPage: page });;
+    return events;
+  }
 
     
     async setEvent(eventData) {
@@ -158,7 +177,8 @@ module.exports = class Event extends Entity {
               format: eventData.format,
               location: eventData.location,
               eve_pic: eventData.eve_pic,
-              publish_date: eventData.publish_date
+              publish_date: eventData.publish_date,
+              is_everybody: eventData.is_everybody
             }).returning('id')
           
 

@@ -12,20 +12,28 @@ export default function EventPage() {
 
   const [event, setEvent] = useState({data: [], isLoading: true})
   const [comments, setComments] = useState({data: [], isLoading: true})
+  const [visitors, setVisistors] = useState({data: [
+    {id: 1, profile_pic: 'none.png'},
+    {id: 2, profile_pic: 'none.png'},
+    {id: 3, profile_pic: 'none.png'},
+    {id: 4, profile_pic: 'none.png'},
+    {id: 5, profile_pic: 'none.png'},
+    {id: 6, profile_pic: 'none.png'},
+    {id: 7, profile_pic: 'none.png'}
+  ], isLoading: true})
   const [commentsChanged, setCommentsChanged] = useState(0)
 
   const [receiverName, setReceiverName] = useState('')
   const [receiverMaintId, setMainCommentId] = useState(-1)
-  const [receiverCommentId, setReceiverCommentId] = useState(-1)
   const [description, setDescription] = useState('')
   const [promo, setPromo] = useState('')
   const [buyData, setBuyData] = useState({data: '', signature: '', isLoading: true});
-
+  const [isOpen, setIsOpen] = useState(false)
   
   useEffect(() => {
     api.get(`/event/${id}`)
       .then(function (response) {
-        // console.log(response.data)
+        console.log(response.data)
         setEvent({
           data: response.data,
           isLoading: false
@@ -35,6 +43,20 @@ export default function EventPage() {
         console.log(error.message)
       })
   }, [id])
+
+  // useEffect(() => {
+  //   api.get(`/event/${id}/buyers`)
+  //     .then(function (response) {
+  //       //console.log(response.data)
+  //       setVisistors({
+  //         data: response.data,
+  //         isLoading: false
+  //       })
+  //     })
+  //     .catch(function(error) {
+  //       console.log(error.message)
+  //     })
+  // }, [id])
 
 
   useEffect(() => {
@@ -178,7 +200,6 @@ export default function EventPage() {
 
       setReceiverName(receiverName)
       setMainCommentId(receiverMaintId)
-      setReceiverCommentId(receiverCommentId)
     }
   };
 
@@ -245,147 +266,197 @@ export default function EventPage() {
       })
   }
 
+  const showVisitors = () => {
+    if(event.data.is_everybody || true) {
+      if(isOpen === true) {
+        document.getElementById('visitor-button').innerText = 'Show visitors'
+        setIsOpen(false)
+      } else {
+        document.getElementById('visitor-button').innerText = 'Hide visitors'
+        setIsOpen(true)
+      }
+    } else {
+      window.alert('Only visitors of this event can see others')
+    }
+  }
+
   return (
     <Container>
       {
         event.isLoading ? 
         <div className="loading">Loading...</div>
         :
-        <div className="event-image">
-          <img src = {`http://localhost:8080/event_pics/${event.data.eve_pic}`} alt="" />
-        </div>
-      }
-      {
-        event.isLoading ? 
-        <div className="loading">Loading...</div>
-        :
-        <div className="description-block">
-          <div className="description">
-            <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginLeft: "15px" } }}>
-              <h2 style={{lineHeight: '0px'}}>
-                {event.data.title} {event.data.isSub ? <FaStar onClick={() => handleSubscription(event.data.id)}/> : <FaRegStar onClick={() => handleSubscription(event.data.id)}/>} 
-              </h2>
-            </IconContext.Provider>
-            <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
-              <p>
-                <FaMapMarkerAlt/>{event.data.location}
-              </p>
-            </IconContext.Provider>
-            <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
-              <p>
-                <FaClock/>{event.data.event_datetime}
-              </p>
-            </IconContext.Provider>
-            <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
-              <p>
-                <FaUser/>{event.data.org_name}
-              </p>
-            </IconContext.Provider>
-            <div className="info">
-              <h3>Description</h3>
-              <p>{event.data.description}</p>
-            </div> 
-            <div className="price-block">
-              <form id="liqPayId" method="POST" action="https://www.liqpay.ua/api/3/checkout" acceptCharset="utf-8">
-                <input type="hidden" name="data" value={buyData.data}/>
-                <input type="hidden" name="signature" value={buyData.signature}/>
-                <button onClick={buyClick}>Buy</button>
-              </form>
-              <div className="price">{event.data.price}₴</div>
-              <IconContext.Provider value={{ style: { verticalAlign: 'middle'} }}>
-                <div className="promo">
-                  <FaHashtag/> <input type="text" value={promo} placeholder='Enter promocode here' onChange={(e) => setPromo(e.target.value)}/>
+        (
+          new Date(event.data.publish_date) > Date.now() ?
+          <div style={{position: 'absolute', width: 'fit-contnet', top: '50%', left: '50%', transform: 'translate(-50%, -50%)'}} className="loading">Not Available Now</div>
+          :
+          <>
+            {
+              event.isLoading ? 
+              <div className="loading">Loading...</div>
+              :
+              <div className="event-image">
+                <img src = {`http://localhost:8080/event_pics/${event.data.eve_pic}`} alt="" />
+              </div>
+            }
+            {
+              event.isLoading ? 
+              <div className="loading">Loading...</div>
+              :
+              <div className="description-block">
+                <div className="description">
+                  <IconContext.Provider value={{ style: { verticalAlign: 'baseline', marginLeft: "15px"} }}>
+                    <h2>
+                      {event.data.title} {event.data.isSub ? <FaStar onClick={() => handleSubscription(event.data.id)}/> : <FaRegStar onClick={() => handleSubscription(event.data.id)}/>} 
+                    </h2>
+                  </IconContext.Provider>
+                  <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
+                    <p>
+                      <FaMapMarkerAlt/>{event.data.location}
+                    </p>
+                  </IconContext.Provider>
+                  <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
+                    <p>
+                      <FaClock/>{event.data.event_datetime}
+                    </p>
+                  </IconContext.Provider>
+                  <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
+                    <p>
+                      <FaUser/>{event.data.org_name}
+                    </p>
+                  </IconContext.Provider>
+                  <div className="info">
+                    <button id='visitor-button' onClick={showVisitors}>Show visitors</button>
+                    <div className={`visitors ${isOpen}`}>
+                      {
+                        visitors.isLoading ?
+                        <div style={{position: 'absolute', width: 'fit-contnet', top: '50%', left: '50%', transform: 'translate(-50%, -50%)'}} className="loading">Loading...</div>
+                        :
+                        (
+                          visitors.data.length === 0 ?
+                          <div style={{position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)'}} className="loading">No visitors yet</div>
+                          :
+                          <>
+                            {
+                              visitors.data.map((item, index) => {
+                                return (
+                                  <div className="visitor-user">
+                                      <img title={item.id} src={`http://localhost:8080/profile_pics/${item.profile_pic}`} alt="logo" />
+                                  </div>
+                                )
+                              })
+                            }
+                          </>
+                        )
+                      }
+                    </div>
+                    <h3>Description</h3>
+                    <p>{event.data.description}</p>
+                  </div> 
+                  <div className="price-block">
+                    <form id="liqPayId" method="POST" action="https://www.liqpay.ua/api/3/checkout" acceptCharset="utf-8">
+                      <input type="hidden" name="data" value={buyData.data}/>
+                      <input type="hidden" name="signature" value={buyData.signature}/>
+                      <button onClick={buyClick}>Buy</button>
+                    </form>
+                    <div className="price">{event.data.price}₴</div>
+                    <IconContext.Provider value={{ style: { verticalAlign: 'middle'} }}>
+                      <div className="promo">
+                        <FaHashtag/> <input type="text" value={promo} placeholder='Enter promocode here' onChange={(e) => setPromo(e.target.value)}/>
+                      </div>
+                    </IconContext.Provider>
+                  </div> 
                 </div>
-              </IconContext.Provider>
-            </div> 
-          </div>
-        </div>
-      }
-      {
-        event.isLoading && comments.isLoading ? 
-        <div className="loading">Loading...</div>
-        :
-        <div className="comments-block">
-          <h2>Comments</h2>
-          {
-            comments.data.length === 0 ? 
-            <div className="loading">No comments yet</div>
-            :
-            <div className="comments-inner">
-              {
-                comments.data.map((item, index) => {
-                  return (
-                    <div key={index} className="comment">
-                      <div className="userinfo">
-                          <div className="photo">
-                            <div><img src={`http://localhost:8080/${item.profile_pic}`} alt="userlogo" /></div>
-                            <div className="name">
-                              <h4>{item.login} {item.company ? <span style={{color: "red", fontSize: "12px", border: '1px solid red', padding: '0px 5px'}}>{item.company}</span> : <></>} </h4>
-                              <p>{item.created_at}</p>
+              </div>
+            }
+            {
+              event.isLoading && comments.isLoading ? 
+              <div className="loading">Loading...</div>
+              :
+              <div className="comments-block">
+                <h2>Comments</h2>
+                {
+                  comments.data.length === 0 ? 
+                  <div className="loading">No comments yet</div>
+                  :
+                  <div className="comments-inner">
+                    {
+                      comments.data.map((item, index) => {
+                        return (
+                          <div key={index} className="comment">
+                            <div className="userinfo">
+                                <div className="photo">
+                                  <div><img src={`http://localhost:8080/${item.profile_pic}`} alt="userlogo" /></div>
+                                  <div className="name">
+                                    <h4>{item.login} {item.company ? <span style={{color: "red", fontSize: "12px", border: '1px solid red', padding: '0px 5px'}}>{item.company}</span> : <></>} </h4>
+                                    <p>{item.created_at}</p>
+                                  </div>
+                                </div>
+                                <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px", cursor: "pointer" } }}>
+                                  <div className="arrow">
+                                    <FaReply onClick={() => handleCommentFocus(item.login, item.id, item.id)}/>
+                                  </div>
+                                </IconContext.Provider>
                             </div>
-                          </div>
-                          <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px", cursor: "pointer" } }}>
-                            <div className="arrow">
-                              <FaReply onClick={() => handleCommentFocus(item.login, item.id, item.id)}/>
+                            <div className="comment-text">
+                              {item.content}
                             </div>
-                          </IconContext.Provider>
-                      </div>
-                      <div className="comment-text">
-                        {item.content}
-                      </div>
-                      <div className="replies">
-                        {
-                          item.replies.map((itemInner, index) => {
-                            return (
-                              <div style={{marginBottom: "25px"}} key={index} className="comment">
-                                <div className="userinfo">
-                                    <div className="photo">
-                                      <div><img src = {`http://localhost:8080/${itemInner.profile_pic}`} alt="" /></div>
-                                      <div className="name">
-                                        <h4>{itemInner.login} {itemInner.company ? <span style={{color: "red", fontSize: "12px", border: '1px solid red', padding: '0px 5px'}}>{itemInner.company}</span> : <></>} <i style={{color: "#868686", fontSize: "12px"}}>replied to {itemInner.receiver_name}</i></h4>
-                                        <p>{itemInner.created_at}</p>
+                            <div className="replies">
+                              {
+                                item.replies.map((itemInner, index) => {
+                                  return (
+                                    <div style={{marginBottom: "25px"}} key={index} className="comment">
+                                      <div className="userinfo">
+                                          <div className="photo">
+                                            <div><img src = {`http://localhost:8080/${itemInner.profile_pic}`} alt="" /></div>
+                                            <div className="name">
+                                              <h4>{itemInner.login} {itemInner.company ? <span style={{color: "red", fontSize: "12px", border: '1px solid red', padding: '0px 5px'}}>{itemInner.company}</span> : <></>} <i style={{color: "#868686", fontSize: "12px"}}>replied to {itemInner.receiver_name}</i></h4>
+                                              <p>{itemInner.created_at}</p>
+                                            </div>
+                                          </div>
+                                          <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px", cursor: "pointer" } }}>
+                                            <div className="arrow">
+                                              <FaReply onClick={() => handleCommentFocus(itemInner.login, item.id, itemInner.id)}/>
+                                            </div>
+                                          </IconContext.Provider>
+                                      </div>
+                                      <div className="comment-text">
+                                        {itemInner.content}
                                       </div>
                                     </div>
-                                    <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px", cursor: "pointer" } }}>
-                                      <div className="arrow">
-                                        <FaReply onClick={() => handleCommentFocus(itemInner.login, item.id, itemInner.id)}/>
-                                      </div>
-                                    </IconContext.Provider>
-                                </div>
-                                <div className="comment-text">
-                                  {itemInner.content}
-                                </div>
-                              </div>
-                            )
-                          })
-                        }
-                      </div>
-                    </div>
-                  )
-                })
-              }
-            </div>
-          }
-          <div className="textarea">
-             <textarea value={description} id="textarea" ref={inputRef} placeholder="Type comment here..." onChange={(e)=>setDescription(e.target.value)}></textarea>
-             <button onClick={handleCommentSend} type="submit">Send</button>
-          </div>
-        </div>
-      }
-      {
-        event.isLoading ? 
-        <div className="loading">Loading...</div>
-        :
-        <div className="map">
-          <iframe
-            title='map'
-            loading="lazy"
-            allowFullScreen=""
-            referrerPolicy="no-referrer-when-downgrade"
-            src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyDuHV2o8j_nfA8XMUC-15fN9vlDB9htW30
-            &q=${event.data.location}`}>
-          </iframe>
-        </div>
+                                  )
+                                })
+                              }
+                            </div>
+                          </div>
+                        )
+                      })
+                    }
+                  </div>
+                }
+                <div className="textarea">
+                  <textarea value={description} id="textarea" ref={inputRef} placeholder="Type comment here..." onChange={(e)=>setDescription(e.target.value)}></textarea>
+                  <button onClick={handleCommentSend} type="submit">Send</button>
+                </div>
+              </div>
+            }
+            {
+              event.isLoading ? 
+              <div className="loading">Loading...</div>
+              :
+              <div className="map">
+                <iframe
+                  title='map'
+                  loading="lazy"
+                  allowFullScreen=""
+                  referrerPolicy="no-referrer-when-downgrade"
+                  src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyDuHV2o8j_nfA8XMUC-15fN9vlDB9htW30
+                  &q=${event.data.location}`}>
+                </iframe>
+              </div>
+            }
+          </>
+        )
       }
 
     </Container>
@@ -419,9 +490,55 @@ const Container = styled.div`
         width: 100%;
         height: 100%;
         .info {
+          position: relative;
           margin-bottom: 60px;
           h3 {
             margin-bottom: 0;
+          }
+          button {
+            margin-top: 20px;
+            color: #ffffff;
+            background-color: #a3a3a3;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+          }
+          .visitors {
+            display: none;
+            &.true {
+              position: absolute;
+              top: 60px;
+              left: 0;
+              width: 300px;
+              height: 190px;
+              background-color: #868686;
+              display: block;
+              border-radius: 5px;
+              overflow-y: scroll;
+              padding: 20px;
+
+              display: flex;
+              justify-content: flex-start;
+              align-items: center;
+              column-gap: 10px;
+              flex-wrap: wrap;
+
+              &::-webkit-scrollbar {
+                display: none;
+              }
+            }
+            .visitor-user {
+              width: 50px;
+              height: 50px;
+              border-radius: 50%;
+              overflow: hidden;
+              img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                object-position: left top;
+              }
+            }
           }
         }
         .price-block {

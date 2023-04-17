@@ -53,32 +53,29 @@ class CommentController{
             const {content, receiver_name} = req.body;
             const commentTable = new Comment(COMMENT_TABLE);
             const eventTable = new Event(EVENT_TABLE);
-            
+            const event = await eventTable.getById(req.params.eventId);
+            if(!event) throw new CustomError(1009);
+
             const commentData= {
                 content: content,
             }
-            let admin = null;
-            
+            const {admin_id} = await eventTable.getAdminId(req.params.eventId);
+            if (req.user.id === admin_id) 
+                commentData.author_organization_id = event.organizer_id;
+            else
+                commentData.author_id = req.user.id
+
             if(req.body.comment_id) {
                 const commentTable = new Comment(COMMENT_TABLE);
                 const mainComment = await commentTable.getById(req.body.comment_id);
                 if(!mainComment) throw new CustomError(1010);
-                /*const eventId = await commentTable.getEventId(req.params.eventId);
-                console.log(eventId)
-                if(!eventId) throw new CustomError(1009);*/
-                admin = await eventTable.getAdminId(req.params.eventId);
+
                 commentData.comment_id = req.body.comment_id;
                 commentData.receiver_name = receiver_name;
             } else {
-                const event = await eventTable.getById(req.params.eventId);
-                if(!event) throw new CustomError(1009);
-                admin = await eventTable.getAdminId(req.params.eventId);
                 commentData.event_id = req.params.eventId
             }
-            if (req.user.id === admin.admin_id) 
-                commentData.author_organization_id = admin.admin_id;
-            else
-                commentData.author_id = req.user.id;
+
             console.log(commentData)
             const [comment] = await commentTable.set(commentData);
             console.log(comment);

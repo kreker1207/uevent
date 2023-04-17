@@ -36,6 +36,7 @@ exports.up = function(knex) {
             table.string('event_datetime', 32).notNullable();
             table.enu('format', ['concert', 'meet_up', 'festival', 'show', 'custom'],
                 { useNative: true, enumName: 'format' }).defaultTo('custom');
+            table.boolean('is_everybody').defaultTo(true);
             table.string('location', 256).notNullable();
             table.timestamp('publish_date',32).notNullable();
             table.string('eve_pic', 128).defaultTo('none.png');
@@ -118,10 +119,11 @@ exports.up = function(knex) {
 */
 exports.down = function(knex) {
     return Promise.all([
-        knex.schema.dropTable('event'),
-        knex.schema.dropTable('seat'),
-        knex.schema.dropTable('organization'),
         knex.schema.dropTable('comment'),
+        knex.schema.dropTable('theme'),
+        knex.schema.dropTable('event_theme'),
+        knex.schema.dropTable('event'),
+        knex.schema.dropTable('organization'),
         knex.schema.dropTable('users')
     ]);
 };

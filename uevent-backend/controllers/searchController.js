@@ -9,7 +9,7 @@ class SearchController{
     try {
       const event = new Event(EVENT_TABLE);
       const { query } = req.body || '';
-      const events = await event.getSearchAll(req.params.page, 9, {
+      const events = await event.getSearchEvent(req.params.page, 9, {
         filter: query.toLowerCase()
       });
       res.json(events);

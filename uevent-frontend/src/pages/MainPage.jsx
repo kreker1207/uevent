@@ -64,8 +64,7 @@ export default function MainPage() {
   /*-----------------------------SEARCH FUNCTIONS-----------------------------*/
   const handleSearchEvents = () => {
     console.log(eventsToSearch)
-    setEvents({...events, loading: true})
-    api.post(`/events/search/`, {query: eventsToSearch})
+    api.post(`/events/search/1`, {query: eventsToSearch})
       .then(response => {
         console.log(response.data)
         setEvents({
@@ -118,18 +117,33 @@ export default function MainPage() {
         console.log(error.message)
       })
     } else {
-      api.get(`/events/${page}`)
-      .then(function(response) {
-        setEvents({
-          loading: false,
-          data: response.data.data,
-          pagination: response.data.pagination
+      if(eventsToSearch) {
+        api.post(`/events/search/${page}`, {query: eventsToSearch})
+        .then(response => {
+          console.log(response.data)
+          setEvents({
+            loading: false,
+            data: response.data.data,
+            pagination: response.data.pagination
+          })
         })
-      
-      })
-      .catch(function(error) {
+        .catch(error => {
           console.log(error.message)
-      })
+        })
+      } else {
+        api.get(`/events/${page}`)
+        .then(function(response) {
+          setEvents({
+            loading: false,
+            data: response.data.data,
+            pagination: response.data.pagination
+          })
+        
+        })
+        .catch(function(error) {
+            console.log(error.message)
+        })
+      }
     }
   }
   /*--------------------------------------------------------------------------------*/

@@ -31,8 +31,7 @@ function CreateEvent() {
     const [format, setFormat] = useState(location.state?.format || 'meet_up')
     const [placeName, setPlaceName] = useState(location.state?.location || "");
     const [publishDate, setPublishDate] = useState(location.state?.publish_date?.split('T')[0] || "");
-  
-    const [evType, setEvType] = useState('')
+    const [ev_type, setEvType] = useState(location.state?.ev_type === true ? 'everybody' : 'visitors')
     const [eve_pic, setFile] = useState(null)
 
 
@@ -101,7 +100,7 @@ function CreateEvent() {
             publish_date: publishDate,
 
             tags,
-            evType,
+            ev_type: ev_type === 'everybody' ? true : false,
         }
 
         let formData = new FormData()
@@ -200,9 +199,9 @@ function CreateEvent() {
                     </div>
                     <div className="additionals">
                         <div>
-                            <input type="radio" name="ev_type" value="everybody" checked={evType === 'everybody'} onChange={handleEvType}/>
+                            <input type="radio" name="ev_type" value="everybody" checked={ev_type === 'everybody'} onChange={handleEvType}/>
                             <label htmlFor="everybody" style={{marginRight: '10px'}}>Everybody</label>
-                            <input type="radio" name="ev_type" value="visitors" checked={evType === 'visitors'} onChange={handleEvType}/>
+                            <input type="radio" name="ev_type" value="visitors" checked={ev_type === 'visitors'} onChange={handleEvType}/>
                             <label htmlFor="visitors">Only visitors</label>
                         </div>
                         <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>

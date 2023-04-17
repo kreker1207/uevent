@@ -81,7 +81,7 @@ class EventController{
             if(! errors.isEmpty()){
                 throw new CustomError(10);
             }
-            const {title, description, event_datetime, location, seat, price, tags, format, publish_date } = req.body;
+            const {title, description, event_datetime, location, seat, price, tags, format, publish_date, ev_type } = req.body;
             const event = new Event(EVENT_TABLE);
             const organization = new Organization(ORGANIZATION_TABLE);
             const candidate = await organization.getById(req.params.orgId);
@@ -99,7 +99,8 @@ class EventController{
                 price:price,
                 tags:tags,
                 format,
-                publish_date: date
+                publish_date: date,
+                is_everybody: ev_type
             }
             console.log(eventData)
             const pawn = await event.setEvent(eventData);
@@ -115,7 +116,7 @@ class EventController{
                 if (!req.user) {
                     return res.status(401).json({message: `User needs to login first`})
                 }
-                const {title, description, seat, price, event_datetime, format, location, publish_date} = req.body;
+                const {title, description, seat, price, event_datetime, format, location, publish_date, ev_type} = req.body;
     
                 const event = new Event(EVENT_TABLE);
                 const organization = new Organization(ORGANIZATION_TABLE);
@@ -132,7 +133,8 @@ class EventController{
                     event_datetime,
                     format,
                     location,
-                    publish_date
+                    publish_date,
+                    is_everybody: ev_type
                 })
                return res.json(new_pawn[0]);
             }catch(e){
@@ -153,20 +155,23 @@ class EventController{
             const event = new Event(EVENT_TABLE);
             const eve = await event.table().select('*').where({id: req.params.id}).first();
             
-            const avatar_name = eve.title + '_' + uuidv4() + '.png';
+            const avatar_name = eve.title.includes('/') ? uuidv4() + '.png' : eve.title + '_' + uuidv4() + '.png';
             const avatar_path = './public/event_pics/';
             
             // input name on front should be like this VVV (avatar)
             const avatar = req.files.avatar;
             avatar.mv(avatar_path + avatar_name, function(err) {
+                console.log('----------avatar_mv------------')
+                console.log(err)
                 if (err) return res.status(500).send(err);
             });
             await event.set({id: eve.id, eve_pic: avatar_name});
 
             if(eve.eve_pic !== 'none.png') {
+                console.log('----------FS_UNlink------------')
                 Fs.unlinkSync(avatar_path + eve.eve_pic)
             }
-            
+            console.log('-----res.send-----')
             res.send('Success File uploaded!');
         } catch (e) {
             e.addMessage = 'edit eve avatar';
