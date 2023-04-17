@@ -9,6 +9,7 @@ router.get('/event/:id',controller.getEventById);
 router.get('/event/user/:userId/:page(\\d+)?',controller.getEventByUserId);
 router.get('/event/org/:orgId/:page(\\d+)?',controller.getEventByOrgId);
 router.get('/event/:id/buyers', controller.getBuyers);
+router.get('/event/:id/seats', controller.getSeats);
 router.get('/tags',controller.getTags);
 //get bought
 router.post('/events/:id/sub', controller.setSub);

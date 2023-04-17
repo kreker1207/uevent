@@ -222,6 +222,22 @@ class EventController{
         }
     }
 
+    async getSeats(req, res) {
+        try {
+            if (!req.params.id) throw new CustomError(10);
+            const eveTable = new Event(EVENT_TABLE);
+            const event = await eveTable.getById(req.params.id);
+            if (!event) throw new CustomError(1009);
+
+            const purTable = new Purchase(PURCHASE_TABLE);
+            const seatsRemaining = await purTable.getRemaining(event.id, event.seat);
+            res.json(seatsRemaining);
+        } catch (e) {
+            e.addMessage = 'get Remaining seats';
+            errorReplier(e, res);
+        }
+    }
+
     async deleteEvent(req,res){
         try{
             const event = new Event(EVENT_TABLE);
