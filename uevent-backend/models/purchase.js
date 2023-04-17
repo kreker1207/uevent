@@ -7,10 +7,17 @@ module.exports = class Purchase extends Entity {
 
     async getUsers(event_id) {
         return await super.table()
-        .select('purchase.id', 'users.id AS user_id', 'users.profile_pic')
+        .select('purchase.id', 'users.id AS user_id','users.email AS email', 'users.profile_pic')
         .from('purchase')
         .join('users', 'purchase.user_id', '=', 'users.id')
         .where({event_id: event_id, status: true});
+    }
+
+    async getRemaining(event_id, seat_count) {
+        const {count} = await super.table()
+        .where({event_id: event_id, status: true})
+        .count('*').first();
+        return seat_count - count;
     }
 
     async set(setObj, edit = false) {
