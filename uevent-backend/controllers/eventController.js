@@ -36,6 +36,14 @@ class EventController{
             }
             res.json(result);
 
+            if(req.user) {
+                const subTable = new Sub('sub');
+                const sub = await subTable.get({user_id: req.user.id, event_id: req.params.id});
+                if (sub) result.isSub = true
+                else result.isSub = false
+            }
+
+            res.json(result);
         } catch(e){
             e.addMessage= 'Get event by id';
             errorReplier(e,res);

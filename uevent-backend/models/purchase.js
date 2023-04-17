@@ -5,7 +5,7 @@ module.exports = class Purchase extends Entity {
         super(tableName);
     }
 
-    async get(searchObj) {
+    /*async get(searchObj) {
         return await super.table()
         .select('purchase.id', 'status', 'users.login', 'users.email',
         'event.title', 'event.event_datetime', 'event.location')
@@ -13,7 +13,7 @@ module.exports = class Purchase extends Entity {
         .join('event', 'purchase.event_id', '=', 'event.id')
         .join('users', 'purchase.user_id', '=', 'users.id')
         .where(searchObj);
-    }
+    }*/
 
     async set(setObj, edit = false) {
         if (edit) {

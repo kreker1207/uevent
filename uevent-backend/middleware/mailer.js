@@ -31,9 +31,13 @@ module.exports = class Mailer {
             from: config.from,
             to: email,
             subject: 'Uevent: Your tickets!',
-            html: `You successfuly purchased tickets for an event that will take place\
+            html: `Dear ${data.buyer}, You successfuly purchased tickets for an event that will take place\
             at ${data.location} at ${data.event_datetime}!\
             \nGood luck`,
+            attachments: [{
+                filename: data.buyer + '_ticket.pdf',
+                content: data.buffer
+            }]
         }, (error, info) => {
             if (error) {
                 console.log(error);

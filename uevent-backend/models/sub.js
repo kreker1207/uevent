@@ -4,6 +4,7 @@ module.exports = class Subscription extends Entity {
     constructor(tableName) {
         super(tableName);
     }
+    
     async getEvents(user_id) {
         return await super.table()
         .select('event_id', 'event.title')
