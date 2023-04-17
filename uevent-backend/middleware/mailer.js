@@ -26,6 +26,43 @@ module.exports = class Mailer {
         });
     };
 
+    sendRefund (email, order_id) {
+        this.transporter.sendMail({
+            from: config.from,
+            to: email,
+            subject: 'Uevent Ticket refund',
+            html: `You purchased a ticket at our site Uevent: \
+            <a href="${this.FrontAddress}"> Uevent</a>\
+            \nWe are terribly sorry to inform you that something went wrong!\
+            You will get your refund in the nearest future.
+            Your order id: ${order_id}
+            You can contact us at: deds_dev_xye.coc.interactive@ukr.net`,
+        }, (error, info) => {
+            if (error) {
+                console.log(error);
+                return error;
+            }
+        });
+    };
+
+    sendRefundError (email, order_id) {
+        this.transporter.sendMail({
+            from: config.from,
+            to: email,
+            subject: 'Uevent Ticket refund ERROR',
+            html: `You purchased a ticket at our site Uevent: \
+            <a href="${this.FrontAddress}"> Uevent</a>\
+            \nWe were trying to refund your money but something went wrong!
+            \nYour order id: ${order_id}
+            \nPlease contact us at deds_dev_xye.coc.interactive@ukr.net so we can solve the problem as soon as possible!`,
+        }, (error, info) => {
+            if (error) {
+                console.log(error);
+                return error;
+            }
+        });
+    };
+
     sendTicket (email, data) {
         this.transporter.sendMail({
             from: config.from,
@@ -45,6 +82,7 @@ module.exports = class Mailer {
             }
         });
     };
+
     sendResetUserPassword (email, password) {
         this.transporter.sendMail({
             from: config.from,
