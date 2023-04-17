@@ -11,25 +11,37 @@ const   EVENT_TABLE = 'event',
         Purchase = require('../models/purchase'),
         Mailer = require('../middleware/mailer'),
         LiqPay = require('../middleware/liqpay'),
-        {PDFDocument} = require('pdf-lib'),
+        {PDFDocument, StandardFonts} = require('pdf-lib'),
+        fontkit = require('@pdf-lib/fontkit'),
+        iconv = require('iconv-lite'),
         Fs = require('fs'),
         {CustomError, errorReplier} = require('../models/error');
 //
 const mailer = new Mailer();
 const pdfBuffer = Fs.readFileSync('./middleware/UeventTicketTemplate.pdf')
+const fontBytes = Fs.readFileSync('./middleware/Alice-Regular.ttf');
 
 const pdfFormFilling = async (organization, event, userLogin) => {
+
     const pdfDoc = await PDFDocument.load(pdfBuffer);
+    pdfDoc.registerFontkit(fontkit)
+    const arialFont = await pdfDoc.embedFont(fontBytes);
     const pdfForm = pdfDoc.getForm();
+    
     pdfForm.getTextField('OrgTitle').setText(organization.title)
     pdfForm.getTextField('OrgEmail').setText(organization.email)
     pdfForm.getTextField('OrgPhone').setText(organization.phone_number)
     pdfForm.getTextField('OrgLocation').setText(organization.location)
 
+    console.log(event.location)
     pdfForm.getTextField('EveTitle').setText(event.title)
     pdfForm.getTextField('EveLocation').setText(event.location)
     pdfForm.getTextField('EveDateTime').setText(event.event_datetime)
     pdfForm.getTextField('Owner').setText(userLogin)
+
+    pdfForm.getFields().forEach((field) => {
+        field.updateAppearances(arialFont)
+    });
     pdfForm.flatten();
     return await pdfDoc.save();
 }
@@ -88,7 +100,7 @@ module.exports = async function purCheker(){
                 });
                 return;
             });
-        //}, 10000)
+        // }, 10000)
         }, 300000)
     } catch (error) {
         e.addMessage = 'purchase checker';

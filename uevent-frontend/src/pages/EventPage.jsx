@@ -44,19 +44,19 @@ export default function EventPage() {
       })
   }, [id])
 
-  // useEffect(() => {
-  //   api.get(`/event/${id}/buyers`)
-  //     .then(function (response) {
-  //       //console.log(response.data)
-  //       setVisistors({
-  //         data: response.data,
-  //         isLoading: false
-  //       })
-  //     })
-  //     .catch(function(error) {
-  //       console.log(error.message)
-  //     })
-  // }, [id])
+  useEffect(() => {
+    api.get(`/event/${id}/buyers`)
+      .then(function (response) {
+        console.log(response.data)
+        setVisistors({
+          data: response.data,
+          isLoading: false
+        })
+      })
+      .catch(function(error) {
+        console.log(error.message)
+      })
+  }, [id])
 
 
   useEffect(() => {
@@ -340,8 +340,13 @@ export default function EventPage() {
                             {
                               visitors.data.map((item, index) => {
                                 return (
-                                  <div className="visitor-user">
-                                      <img title={item.id} src={`http://localhost:8080/profile_pics/${item.profile_pic}`} alt="logo" />
+                                  <div key={index} className='nested'>
+                                    <div className="visitor-user">
+                                      <img src={`http://localhost:8080/profile_pics/${item.profile_pic}`} alt="logo" />
+                                    </div>
+                                    <div className={`mail`}>
+                                      <a href={`mailto:${item.email}`}>Send Email</a>
+                                    </div>
                                   </div>
                                 )
                               })
@@ -519,24 +524,30 @@ const Container = styled.div`
 
               display: flex;
               justify-content: flex-start;
-              align-items: center;
-              column-gap: 10px;
-              flex-wrap: wrap;
+              align-items: flex-start;
+              flex-direction: column;
+              row-gap: 10px;
 
               &::-webkit-scrollbar {
                 display: none;
               }
-            }
-            .visitor-user {
-              width: 50px;
-              height: 50px;
-              border-radius: 50%;
-              overflow: hidden;
-              img {
+              .nested {
                 width: 100%;
-                height: 100%;
-                object-fit: cover;
-                object-position: left top;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                .visitor-user {
+                  width: 50px;
+                  height: 50px;
+                  border-radius: 50%;
+                  overflow: hidden;
+                  img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    object-position: left top;
+                  }
+                }
               }
             }
           }

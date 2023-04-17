@@ -21,6 +21,16 @@ module.exports = class Purchase extends Entity {
         return seat_count - count;
     }
 
+    async getEvents(user_id) {
+        return await super.table()
+        .select('purchase.id', 'event.id AS event_id', 'event.title AS title',
+        'event.description as description', 'event.event_datetime as event_datetime',
+        'event.location as location', 'event.eve_pic')
+        .from('purchase')
+        .join('event', 'purchase.event_id', '=', 'event.id')
+        .where({user_id: user_id, status: true});
+    }
+
     async set(setObj, edit = false) {
         if (edit) {
             return await this.table().returning('*').where({id: setObj.id}).update(setObj)

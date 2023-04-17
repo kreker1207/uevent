@@ -15,6 +15,7 @@ export default function UserPage() {
   const [userCompanies, setUserCompanies] = useState({ data: [], isLoading: true })
   const [userEvents, setUserEvents] = useState({ data: {}, isLoading: true })
   const [subscriptions, setSubscriptions] = useState({data: [], isLoading: true})
+  const [tickets, setTickets] = useState({data: [], isLoading: true})
   const navigate = useNavigate()
   
   const inputFileRef = useRef(null)
@@ -23,6 +24,20 @@ export default function UserPage() {
     api.get(`/users/${userInfo.id}`)
       .then(response => {
         setUser({
+          data: response.data,
+          isLoading: false
+        })
+      })
+      .catch(error => {
+        console.log(error.message)
+      })
+  }, [userInfo])
+
+  useEffect(() => {
+    api.get(`/users/buy`)
+      .then(response => {
+        console.log(response.data)
+        setTickets({
           data: response.data,
           isLoading: false
         })
@@ -212,6 +227,49 @@ export default function UserPage() {
                 <button className='unactive' onClick={()=>setUserSettings('companies')}>Companies</button>
               </div>
               <h2>My tickets</h2>
+              {
+                tickets.isLoading ? 
+                <div className="loading">Loading...</div>
+                :
+                <div className="events">
+                  {
+                    tickets.data.length === 0 ? 
+                    <div className="loading">Loading...</div>
+                    :
+                    <>
+                    {
+                      tickets.data.map((item, index) => {
+                        return (
+                          <div key={index} className="event">
+                            <div className='time-location'>
+                              <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
+                                <p className='location'>
+                                  <FaMapMarkerAlt/>{item.location}
+                                </p>
+                              </IconContext.Provider>
+                              <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
+                                <p className='time'>
+                                  <FaClock/>{item.event_datetime}
+                                </p>
+                              </IconContext.Provider>
+                            </div>
+                            <div className='description'>
+                              <h2>{item.title}</h2>
+                              <p>{item.description}</p>
+                            </div>
+                            <div className='price'>
+                              <div className="buttons">
+                                <button className='more' onClick={() => handleEventClick(item.event_id)}>More</button>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })
+                    }
+                    </>
+                  }
+                </div>
+              }
               <h2>Notification subscriptions</h2>
               {
                 subscriptions.isLoading ? 
@@ -425,6 +483,112 @@ const Container = styled.div`
               color: #ffffff;
               padding: 8px 50px;
               cursor: pointer;
+            }
+          }
+        }
+        .events {
+          max-width: 1480px;
+          margin: 0 auto;
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          grid-gap: 10px;
+          margin-bottom: 60px;
+
+          .event {
+            background-color: #ffffff;
+            border: 1px solid #000000;
+            background: #333533;
+            box-shadow: 0px 4px 50px 4px rgba(0, 0, 0, 0.25);
+
+            display: flex;
+            justify-content: space-between;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            height: fit-content;
+            padding: 25px 20px;
+
+            .time-location {
+              width: 100%;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              p {
+                width: 50%;
+              }
+              .time {
+                text-align: end;
+              }
+              .location {
+                margin: 0;
+                -ms-text-overflow: ellipsis;
+                -o-text-overflow: ellipsis;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                -ms-line-clamp: 1;
+                -webkit-line-clamp: 1;
+                line-clamp: 1;
+                display: -webkit-box;
+                display: box;
+                word-wrap: break-word;
+                -webkit-box-orient: vertical;
+                box-orient: vertical;
+              }
+            } 
+            .description {
+              width: 100%;
+              h2 {
+                margin: 0;
+              }
+              p {
+                margin: 0;
+                -ms-text-overflow: ellipsis;
+                -o-text-overflow: ellipsis;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                -ms-line-clamp: 2;
+                -webkit-line-clamp: 2;
+                line-clamp: 2;
+                display: -webkit-box;
+                display: box;
+                word-wrap: break-word;
+                -webkit-box-orient: vertical;
+                box-orient: vertical;
+              }
+            }
+            .price {
+              width: 100%;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+
+              .buttons {
+                width: fit-content;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+                  button {
+                  width: fit-content;
+                  height: fit-content;
+                  text-align: center;
+                  padding: 5px 20px;
+                  font-weight: 700;
+                  font-size: 20px;
+                  border: none;
+                  cursor: pointer;
+
+                  &.more {
+                    color: #fff;
+                    background-color: #FFD100;
+                  }
+                }
+              }
+              p {
+                font-weight: 700;
+                font-size: 20px;
+                color: #fff;
+              }
             }
           }
         }

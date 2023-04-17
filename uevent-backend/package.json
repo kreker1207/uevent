@@ -4,6 +4,7 @@
   "description": "",
   "main": "app.js",
   "dependencies": {
+    "@pdf-lib/fontkit": "^1.1.1",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -12,6 +13,7 @@
     "express-fileupload": "^1.4.0",
     "express-validator": "^6.15.0",
     "helmet": "^6.0.1",
+    "iconv-lite": "^0.6.3",
     "js-sha1": "^0.6.0",
     "jsonwebtoken": "^9.0.0",
     "knex": "^2.4.2",

@@ -1,4 +1,5 @@
 const   USERS_TABLE = 'users',
+        PURCHSE_TABLE = 'purchase',
         bcrypt = require('bcryptjs'),
         jwt = require('jsonwebtoken'),
         {secret_mails} = require('../config'),
@@ -7,6 +8,7 @@ const   USERS_TABLE = 'users',
         User = require('../models/user'),
         Sub = require('../models/sub'),
         Mailer = require('../middleware/mailer'),
+        Purchase = require('../models/purchase'),
         {CustomError, errorReplier} = require('../models/error');
 //
 const mailer = new Mailer();
@@ -135,6 +137,18 @@ class userController{
             res.send('Success File uploaded!');
         } catch (e) {
             e.addMessage = 'edit avatar';
+            errorReplier(e, res);
+        }
+    }
+
+    async getBought(req, res) {
+        try {
+            if (!req.user) throw new CustomError(1011);
+            const purTable = new Purchase(PURCHSE_TABLE);
+            const purchases = await purTable.getEvents(req.user.id);
+            res.json(purchases);
+        } catch (e) {
+            e.addMessage = 'get Bought';
             errorReplier(e, res);
         }
     }
