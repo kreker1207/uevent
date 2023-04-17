@@ -5,14 +5,12 @@ module.exports = class Purchase extends Entity {
         super(tableName);
     }
 
-    async get(searchObj) {
+    async getUsers(event_id) {
         return await super.table()
-        .select('purchase.id', 'status', 'users.login', 'users.email',
-        'event.title', 'event.event_datetime', 'event.location')
+        .select('purchase.id', 'users.id AS user_id', 'users.profile_pic')
         .from('purchase')
-        .join('event', 'purchase.event_id', '=', 'event.id')
         .join('users', 'purchase.user_id', '=', 'users.id')
-        .where(searchObj);
+        .where({event_id: event_id, status: true});
     }
 
     async set(setObj, edit = false) {

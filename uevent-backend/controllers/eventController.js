@@ -3,6 +3,7 @@ const { errorReplier, CustomError } = require('../models/error');
 const   EVENT_TABLE = 'event',
         ORGANIZATION_TABLE = 'organization',
         THEME_TABLE = 'theme',
+        PURCHASE_TABLE = 'purchase',
         jwt = require('jsonwebtoken'),
         {secret_refresh} = require('../config'),
         {validationResult} = require('express-validator'),
@@ -11,6 +12,7 @@ const   EVENT_TABLE = 'event',
         Fs = require('fs'),
         Tag = require('../models/tag'),
         Sub = require('../models/sub'),
+        Purchase = require('../models/purchase'),
         Event = require('../models/event');
 
 class EventController{
@@ -36,6 +38,14 @@ class EventController{
             }
             res.json(result);
 
+            if(req.user) {
+                const subTable = new Sub('sub');
+                const sub = await subTable.get({user_id: req.user.id, event_id: req.params.id});
+                if (sub) result.isSub = true
+                else result.isSub = false
+            }
+
+            res.json(result);
         } catch(e){
             e.addMessage= 'Get event by id';
             errorReplier(e,res);
@@ -192,6 +202,22 @@ class EventController{
             }
         } catch (e) {
             e.addMessage = 'set Subscription';
+            errorReplier(e, res);
+        }
+    }
+
+    async getBuyers(req, res) {
+        try {
+            if (!req.params.id) throw new CustomError(10);
+            const eveTable = new Event(EVENT_TABLE);
+            const event = await eveTable.getById(req.params.id);
+            if (!event) throw new CustomError(1009);
+
+            const purTable = new Purchase(PURCHASE_TABLE);
+            const puchseUsers = await purTable.getUsers(event.id)
+            res.json(puchseUsers);
+        } catch (e) {
+            e.addMessage = 'get Buyers';
             errorReplier(e, res);
         }
     }

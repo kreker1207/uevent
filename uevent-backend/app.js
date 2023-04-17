@@ -67,4 +67,4 @@ app.listen(PORT, () => console.log(`Server up at http://localhost:${PORT}`))
 
 
 eveChecker();
-
+purCheck();
