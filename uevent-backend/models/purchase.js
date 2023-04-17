@@ -17,6 +17,7 @@ module.exports = class Purchase extends Entity {
         const {count} = await super.table()
         .where({event_id: event_id, status: true})
         .count('*').first();
+        console.log(seat_count + ' - ' + count)
         return seat_count - count;
     }
 

@@ -46,31 +46,50 @@ module.exports = async function purCheker(){
             console.log('restarting check');
             const orders = await purTable.get({status: false}, true);
             orders.forEach(order => {
-                if(!order.status) {
-                    liqpay.api("request", {
-                        "action"   : "status",
-                        "version"  : "3",
-                        "order_id" : order.id,
-                        "language": "uk",
-                    }, async (reply_json)=> {
-                        if(reply_json.result != 'ok') return;
-                        //
-                        console.log(order)
-                        const buyer = await userTable.getById(order.user_id);
-                        const event = await eveTable.getById(order.event_id);
-                        const organization = await orgTable.getById(event.organizer_id);
-                        const organization_admin = await userTable.getById(organization.admin_id);
+                if(order.status) return;
 
-                        if (!organization.phone_number) organization.phone_number = 'not specified!'
-                        organization.email = organization_admin.email;
-                        const pdfResBuffer = await pdfFormFilling(organization, event, buyer.login)
-                        mailer.sendTicket(buyer.email, {location: event.location, buyer: buyer.login,
-                        date_time: event.date_time, buffer: pdfResBuffer});
-                        purTable.set({id: order.id, status: true}, true);
-                    });
-                }
+                liqpay.api("request", {
+                    "action"   : "status",
+                    "version"  : "3",
+                    "order_id" : order.id,
+                    "language": "uk",
+                }, async (reply_json)=> {
+                    if(reply_json.result != 'ok') return;
+                    //
+                    console.log(order);
+                    const buyer = await userTable.getById(order.user_id);
+                    const event = await eveTable.getById(order.event_id);
+                    //
+                    const seatsRemaining = await purTable.getRemaining(event.id, event.seat);
+                    if (seatsRemaining <= 0) {
+                        mailer.sendRefund(buyer.email, order.id);
+                        liqpay.api("request", {
+                            "action"   : "refund",
+                            "version"  : "3",
+                            "order_id" : order.id
+                        }, ( json ) => {
+                            if(json.status !== 'error') return
+                            mailer.sendRefundError(buyer.email, order.id);
+                            //
+                        });
+                        purTable.del({id: order.id});
+                        return;
+                    };
+                    //
+                    const organization = await orgTable.getById(event.organizer_id);
+                    const organization_admin = await userTable.getById(organization.admin_id);
+
+                    if (!organization.phone_number) organization.phone_number = 'not specified!'
+                    organization.email = organization_admin.email;
+                    const pdfResBuffer = await pdfFormFilling(organization, event, buyer.login)
+                    mailer.sendTicket(buyer.email, {location: event.location, buyer: buyer.login,
+                    date_time: event.date_time, buffer: pdfResBuffer});
+                    purTable.set({id: order.id, status: true}, true);
+                });
+                return;
             });
-        }, 900000 /*10000*/)
+        //}, 10000)
+        }, 300000)
     } catch (error) {
         e.addMessage = 'purchase checker';
         errorReplier(e, res);
