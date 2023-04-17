@@ -38,7 +38,7 @@ class userController{
     async getAvatar(req, res) {
         try {
             if (!req.params || !req.params.avatarName)
-                return res.status(400).json({message: `Crappy params`});
+                throw new CustomError(10);
             const buffer = Fs.readFileSync('./public/profile_pics/' + req.params.avatarName)
             res.status(200).send(buffer);
         } catch (e) {
@@ -51,9 +51,7 @@ class userController{
             const {email} = req.body;
             const userTable = new User(USERS_TABLE);
             const user = await userTable.getUserByEmail(email);
-            if(!user){
-                throw new CustomError(1014);
-            }
+            if(!user) throw new CustomError(1014);
             const newPassword = uuidv4().slice(0,7);
             console.log(newPassword);
             const hashedNewPassword = bcrypt.hashSync(newPassword,8);
@@ -69,17 +67,15 @@ class userController{
 
     async edit(req, res) {
         try{
-            if (!req.user) {
-                return res.status(401).json({message: `User needs to login first`})
-            }
+            if (!req.user) throw new CustomError(1011)
             const {login, password, email} = req.body;
 
             const user = new User(USERS_TABLE);
 
             const old_pawn = await user.getById(req.user.id);
-            if (!old_pawn) return res.status(401).json({message: `User does not exists`})
-            else if (old_pawn.login === login) return res.status(400).json({message: `User needs to chose a different login`})
-            else if (old_pawn.email === email) return res.status(400).json({message: `User needs to chose a different email`})
+            if (!old_pawn) throw new CustomError(10);
+            else if (old_pawn.login === login) throw new CustomError(1004);
+            else if (old_pawn.email === email) throw new CustomError(1005);
             const pawn_by_new_data = await user.get(login, email);
             if(pawn_by_new_data){
                 if(pawn_by_new_data.login === login)
@@ -114,12 +110,10 @@ class userController{
 
     async editAvatar(req, res) {
         try {
-            if (!req.user){
+            if (!req.user)
                 throw new CustomError(1011);
-            }
-            if (!req.files || Object.keys(req.files).length === 0) {
+            if (!req.files || Object.keys(req.files).length === 0)
                 throw new CustomError(1012);
-            }
             console.log(req.files);
             
             const avatar_name = req.user.login + '_' + uuidv4() + '.png';
@@ -159,9 +153,7 @@ class userController{
 
     async delete(req,res){
         try{
-            if (!req.user) {
-                return res.status(401).json({message: `User needs to login first`})
-            }
+            if (!req.user) throw new CustomError(1011);
             const user = new User(USERS_TABLE);
             const pawn = await user.del({id: req.user.id});
             res.json(pawn)
