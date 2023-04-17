@@ -7,19 +7,20 @@ import Map from '../components/Map'
 import api from '../utils/apiSetting';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-//import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function CreateCompany() {
-    //const location = useLocation();
-
-    const [placeName, setPlaceName] = useState("Location");
+    const location = useLocation();
+    const navigate = useNavigate()
     const { userInfo } = useSelector((state) => state.auth)
-    const [phone_number, setPhoneNumber] = useState("");
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
+    
+    const [title, setTitle] = useState(location.state?.title || '');
+    const [description, setDescription] = useState(location.state?.description || '');
+    const [placeName, setPlaceName] = useState(location.state?.location || '');
+    const [phone_number, setPhoneNumber] = useState(location.state?.phone_number || '');
+
     const [userEmail, setUserEmail] = useState('')
     const [org_pic, setFile] = useState(null)
-
 
     const handleMapCoordinates = (placeName) => {
         setPlaceName(placeName);
@@ -29,19 +30,27 @@ export default function CreateCompany() {
     };
 
     const handlePublish = () => {
-        const data = {
+        const dataE = {
             title ,
             description,
             location: placeName,
             phone_number,
-            admin_id: 1
+            admin_id: userInfo.id
         }
-        console.log(data)
-
         let formData = new FormData()
         formData.append('avatar', org_pic)
 
-        api.post(`/org`, data)
+        if(location.state?.id) {
+            api.post(`/org/${location.state?.id}`, dataE)
+                .then(response => {
+                    console.log(response.data)
+                    navigate(`/companies/${response.data.id}`)
+                })
+                .catch(error => {
+                    console.log(error.message)
+                })
+        } else {
+            api.post(`/org`, dataE)
             .then(response => {
                 console.log(response.data)
                 axios({
@@ -56,6 +65,7 @@ export default function CreateCompany() {
             .catch(error => {
                 console.log(error.message)
             })
+        }
     }
 
     useEffect(() => {

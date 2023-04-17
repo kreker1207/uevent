@@ -30,8 +30,8 @@ function CreateEvent() {
     const [price, setPrice] = useState(location.state?.price || '');
     const [format, setFormat] = useState(location.state?.format || 'meet_up')
     const [placeName, setPlaceName] = useState(location.state?.location || "");
-    const [publishDate, setPublishDate] = useState('' );
-
+    const [publishDate, setPublishDate] = useState(location.state?.publish_date?.split('T')[0] || "");
+  
     const [evType, setEvType] = useState('')
     const [eve_pic, setFile] = useState(null)
 
@@ -88,18 +88,19 @@ function CreateEvent() {
     };
 
     const handlePublish = () => {
+        console.log(publishDate)
         const dataE = {
             title,
             description,
-            seats,
+            seat: seats,
             price,
-            "event_datetime": eventDate + ' ' + eventTime,
+            event_datetime: eventDate + ' ' + eventTime,
             format,
             location: placeName,
             eve_pic,
-            tags,
+            publish_date: publishDate,
 
-            publishDate,
+            tags,
             evType,
         }
 
@@ -107,8 +108,8 @@ function CreateEvent() {
         formData.append('avatar', eve_pic)
 
         if(location.state?.id) {
-
-            api.post(`/event/edit/${location.state?.id}`)
+            console.log(`---------sdikjcoisdjcoisdjciosdjcoisdjciods--------${location.state?.id}`)
+            api.post(`/event/edit/${location.state?.id}`, dataE)
                 .then(response => {
                     console.log(response.data)
                     navigate(`/events/${response.data.id}`)
@@ -224,7 +225,7 @@ function CreateEvent() {
                                 <select defaultValue={format} onChange={(e) => setFormat(e.target.value)} name="formats" id="formats">
                                     <option value="concert">Concert</option>
                                     <option value="meet_up">Meet Up</option>
-                                    <option value="fetival">Festival</option>
+                                    <option value="festival">Festival</option>
                                     <option value="show">Show</option>
                                     <option value="custom">Custom</option>
                                 </select>

@@ -9,6 +9,6 @@ router.get('/org/users/:userId',controller.getOrgsByUserId);
 
 router.post('/org',authMiddleware, controller.createOrg);
 router.post('/org/avatar/:id', controller.editAvatar);
-router.put('/org/:id',authMiddleware, controller.editOrg);
+router.post('/org/:id',authMiddleware, controller.editOrg);
 router.delete('/org/:id',authMiddleware,controller.deleteOrg);
 module.exports = router

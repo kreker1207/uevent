@@ -76,6 +76,7 @@ class OrganizationController{
     }
     async editOrg(req,res){
         try{
+            console.log('jopaaaaa')
             const errors = validationResult(req);
             if(! errors.isEmpty()){
                 throw new CustomError(10);
@@ -94,7 +95,7 @@ class OrganizationController{
                 location: location,
                 phone_number
             })
-            res.json(newOrganization);
+            res.json(newOrganization[0]);
         } catch(e){
             e.addMessage = 'Edit organization';
             errorReplier(e, res);
@@ -142,7 +143,7 @@ class OrganizationController{
             if (!candidate){
                 throw new CustomError(1006);
             } else if(userId != candidate.admin_id) throw new CustomError(1007);
-            const pawn = await organization.del({id: req.params.id});
+            const pawn = await organization.deleteOrganizationWithRelatedData(req.params.id);
             
             res.json(pawn)
         } catch(e){

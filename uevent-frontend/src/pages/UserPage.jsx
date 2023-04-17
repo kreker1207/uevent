@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import api from '../utils/apiSetting'
 import { IconContext } from 'react-icons'
-import { FaCalendar, FaClock, FaMapMarkerAlt } from 'react-icons/fa'
+import { FaCalendar, FaClock, FaMapMarkerAlt, FaPencilAlt, FaTrashAlt } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import Pagination from 'react-js-pagination'
 
@@ -14,6 +14,7 @@ export default function UserPage() {
   const [user, setUser] = useState({ data: {}, isLoading: true })
   const [userCompanies, setUserCompanies] = useState({ data: [], isLoading: true })
   const [userEvents, setUserEvents] = useState({ data: {}, isLoading: true })
+  const [subscriptions, setSubscriptions] = useState({data: [], isLoading: true})
   const navigate = useNavigate()
   
   const inputFileRef = useRef(null)
@@ -30,6 +31,7 @@ export default function UserPage() {
         console.log(error.message)
       })
   }, [userInfo])
+
 
   useEffect(() => {
     if(Object.keys(user.data) !== 0 && user.data.id) {
@@ -63,10 +65,26 @@ export default function UserPage() {
     }
   }, [user])
 
+  useEffect(() => {
+    if(Object.keys(user.data) !== 0 && user.data.id) {
+      api.get('/users/sub')
+      .then(response => {
+        setSubscriptions({
+          data: response.data,
+          isLoading: false
+        })
+        console.log(response.data)
+      })
+      .catch(error => {
+        console.log(error.message)
+      })
+    }
+  }, [user])
+
   const handlePageChange = (page) => {
     api.get(`/event/user/${user.data.id}/${page}`)
     .then(function(response) {
-      console.log(response.data)
+      // console.log(response.data)
       setUserEvents({
         data: response.data,
         isLoading: false
@@ -83,7 +101,6 @@ export default function UserPage() {
         const file = event.target.files[0]
         console.log(file)
         formData.append('avatar', file)
-        console.log(formData)
 
         const { data } = await axios({
             method: "post",
@@ -93,8 +110,6 @@ export default function UserPage() {
             credentials: 'include',   
             withCredentials: true
         })
-
-        console.log(data);
 
     } catch (error) {
         console.warn(error)
@@ -106,8 +121,8 @@ export default function UserPage() {
     navigate(`/companies/${id}`)
   }
 
-  const handleEditClick = (item) => {
-      console.log(item.location)
+  const handleEventEditClick = (item) => {
+      // console.log(item.tags)
       navigate('/create-event', { state: {
         id: item.id,
         title: item.title,
@@ -120,19 +135,57 @@ export default function UserPage() {
         eve_pic: item.eve_pic,
         tags: item.tags,
   
-        publishDate: item.publishDate,
+        publish_date: item.publish_date,
         evType: item.evType,
       } });
   }
+
+  const handleCompanyEditClick = (item => {
+    navigate('/create-company', { state: {
+      id: item.id,
+      title: item.title,
+      description: item.description,
+      location: item.location,
+      phone_number: item.phone_number,
+    } });
+  })
+
+  const handleUnsubscribe = (id) => {
+    api.post(`/events/${id}/sub`)
+    .then(response => {
+      setSubscriptions({
+        data: [],
+        isLoading: false
+      })
+      console.log(response.data)
+    })
+    .catch(error => {
+      console.log(error.message)
+    })
+  }
+
   const handleEventClick = (id) => {
     navigate(`/events/${id}`)
   }
-  const handleDeleteClick = (id) => {
-    //delete
-  }
 
-  // /event/user/:userId/:page(\d+)?
-  // /org/users/:userId
+  const handleEventDeleteClick = (id) => {
+    api.delete(`/events/${id}`)
+      .then(response => {
+        console.log(response.data)
+      })
+      .catch(error => {
+        console.log(error.message)
+      })
+  }
+  const handleCompanyDeleteClick = (id) => {
+    api.delete(`/org/${id}`)
+      .then(response => {
+        console.log(response.data)
+      })
+      .catch(error => {
+        console.log(error.message)
+      })
+  }
 
   return (
     <Container>
@@ -159,6 +212,23 @@ export default function UserPage() {
               </div>
               <h2>My tickets</h2>
               <h2>Notification subscriptions</h2>
+              {
+                subscriptions.isLoading ? 
+                <div className="loading">Loading...</div>
+                :
+                <div className="subscriptions">
+                  {
+                    subscriptions.data.map((item, index) => {
+                      return (
+                        <div key={index} className="subscription">
+                          <div>{item.title}</div>
+                          <button onClick={() => handleUnsubscribe(item.event_id)}>Unsubscribe</button>
+                        </div>
+                      )
+                    })
+                  }
+                </div>
+              }
             </div>
             :
             <div className="companies-settings">
@@ -182,13 +252,20 @@ export default function UserPage() {
                           </div>
                         </div>
                         <div className='company-content'>
-                          <h2>{item.title}</h2>
+                          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}} className='company-header'>
+                            <h2>{item.title}</h2>
+                            <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "20px" } }}>
+                                <div>
+                                  <FaPencilAlt style={{cursor: 'pointer'}} onClick={() => handleCompanyEditClick(item)}/> <FaTrashAlt style={{color: 'red', cursor: 'pointer'}} onClick={() => handleCompanyDeleteClick(item.id)}/>
+                                </div>
+                            </IconContext.Provider>
+                          </div>
                           <div className='description'>{item.description}</div>
                           <div className='additionals'>
                             <div style={{width: "70%"}}>
                               <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
                                 <div>
-                                  <FaCalendar/> Events number: {item.num_events}
+                                  <FaCalendar/> Events number: {item.event_count}
                                 </div>
                               </IconContext.Provider>
                               <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
@@ -235,8 +312,8 @@ export default function UserPage() {
                         <div className='price'>
                           <div className="buttons">
                             <button className='more' onClick={() => handleEventClick(item.id)}>More</button>
-                            <button className='edit' onClick={() => handleEditClick(item)}>Edit</button>
-                            <button className='delete' onClick={() => handleDeleteClick(item.id)}>Delete</button>
+                            <button className='edit' onClick={() => handleEventEditClick(item)}>Edit</button>
+                            <button className='delete' onClick={() => handleEventDeleteClick(item.id)}>Delete</button>
                           </div>
                           <p>{item.price}$</p>
                         </div>
@@ -413,6 +490,7 @@ const Container = styled.div`
                   width: 20%;
                   height: 40px;
                   background: #FFD100;
+                  font-weight: 700;
                   border: none;
                   color: #fff;
                 }

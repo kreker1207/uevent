@@ -6,21 +6,24 @@ module.exports = class Event extends Entity {
     constructor(tableName) {
         super(tableName);
     }
+
     async getAll(page = null, limit = 20) {
       if (page === null || page === undefined) {
         page = 0;
       }
       const knexInstance = knex(knexfile);
       const currentDatetime = knexInstance.fn.now();
+      const utcCurrentDatetime = knexInstance.raw("timezone('utc', ?)", [currentDatetime]);
       return await super.table()
         .select('event.*', knexInstance.raw('json_agg(theme.name) AS tags'))
         .leftJoin('event_theme', 'event.id', 'event_theme.event_id')
         .leftJoin('theme', 'event_theme.theme_id', 'theme.id')
-        .where('event.publish_date', '>=', currentDatetime)
+        .where('event.publish_date', '<', utcCurrentDatetime)
         .groupBy('event.id')
         .orderBy('event.event_datetime', 'asc')
         .paginate({ isLengthAware: true, perPage: limit, currentPage: page });
     }
+
     async getById(id) {
       if (id) {
         const knexInstance = knex(knexfile);
@@ -42,7 +45,7 @@ module.exports = class Event extends Entity {
             .from('event')
             .join('organization', 'event.organizer_id', '=', 'organization.id')
             .join('users', 'organization.admin_id', '=', 'users.id')
-            .where({ 'event.id': eventId });
+            .where({ 'event.id': eventId }).first();
         }
         else return result[0];
     }
@@ -154,7 +157,8 @@ module.exports = class Event extends Entity {
               event_datetime: eventData.event_datetime,
               format: eventData.format,
               location: eventData.location,
-              eve_pic: eventData.eve_pic
+              eve_pic: eventData.eve_pic,
+              publish_date: eventData.publish_date
             }).returning('id')
           
 

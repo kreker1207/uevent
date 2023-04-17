@@ -32,4 +32,16 @@ module.exports = class Organization extends Entity {
         const orgs = await query;
         return orgs;
       }
+    async deleteOrganizationWithRelatedData(organizationId) {
+      try {
+        const knexInstance = knex(knexfile);
+        await knexInstance.transaction(async (trx) => {
+          await knexInstance('comment').where('author_organization_id', organizationId).del().transacting(trx);
+          await knexInstance('event').where('organizer_id', organizationId).del().transacting(trx);
+          await knexInstance('organization').where('id', organizationId).del().transacting(trx);
+        });
+      } catch (error) {
+        console.error(`Error deleting organization with ID ${organizationId} and its related events and comments: ${error}`);
+      }
+    }
 }

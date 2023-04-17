@@ -28,6 +28,12 @@ class EventController{
         try{
             const event = new Event(EVENT_TABLE);
             const result = await event.getById(req.params.id);
+            if(req.user) {
+                const subTable = new Sub('sub');
+                const sub = await subTable.get({user_id: req.user.id, event_id: req.params.id});
+                if (sub) result.isSub = true
+                else result.isSub = false
+            }
             res.json(result);
 
         } catch(e){
@@ -75,24 +81,27 @@ class EventController{
             if(! errors.isEmpty()){
                 throw new CustomError(10);
             }
-            const {title, description, event_datetime, location, seats, price, tags, format } = req.body;
+            const {title, description, event_datetime, location, seat, price, tags, format, publish_date } = req.body;
             const event = new Event(EVENT_TABLE);
             const organization = new Organization(ORGANIZATION_TABLE);
             const candidate = await organization.getById(req.params.orgId);
             const {refreshToken} = req.cookies;
             checkEventAndRelation(candidate,refreshToken);
+            const date = new Date(publish_date)
+            date.setDate(date.getDate()) 
             const eventData= {
                 organizer_id: req.params.orgId,
                 title,
                 description,
                 event_datetime,
                 location:location,
-                seat: seats,
+                seat,
                 price:price,
                 tags:tags,
-                format
+                format,
+                publish_date: date
             }
-            // console.log(eventData)
+            console.log(eventData)
             const pawn = await event.setEvent(eventData);
             return res.json(pawn)
 
@@ -106,14 +115,14 @@ class EventController{
                 if (!req.user) {
                     return res.status(401).json({message: `User needs to login first`})
                 }
-                const {title, description, seat,price,event_datetime,format,location,publish_date} = req.body;
+                const {title, description, seat, price, event_datetime, format, location, publish_date} = req.body;
     
                 const event = new Event(EVENT_TABLE);
                 const organization = new Organization(ORGANIZATION_TABLE);
                 const oldEvent = await event.getById(req.params.id);
                 const org = await organization.getById(oldEvent.organizer_id);
                 if (!oldEvent) return res.status(401).json({message: `User does not exists`})
-                else if (org.id !== req.user.id) return res.status(400).json({message: `You can not edit this event`})
+                else if (org.admin_id !== req.user.id) return res.status(400).json({message: `You can not edit this event`})
                 const new_pawn = await event.set({
                     id: req.params.id, 
                     title, 
@@ -125,8 +134,7 @@ class EventController{
                     location,
                     publish_date
                 })
-    
-               return res.json(new_pawn);
+               return res.json(new_pawn[0]);
             }catch(e){
             e.addMessage = 'Edit event';
             errorReplier(e,res);
@@ -169,14 +177,19 @@ class EventController{
     async setSub(req, res) {
         try {
             if (!req.user) throw new CustomError(1011);
-            if (!req.params.eventId) throw new CustomError(10);
+            if (!req.params.id) throw new CustomError(10);
 
             const subTable = new Sub('sub');
-            const subObj = {event_id: req.params.eventId, user_id: req.user.id};
+            const subObj = {event_id: req.params.id, user_id: req.user.id};
             const sub = await subTable.get(subObj);
-            if (sub) subTable.del(subObj)
-            else subTable.set(subObj)
-            res.json(sub)
+            if (sub) {
+                subTable.del(subObj)
+                res.json({isSub: false})
+            }
+            else {
+                subTable.set(subObj)
+                res.json({isSub: true})
+            }
         } catch (e) {
             e.addMessage = 'set Subscription';
             errorReplier(e, res);

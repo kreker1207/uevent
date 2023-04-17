@@ -22,6 +22,7 @@ export default function MainPage() {
   useEffect(() => {
     api.get(`/events`)
     .then(function(response) {
+      console.log('PIZDA')
       setEvents({
         loading: false,
         data: response.data.data,
@@ -62,6 +63,8 @@ export default function MainPage() {
 
   /*-----------------------------SEARCH FUNCTIONS-----------------------------*/
   const handleSearchEvents = () => {
+    console.log(eventsToSearch)
+    setEvents({...events, loading: true})
     api.post(`/events/search/`, {query: eventsToSearch})
       .then(response => {
         console.log(response.data)
@@ -222,7 +225,7 @@ export default function MainPage() {
                 </div>
                 <div className='price'>
                   <button onClick={() => handleEventClick(item.id)}>More</button>
-                  <p>{item.price}$</p>
+                  <p>{item.price}₴</p>
                 </div>
               </div>
             )

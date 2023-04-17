@@ -148,9 +148,8 @@ class userController{
     async getSub(req, res) {
         try {
             if (!req.user) throw new CustomError(1011);
-
             const subTable = new Sub('sub');
-            const subs = await subTable.get({user_id: req.user.id}, true)
+            const subs = await subTable.getEvents(req.user.id);
             res.json(subs)
         } catch (e) {
             e.addMessage = 'get Subscription';

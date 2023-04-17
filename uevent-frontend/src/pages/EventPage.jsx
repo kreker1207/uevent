@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components'
 
 import { IconContext } from 'react-icons';
-import { FaClock, FaHashtag, FaMapMarkerAlt, FaReply, FaUser } from "react-icons/fa";
+import { FaClock, FaHashtag, FaMapMarkerAlt, FaRegStar, FaReply, FaStar, FaUser } from "react-icons/fa";
 import api from '../utils/apiSetting';
 
 export default function EventPage() {
@@ -25,8 +25,7 @@ export default function EventPage() {
   useEffect(() => {
     api.get(`/event/${id}`)
       .then(function (response) {
-        // getOrganizationByID !!!!
-        console.log(response.data)
+        // console.log(response.data)
         setEvent({
           data: response.data,
           isLoading: false
@@ -55,10 +54,10 @@ export default function EventPage() {
 
           const nestedArrayPromises = comment.replies.map(nested => {
             if(nested.author_id) {
-              console.log(nested)
+              // console.log(nested)
               return api.get(`/users/${nested.author_id}`)
             } else {
-              console.log('Hui2')
+              // console.log('Hui2')
               return api.get(`/org/${nested.author_organization_id}`)
             }
           });
@@ -88,7 +87,7 @@ export default function EventPage() {
         // Wait for all the commentPromises to resolve and update the state with the updated comments
         Promise.all(commentPromises)
           .then(updatedComments => {
-            console.log(updatedComments)
+            // console.log(updatedComments)
             setComments({
               data: updatedComments,
               isLoading: false
@@ -103,52 +102,72 @@ export default function EventPage() {
       });
   }, [id]);
 
-  // useEffect(() => {
-  //   // Make API request to get the comments
-  //   api.get(`/comments/event/${id}`)
-  //     .then(response => {
-  //       const commentsData = response.data;
-
-  //       // Create an array of promises to get the additional fields for each comment object and its nestedArray
-  //       const commentPromises = commentsData.map(comment => {
-  //         const authorPromise = api.get(`/users/${comment.author_id}`);
-  //         const nestedArrayPromises = comment.replies.map(nested => api.get(`/users/${nested.author_id}`));
-
-  //         return Promise.all([authorPromise, ...nestedArrayPromises]).then(responses => {
-  //           const [authorResponse, ...nestedResponses] = responses;
-  //           const authorData = authorResponse.data;
-  //           const nestedData = nestedResponses.map(response => response.data);
-
-  //           // Return the updated comment object with the additional fields
-  //           return {
-  //             ...comment,
-  //             login: authorData.login,
-  //             profile_pic: authorData.profile_pic,
-  //             replies: comment.replies.map((nested, index) => ({
-  //               ...nested,
-  //               login: nestedData[index].login,
-  //               profile_pic: nestedData[index].profile_pic,
-  //             })),
-  //           };
-  //         });
-  //       });
-
-  //       // Wait for all the commentPromises to resolve and update the state with the updated comments
-  //       Promise.all(commentPromises)
-  //         .then(updatedComments => {
-  //           setComments({
-  //             data: updatedComments,
-  //             isLoading: false
-  //           });
-  //         })
-  //         .catch(error => {
-  //           console.error(error);
-  //         });
-  //     })
-  //     .catch(error => {
-  //       console.error(error);
-  //     });
-  // }, [id, commentsChanged]);
+    useEffect(() => {
+      if(commentsChanged !== 0) {
+        // Make API request to get the comments
+        api.get(`/comments/event/${id}`)
+        .then(response => {
+          const commentsData = response.data;
+  
+          // Create an array of promises to get the additional fields for each comment object and its nestedArray
+          const commentPromises = commentsData.map(comment => {
+            let authorPromise;
+            if(comment.author_id) {
+              authorPromise = api.get(`/users/${comment.author_id}`);
+            } else {
+              authorPromise = api.get(`/org/${comment.author_organization_id}`);
+            }
+  
+            const nestedArrayPromises = comment.replies.map(nested => {
+              if(nested.author_id) {
+                console.log(nested)
+                return api.get(`/users/${nested.author_id}`)
+              } else {
+                console.log('Hui2')
+                return api.get(`/org/${nested.author_organization_id}`)
+              }
+            });
+  
+            return Promise.all([authorPromise, ...nestedArrayPromises]).then(responses => {
+              const [authorResponse, ...nestedResponses] = responses;
+              const authorData = authorResponse.data;
+              const nestedData = nestedResponses.map(response => response.data);
+  
+  
+              // Return the updated comment object with the additional fields
+              return {
+                ...comment,
+                login: authorData.login ? authorData.login : authorData.title,
+                company: authorData.login ? null : 'creator',
+                profile_pic: authorData.profile_pic ? 'profile_pics/'+ authorData.profile_pic : 'organization_pics/' + authorData.org_pic,
+                replies: comment.replies.map((nested, index) => ({
+                  ...nested,
+                  login: nestedData[index].login ? nestedData[index].login : nestedData[index].title,
+                  company: nestedData[index].login ? null : 'creator',
+                  profile_pic: nestedData[index].profile_pic ? 'profile_pics/' + nestedData[index].profile_pic : 'organization_pics/'+ nestedData[index].org_pic,
+                })),
+              };
+            });
+          });
+  
+          // Wait for all the commentPromises to resolve and update the state with the updated comments
+          Promise.all(commentPromises)
+            .then(updatedComments => {
+              console.log(updatedComments)
+              setComments({
+                data: updatedComments,
+                isLoading: false
+              });
+            })
+            .catch(error => {
+              console.error(error);
+            });
+        })
+        .catch(error => {
+          console.error(error);
+        });
+      }
+  }, [id, commentsChanged]);
 
 
   const handleCommentFocus = (receiverName, receiverMaintId, receiverCommentId) => {
@@ -212,6 +231,20 @@ export default function EventPage() {
     
   }
 
+  const handleSubscription = (id) => {
+    api.post(`/events/${id}/sub`)
+      .then(response => {
+        console.log(response.data)
+        setEvent({...event, data: {
+          ...event.data,
+          isSub: response.data.isSub
+        }})
+      })
+      .catch(error => {
+        console.log(error.message)
+      })
+  }
+
   return (
     <Container>
       {
@@ -228,7 +261,11 @@ export default function EventPage() {
         :
         <div className="description-block">
           <div className="description">
-            <h2>{event.data.title}</h2>
+            <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginLeft: "15px" } }}>
+              <h2 style={{lineHeight: '0px'}}>
+                {event.data.title} {event.data.isSub ? <FaStar onClick={() => handleSubscription(event.data.id)}/> : <FaRegStar onClick={() => handleSubscription(event.data.id)}/>} 
+              </h2>
+            </IconContext.Provider>
             <IconContext.Provider value={{ style: { verticalAlign: 'middle', marginRight: "5px" } }}>
               <p>
                 <FaMapMarkerAlt/>{event.data.location}
@@ -254,7 +291,7 @@ export default function EventPage() {
                 <input type="hidden" name="signature" value={buyData.signature}/>
                 <button onClick={buyClick}>Buy</button>
               </form>
-              <div className="price">430$</div>
+              <div className="price">{event.data.price}₴</div>
               <IconContext.Provider value={{ style: { verticalAlign: 'middle'} }}>
                 <div className="promo">
                   <FaHashtag/> <input type="text" value={promo} placeholder='Enter promocode here' onChange={(e) => setPromo(e.target.value)}/>

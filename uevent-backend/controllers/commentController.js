@@ -57,7 +57,7 @@ class CommentController{
             const commentData= {
                 content: content,
             }
-            let adminId = null;
+            let admin = null;
             
             if(req.body.comment_id) {
                 const commentTable = new Comment(COMMENT_TABLE);
@@ -66,18 +66,17 @@ class CommentController{
                 /*const eventId = await commentTable.getEventId(req.params.eventId);
                 console.log(eventId)
                 if(!eventId) throw new CustomError(1009);*/
-                adminId = await eventTable.getAdminId(req.params.eventId);
+                admin = await eventTable.getAdminId(req.params.eventId);
                 commentData.comment_id = req.body.comment_id;
                 commentData.receiver_name = receiver_name;
             } else {
                 const event = await eventTable.getById(req.params.eventId);
                 if(!event) throw new CustomError(1009);
-                adminId = await eventTable.getAdminId(req.params.eventId);
+                admin = await eventTable.getAdminId(req.params.eventId);
                 commentData.event_id = req.params.eventId
             }
-
-            if (req.user.id === adminId) 
-                commentData.author_organization_id = adminId;
+            if (req.user.id === admin.admin_id) 
+                commentData.author_organization_id = admin.admin_id;
             else
                 commentData.author_id = req.user.id;
             console.log(commentData)
